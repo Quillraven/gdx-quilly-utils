@@ -21,6 +21,7 @@
     "postcss": "^8.5.3",
     "rxjs": "~7.8.2",
     "tailwindcss": "^4.1.6",
+    "tile-extruder": "^2.1.1",
     "tslib": "^2.8.1",
     "zone.js": "~0.15.0"
   },
