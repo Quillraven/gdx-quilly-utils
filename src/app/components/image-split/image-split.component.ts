@@ -1,27 +1,90 @@
 import {Component, OnDestroy} from '@angular/core';
-import {FormsModule} from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators
+} from '@angular/forms';
 import {CropOptions, Jimp} from 'jimp';
 import JSZip from 'jszip';
+import {CommonModule} from '@angular/common';
 
 @Component({
   selector: 'app-image-split',
   imports: [
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule,
+    CommonModule
   ],
   templateUrl: './image-split.component.html',
   styleUrl: './image-split.component.css'
 })
 export class ImageSplitComponent implements OnDestroy {
   selectedImage: string | null = null;
-  tilesBaseFileName: string = 'Tile';
   splitTiles: string[] = [];
 
-  numTilesX: number = 4;
-  numTilesY: number = 4;
-  ignoreFirstN: number = 0;
-  ignoreLastN: number = 0;
+  // Form group for validation
+  form: FormGroup;
+
+  // Properties accessed through the form
+  get tilesBaseFileName(): string {
+    return this.form.get('tilesBaseFileName')?.value || 'Tile';
+  }
+
+  get numTilesX(): number {
+    return this.form.get('numTilesX')?.value || 4;
+  }
+
+  get numTilesY(): number {
+    return this.form.get('numTilesY')?.value || 4;
+  }
+
+  get ignoreFirstN(): number {
+    return this.form.get('ignoreFirstN')?.value || 0;
+  }
+
+  get ignoreLastN(): number {
+    return this.form.get('ignoreLastN')?.value || 0;
+  }
 
   private debounceTimer: any;
+
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      numTilesX: [4, [Validators.required, Validators.min(1)]],
+      numTilesY: [4, [Validators.required, Validators.min(1)]],
+      ignoreFirstN: [0],
+      ignoreLastN: [0],
+      tilesBaseFileName: ['Tile', [Validators.required, Validators.minLength(1), this.validFilenameValidator]]
+    });
+
+    // Subscribe to form value changes to trigger image splitting
+    this.form.valueChanges.subscribe(() => {
+      this.onSettingsChange();
+    });
+  }
+
+  // Custom validator for valid filename
+  validFilenameValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value) return null;
+
+    // Check for invalid characters in filename
+    const invalidChars = /[<>:"/\\|?*\x00-\x1F]/g;
+    if (invalidChars.test(value)) {
+      return {invalidFilename: true};
+    }
+
+    // Check if the filename is just whitespace
+    if (value.trim() === '') {
+      return {blankFilename: true};
+    }
+
+    return null;
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -101,13 +164,15 @@ export class ImageSplitComponent implements OnDestroy {
   onSettingsChange(): void {
     clearTimeout(this.debounceTimer); // Clear any existing timer
     this.debounceTimer = setTimeout(() => {
-      this.splitImage();
+      if (this.form.valid) {
+        this.splitImage();
+      }
     }, 1000); // Wait for 1 second (1000 milliseconds)
   }
 
   async downloadSplitTiles(): Promise<void> {
-    if (this.splitTiles.length === 0) {
-      console.warn('No split tiles available to download.');
+    if (this.splitTiles.length === 0 || this.form.invalid) {
+      console.warn('No split tiles available to download or form is invalid.');
       return;
     }
 
