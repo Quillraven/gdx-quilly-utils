@@ -16,6 +16,9 @@
 
       <label class="label" for="ignoreLastN">Ignore last n tiles</label>
       <input id="ignoreLastN" type="number" class="input" [(ngModel)]="ignoreLastN" (ngModelChange)="onSettingsChange()">
+
+      <label class="label" for="tileNames">Tiles base name</label>
+      <input id="tileNames" type="text" class="input" [(ngModel)]="tilesBaseFileName">
     </div>
   </fieldset>
 
@@ -43,13 +46,13 @@
     </div>
 
     <div>
-      <h3 class="text-xl font-semibold mb-2">Split Tiles:</h3>
+      <h3 class="text-xl font-semibold mb-2">Split {{ tilesBaseFileName }}:</h3>
       @if (splitTiles.length > 0) {
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
           @for (tile of splitTiles; track $index) {
             <div class="border rounded p-1 bg-base-200">
-              <img [src]="tile" [alt]="'Tile ' + $index" class="w-full h-auto">
-              <div class="text-center text-xs mt-1">Tile {{$index}}</div>
+              <img [src]="tile" [alt]="tilesBaseFileName + $index" class="w-full h-auto">
+              <div class="text-center text-xs mt-1">{{ tilesBaseFileName }} {{ $index }}</div>
             </div>
           }
         </div>

@@ -13,7 +13,7 @@ import JSZip from 'jszip';
 })
 export class ImageSplitComponent implements OnDestroy {
   selectedImage: string | null = null;
-  originalFileName: string = '';
+  tilesBaseFileName: string = 'Tile';
   splitTiles: string[] = [];
 
   numTilesX: number = 4;
@@ -27,7 +27,6 @@ export class ImageSplitComponent implements OnDestroy {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      this.originalFileName = file.name;
       const reader = new FileReader();
       reader.onload = async () => {
         this.selectedImage = reader.result as string;
@@ -39,7 +38,6 @@ export class ImageSplitComponent implements OnDestroy {
     } else {
       this.selectedImage = null;
       this.splitTiles = [];
-      this.originalFileName = '';
     }
   }
 
@@ -131,7 +129,7 @@ export class ImageSplitComponent implements OnDestroy {
         }
 
         // Add the tile to the zip with a sequential filename
-        zip.file(`tile_${i.toString().padStart(3, '0')}.png`, bytes);
+        zip.file(`${this.tilesBaseFileName}_${i.toString().padStart(2, '0')}.png`, bytes);
       }
 
       // Generate the zip file
@@ -141,11 +139,7 @@ export class ImageSplitComponent implements OnDestroy {
       const link = document.createElement('a');
       link.href = URL.createObjectURL(zipBlob);
 
-      // Suggest a filename
-      const nameParts = this.originalFileName.split('.');
-      nameParts.pop(); // Remove extension
-      const baseName = nameParts.join('.');
-      link.download = `${baseName}-tiles.zip`;
+      link.download = `${this.tilesBaseFileName}.zip`;
 
       // Trigger the download
       document.body.appendChild(link);
