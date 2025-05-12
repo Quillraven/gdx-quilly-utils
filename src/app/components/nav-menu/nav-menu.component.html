@@ -1,13 +1,14 @@
 <div class="navbar-start">
   <details class="dropdown" #navMenu>
     <summary class="btn btn-square btn-ghost">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-content" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
       </svg>
     </summary>
     <ul class="menu menu-lg dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
       <li><a routerLink="/" (click)="closeMenu()" routerLinkActive="bg-primary text-primary-content" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
       <li><a routerLink="/tile-extruder" (click)="closeMenu()" routerLinkActive="bg-primary text-primary-content">Tile Extruder</a></li>
+      <li><a routerLink="/image-split" (click)="closeMenu()" routerLinkActive="bg-primary text-primary-content">Spritesheet Splitter</a></li>
     </ul>
   </details>
 </div>

@@ -18,6 +18,8 @@
     "@angular/platform-browser-dynamic": "^19.2.10",
     "@angular/router": "^19.2.10",
     "@tailwindcss/postcss": "^4.1.6",
+    "jimp": "^1.6.0",
+    "jszip": "^3.10.1",
     "postcss": "^8.5.3",
     "rxjs": "~7.8.2",
     "tailwindcss": "^4.1.6",

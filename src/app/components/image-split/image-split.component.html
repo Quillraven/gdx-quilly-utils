@@ -1,0 +1,64 @@
+<div class="container mx-auto p-4">
+  <h2 class="text-2xl font-bold mb-4">Spritesheet Splitter</h2>
+
+  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-md border p-4">
+    <legend class="fieldset-legend">Settings</legend>
+
+    <div class="grid grid-cols-4 gap-x-4 gap-y-2">
+      <label class="label" for="tileWidth">#Tiles on x-axis</label>
+      <input id="tileWidth" type="number" class="input" [(ngModel)]="numTilesX" (ngModelChange)="onSettingsChange()">
+
+      <label class="label" for="tileHeight">#Tiles on y-axis</label>
+      <input id="tileHeight" type="number" class="input" [(ngModel)]="numTilesY" (ngModelChange)="onSettingsChange()">
+
+      <label class="label" for="ignoreFirstN">Ignore first n tiles</label>
+      <input id="ignoreFirstN" type="number" class="input" [(ngModel)]="ignoreFirstN" (ngModelChange)="onSettingsChange()">
+
+      <label class="label" for="ignoreLastN">Ignore last n tiles</label>
+      <input id="ignoreLastN" type="number" class="input" [(ngModel)]="ignoreLastN" (ngModelChange)="onSettingsChange()">
+    </div>
+  </fieldset>
+
+  <div class="mb-6 mt-4 flex flex-wrap gap-4 items-center">
+    <label class="btn btn-primary">
+      Upload spritesheet
+      <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+    </label>
+
+    <button class="btn btn-secondary"
+            (click)="downloadSplitTiles()"
+            [disabled]="splitTiles.length === 0">
+      Download tiles as ZIP
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6">
+    <div>
+      <h3 class="text-xl font-semibold mb-2">Original Image:</h3>
+      @if (selectedImage) {
+        <img [src]="selectedImage" alt="Original Spritesheet" class="max-w-full h-auto rounded border shadow">
+      } @else {
+        <div class="skeleton h-32 w-32"></div>
+      }
+    </div>
+
+    <div>
+      <h3 class="text-xl font-semibold mb-2">Split Tiles:</h3>
+      @if (splitTiles.length > 0) {
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+          @for (tile of splitTiles; track $index) {
+            <div class="border rounded p-1 bg-base-200">
+              <img [src]="tile" [alt]="'Tile ' + $index" class="w-full h-auto">
+              <div class="text-center text-xs mt-1">Tile {{$index}}</div>
+            </div>
+          }
+        </div>
+      } @else if (selectedImage) {
+        <p class="text-gray-500">Processing or waiting for parameters...</p>
+        <div class="skeleton h-32 w-32"></div>
+      } @else {
+        <div class="skeleton h-32 w-32"></div>
+      }
+    </div>
+  </div>
+</div>
