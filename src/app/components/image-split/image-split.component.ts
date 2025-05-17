@@ -179,6 +179,55 @@ export class ImageSplitComponent {
     }
   }
 
+  async downloadViaFilePicker(suggestedName: string, zipBlob: Blob): Promise<boolean> {
+    if (!(window as any).showSaveFilePicker) {
+      // API not available
+      return Promise.resolve(false);
+    }
+
+    try {
+      const fileHandle = await (window as any).showSaveFilePicker({
+        suggestedName: suggestedName,
+        types: [
+          {
+            description: 'ZIP Archive',
+            accept: {'application/zip': ['.zip']},
+          },
+        ],
+      });
+
+      const writable = await fileHandle.createWritable();
+      await writable.write(zipBlob);
+      await writable.close();
+      return true;
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        // User cancelled save dialog -> don't download
+        return true;
+      }
+
+      // User did not cancel the save dialog
+      console.error('downloadViaFilePicker failed', err);
+      return false;
+    }
+  }
+
+  downloadDirectly(zipBlob: Blob) {
+    // Create a download link
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(zipBlob);
+
+    link.download = `${this.tilesBaseFileName}.zip`;
+
+    // Trigger the download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Clean up
+    URL.revokeObjectURL(link.href);
+  }
+
   async downloadSplitTiles(): Promise<void> {
     if (this.splitTiles.length === 0 || this.form.invalid) {
       console.warn('No split tiles available to download or form is invalid.');
@@ -207,21 +256,18 @@ export class ImageSplitComponent {
       }
 
       // Generate the zip file
+      const suggestedName = `${this.tilesBaseFileName}.zip`;
       const zipBlob = await zip.generateAsync({type: 'blob'});
 
-      // Create a download link
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(zipBlob);
+      // Try to use showSaveFilePicker API
+      const downloaded = await this.downloadViaFilePicker(suggestedName, zipBlob);
+      if (downloaded) {
+        // already downloaded via file chooser API or file chooser dialog canceled
+        return;
+      }
 
-      link.download = `${this.tilesBaseFileName}.zip`;
-
-      // Trigger the download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Clean up
-      URL.revokeObjectURL(link.href);
+      // download directly without a file chooser
+      this.downloadDirectly(zipBlob);
     } catch (error) {
       console.error('Error creating zip file:', error);
       if (error instanceof Error) {
