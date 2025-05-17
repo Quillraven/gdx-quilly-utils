@@ -1,12 +1,23 @@
 import {Component} from '@angular/core';
 import {extrudeTilesetToBuffer} from 'tile-extruder';
-import {FormsModule} from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators
+} from '@angular/forms';
+import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 
 @Component({
   selector: 'app-tile-extruder',
   imports: [
     FormsModule,
+    ReactiveFormsModule,
+    CommonModule,
     ErrorAlertComponent
   ],
   templateUrl: './tile-extruder.component.html',
@@ -16,14 +27,55 @@ export class TileExtruderComponent {
   selectedImage: string | null = null;
   originalFileName: string = '';
   extrudedImageUrl: string | null = null;
-
-  tileWidth: number = 16;
-  tileHeight: number = 16;
-  margin: number = 0;
-  spacing: number = 0;
-  extrusion: number = 4;
-
   errorDetails: string | null = null;
+
+  // Form group for validation
+  form: FormGroup;
+
+  // Properties accessed through the form
+  get tileWidth(): number {
+    return this.form.get('tileWidth')?.value || 16;
+  }
+
+  get tileHeight(): number {
+    return this.form.get('tileHeight')?.value || 16;
+  }
+
+  get margin(): number {
+    return this.form.get('margin')?.value || 0;
+  }
+
+  get spacing(): number {
+    return this.form.get('spacing')?.value || 0;
+  }
+
+  get extrusion(): number {
+    return this.form.get('extrusion')?.value || 4;
+  }
+
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      tileWidth: [16, [Validators.required, Validators.min(1), this.integerValidator]],
+      tileHeight: [16, [Validators.required, Validators.min(1), this.integerValidator]],
+      margin: [0, [this.integerValidator]],
+      spacing: [0, [this.integerValidator]],
+      extrusion: [4, [Validators.required, Validators.min(1), this.integerValidator]]
+    });
+  }
+
+  // Custom validator for integers
+  integerValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    if (!Number.isInteger(value)) {
+      return {notAnInteger: true};
+    }
+
+    return null;
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -49,6 +101,12 @@ export class TileExtruderComponent {
     this.errorDetails = null;
     if (!this.selectedImage) {
       console.warn("No image has been selected to extrude.");
+      this.extrudedImageUrl = null;
+      return;
+    }
+
+    if (this.form.invalid) {
+      console.warn("Form is invalid. Please correct the errors.");
       this.extrudedImageUrl = null;
       return;
     }
