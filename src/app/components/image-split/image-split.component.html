@@ -1,133 +1,170 @@
 <div class="container mx-auto p-4">
-  <h2 class="text-2xl font-bold mb-4">Spritesheet Splitter</h2>
+  <h2 class="text-2xl font-bold mb-2">Spritesheet Splitter</h2>
+  <p class="mb-4 text-gray-600">Split a spritesheet into individual image tiles.
+    <br>
+    This tool divides your spritesheet into a grid of tiles based on the number of rows and columns you specify.
+    <br>
+    Upload your spritesheet first, then configure the settings and click on <strong>Split Image</strong> to generate the
+    individual tiles.</p>
 
-  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-md border p-4">
-    <legend class="fieldset-legend">Settings</legend>
+  <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
+    <div>
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-md border p-4 md:mt-5">
+        <legend class="fieldset-legend">Settings</legend>
 
-    <form [formGroup]="form" class="grid grid-cols-4 gap-x-4 gap-y-2">
-      <label class="label" for="numTilesX">Num tiles on x-axis</label>
-      <div class="flex flex-col">
-        <input
-          id="numTilesX"
-          type="number"
-          formControlName="numTilesX"
-          class="input"
-          [ngClass]="{'input-error': form.get('numTilesX')?.invalid && (form.get('numTilesX')?.touched || form.get('numTilesX')?.dirty)}">
-        @if (form.get('numTilesX')?.invalid && (form.get('numTilesX')?.touched || form.get('numTilesX')?.dirty)) {
-          <div class="text-error text-xs mt-1">
-            @if (form.get('numTilesX')?.errors?.['required']) {
-              <span>This field is required</span>
-            } @else if (form.get('numTilesX')?.errors?.['min']) {
-              <span>Value must be at least 1</span>
+        <form [formGroup]="form" class="grid grid-cols-4 gap-x-4 gap-y-2">
+          <label class="btn btn-secondary col-span-4">
+            Upload spritesheet
+            <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+          </label>
+
+          <label class="label" for="numTilesX">Num tiles on x-axis</label>
+          <div class="flex flex-col">
+            <input
+              id="numTilesX"
+              type="number"
+              formControlName="numTilesX"
+              class="input"
+              [ngClass]="{'input-error': form.get('numTilesX')?.invalid && (form.get('numTilesX')?.touched || form.get('numTilesX')?.dirty)}">
+            @if (form.get('numTilesX')?.invalid && (form.get('numTilesX')?.touched || form.get('numTilesX')?.dirty)) {
+              <div class="text-error text-xs mt-1">
+                @if (form.get('numTilesX')?.errors?.['required']) {
+                  <span>This field is required</span>
+                } @else if (form.get('numTilesX')?.errors?.['min']) {
+                  <span>Value must be at least 1</span>
+                } @else if (form.get('numTilesX')?.errors?.['notAnInteger']) {
+                  <span>Value must be an integer</span>
+                }
+              </div>
             }
           </div>
-        }
-      </div>
 
-      <label class="label" for="numTilesY">Num tiles on y-axis</label>
-      <div class="flex flex-col">
-        <input
-          id="numTilesY"
-          type="number"
-          formControlName="numTilesY"
-          class="input"
-          [ngClass]="{'input-error': form.get('numTilesY')?.invalid && (form.get('numTilesY')?.touched || form.get('numTilesY')?.dirty)}">
-        @if (form.get('numTilesY')?.invalid && (form.get('numTilesY')?.touched || form.get('numTilesY')?.dirty)) {
-          <div class="text-error text-xs mt-1">
-            @if (form.get('numTilesY')?.errors?.['required']) {
-              <span>This field is required</span>
-            } @else if (form.get('numTilesY')?.errors?.['min']) {
-              <span>Value must be at least 1</span>
+          <label class="label" for="numTilesY">Num tiles on y-axis</label>
+          <div class="flex flex-col">
+            <input
+              id="numTilesY"
+              type="number"
+              formControlName="numTilesY"
+              class="input"
+              [ngClass]="{'input-error': form.get('numTilesY')?.invalid && (form.get('numTilesY')?.touched || form.get('numTilesY')?.dirty)}">
+            @if (form.get('numTilesY')?.invalid && (form.get('numTilesY')?.touched || form.get('numTilesY')?.dirty)) {
+              <div class="text-error text-xs mt-1">
+                @if (form.get('numTilesY')?.errors?.['required']) {
+                  <span>This field is required</span>
+                } @else if (form.get('numTilesY')?.errors?.['min']) {
+                  <span>Value must be at least 1</span>
+                } @else if (form.get('numTilesY')?.errors?.['notAnInteger']) {
+                  <span>Value must be an integer</span>
+                }
+              </div>
             }
           </div>
-        }
-      </div>
 
-      <label class="label" for="ignoreFirstN">Ignore first n tiles</label>
-      <div class="flex flex-col">
-        <input
-          id="ignoreFirstN"
-          type="number"
-          formControlName="ignoreFirstN"
-          class="input">
-      </div>
-
-      <label class="label" for="ignoreLastN">Ignore last n tiles</label>
-      <div class="flex flex-col">
-        <input
-          id="ignoreLastN"
-          type="number"
-          formControlName="ignoreLastN"
-          class="input">
-      </div>
-
-      <label class="label" for="tilesBaseFileName">Tiles base name</label>
-      <div class="flex flex-col">
-        <input
-          id="tilesBaseFileName"
-          type="text"
-          formControlName="tilesBaseFileName"
-          class="input"
-          [ngClass]="{'input-error': form.get('tilesBaseFileName')?.invalid && (form.get('tilesBaseFileName')?.touched || form.get('tilesBaseFileName')?.dirty)}">
-        @if (form.get('tilesBaseFileName')?.invalid && (form.get('tilesBaseFileName')?.touched || form.get('tilesBaseFileName')?.dirty)) {
-          <div class="text-error text-xs mt-1">
-            @if (form.get('tilesBaseFileName')?.errors?.['required']) {
-              <span>This field is required</span>
-            } @else if (form.get('tilesBaseFileName')?.errors?.['minlength']) {
-              <span>Name cannot be empty</span>
-            } @else if (form.get('tilesBaseFileName')?.errors?.['invalidFilename']) {
-              <span>Invalid filename. Cannot contain: < > : " / \ | ? *</span>
-            } @else if (form.get('tilesBaseFileName')?.errors?.['blankFilename']) {
-              <span>Filename cannot be just whitespace</span>
+          <label class="label" for="ignoreFirstN">Ignore first n tiles</label>
+          <div class="flex flex-col">
+            <input
+              id="ignoreFirstN"
+              type="number"
+              formControlName="ignoreFirstN"
+              class="input">
+            @if (form.get('ignoreFirstN')?.invalid && (form.get('ignoreFirstN')?.touched || form.get('ignoreFirstN')?.dirty)) {
+              <div class="text-error text-xs mt-1">
+                @if (form.get('ignoreFirstN')?.errors?.['notAnInteger']) {
+                  <span>Value must be an integer</span>
+                }
+              </div>
             }
           </div>
-        }
-      </div>
-    </form>
-  </fieldset>
 
-  <div class="mb-6 mt-4 flex flex-wrap gap-4 items-center">
-    <label class="btn btn-primary">
-      Upload spritesheet
-      <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
-    </label>
+          <label class="label" for="ignoreLastN">Ignore last n tiles</label>
+          <div class="flex flex-col">
+            <input
+              id="ignoreLastN"
+              type="number"
+              formControlName="ignoreLastN"
+              class="input">
+            @if (form.get('ignoreLastN')?.invalid && (form.get('ignoreLastN')?.touched || form.get('ignoreLastN')?.dirty)) {
+              <div class="text-error text-xs mt-1">
+                @if (form.get('ignoreLastN')?.errors?.['notAnInteger']) {
+                  <span>Value must be an integer</span>
+                }
+              </div>
+            }
+          </div>
 
-    <button class="btn btn-secondary"
-            (click)="downloadSplitTiles()"
-            [disabled]="splitTiles.length === 0 || form.invalid">
-      Download tiles as ZIP
-    </button>
-  </div>
+          <label class="label" for="tilesBaseFileName">Tiles base name</label>
+          <div class="flex flex-col">
+            <input
+              id="tilesBaseFileName"
+              type="text"
+              formControlName="tilesBaseFileName"
+              class="input"
+              [ngClass]="{'input-error': form.get('tilesBaseFileName')?.invalid && (form.get('tilesBaseFileName')?.touched || form.get('tilesBaseFileName')?.dirty)}">
+            @if (form.get('tilesBaseFileName')?.invalid && (form.get('tilesBaseFileName')?.touched || form.get('tilesBaseFileName')?.dirty)) {
+              <div class="text-error text-xs mt-1">
+                @if (form.get('tilesBaseFileName')?.errors?.['required']) {
+                  <span>This field is required</span>
+                } @else if (form.get('tilesBaseFileName')?.errors?.['minlength']) {
+                  <span>Name cannot be empty</span>
+                } @else if (form.get('tilesBaseFileName')?.errors?.['invalidFilename']) {
+                  <span>Invalid filename. Cannot contain: < > : " / \ | ? *</span>
+                } @else if (form.get('tilesBaseFileName')?.errors?.['blankFilename']) {
+                  <span>Filename cannot be just whitespace</span>
+                }
+              </div>
+            }
+          </div>
 
-  <div class="grid grid-cols-1 gap-6">
+          <div class="flex justify-end col-span-2">
+            <button class="btn btn-primary"
+                    (click)="splitImage()"
+                    [disabled]="!selectedImage">
+              Split Image
+            </button>
+          </div>
+        </form>
+      </fieldset>
+
+      @if (errorDetails) {
+        <app-error-alert [errorDetails]="errorDetails"></app-error-alert>
+      }
+
+      <button class="btn btn-secondary mt-2"
+              (click)="downloadSplitTiles()"
+              [disabled]="splitTiles.length === 0 || form.invalid">
+        Download tiles as ZIP
+      </button>
+    </div>
+
     <div>
       <h3 class="text-xl font-semibold mb-2">Original Image:</h3>
       @if (selectedImage) {
-        <img [src]="selectedImage" alt="Original Spritesheet" class="max-w-full h-auto rounded border shadow">
+        <img [src]="selectedImage" alt="Original Spritesheet"
+             class="max-w-[300px] max-h-[300px] w-auto h-auto rounded border shadow">
       } @else {
         <div class="skeleton h-32 w-32"></div>
       }
     </div>
+  </div>
 
-    <div>
-      <h3 class="text-xl font-semibold mb-2">Split {{ tilesBaseFileName }}:</h3>
-      @if (splitTiles.length > 0) {
-        <div class="grid gap-2"
-             [style.grid-template-columns]="'repeat(' + (form.get('numTilesX')?.value >= 1 ? form.get('numTilesX')?.value : 2) + ', minmax(0, 1fr))'"
-        >
-          @for (tile of splitTiles; track $index) {
-            <div class="border rounded p-1 bg-base-200">
-              <img [src]="tile" [alt]="tilesBaseFileName + $index" class="w-full h-auto">
-              <div class="text-center text-xs mt-1">{{ tilesBaseFileName }}_{{ $index }}</div>
-            </div>
-          }
-        </div>
-      } @else if (selectedImage) {
-        <p class="text-gray-500">Processing or waiting for parameters...</p>
-        <div class="skeleton h-32 w-32"></div>
-      } @else {
-        <div class="skeleton h-32 w-32"></div>
-      }
-    </div>
+  <div class="mt-6">
+    <h3 class="text-xl font-semibold mb-2">{{ tilesBaseFileName }} Images:</h3>
+    @if (splitTiles.length > 0) {
+      <div class="grid gap-2"
+           [style.grid-template-columns]="'repeat(' + (form.get('numTilesX')?.value >= 1 ? form.get('numTilesX')?.value : 2) + ', minmax(0, 1fr))'"
+      >
+        @for (tile of splitTiles; track $index) {
+          <div class="border rounded p-1 bg-base-200">
+            <img [src]="tile" [alt]="tilesBaseFileName + $index" class="w-full h-auto">
+            <div class="text-center text-xs mt-1">{{ tilesBaseFileName }}_{{ $index }}</div>
+          </div>
+        }
+      </div>
+    } @else if (selectedImage) {
+      <p class="text-gray-500">Click the Split Image button to generate the tiles.</p>
+      <div class="skeleton h-32 w-32"></div>
+    } @else {
+      <div class="skeleton h-32 w-32"></div>
+    }
   </div>
 </div>

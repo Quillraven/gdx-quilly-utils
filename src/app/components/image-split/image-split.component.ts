@@ -1,4 +1,4 @@
-import {Component, OnDestroy} from '@angular/core';
+import {Component} from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -11,20 +11,23 @@ import {
 import {CropOptions, Jimp} from 'jimp';
 import JSZip from 'jszip';
 import {CommonModule} from '@angular/common';
+import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 
 @Component({
   selector: 'app-image-split',
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    CommonModule
+    CommonModule,
+    ErrorAlertComponent
   ],
   templateUrl: './image-split.component.html',
   styleUrl: './image-split.component.css'
 })
-export class ImageSplitComponent implements OnDestroy {
+export class ImageSplitComponent {
   selectedImage: string | null = null;
   splitTiles: string[] = [];
+  errorDetails: string | null = null;
 
   // Form group for validation
   form: FormGroup;
@@ -50,20 +53,13 @@ export class ImageSplitComponent implements OnDestroy {
     return this.form.get('ignoreLastN')?.value || 0;
   }
 
-  private debounceTimer: any;
-
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
-      numTilesX: [4, [Validators.required, Validators.min(1)]],
-      numTilesY: [4, [Validators.required, Validators.min(1)]],
-      ignoreFirstN: [0],
-      ignoreLastN: [0],
+      numTilesX: [4, [Validators.required, Validators.min(1), this.integerValidator]],
+      numTilesY: [4, [Validators.required, Validators.min(1), this.integerValidator]],
+      ignoreFirstN: [0, [this.integerValidator]],
+      ignoreLastN: [0, [this.integerValidator]],
       tilesBaseFileName: ['Tile', [Validators.required, Validators.minLength(1), this.validFilenameValidator]]
-    });
-
-    // Subscribe to form value changes to trigger image splitting
-    this.form.valueChanges.subscribe(() => {
-      this.onSettingsChange();
     });
   }
 
@@ -86,25 +82,40 @@ export class ImageSplitComponent implements OnDestroy {
     return null;
   }
 
+  integerValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    if (!Number.isInteger(value)) {
+      return {notAnInteger: true};
+    }
+
+    return null;
+  }
+
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       const reader = new FileReader();
-      reader.onload = async () => {
+      reader.onload = () => {
         this.selectedImage = reader.result as string;
         this.splitTiles = [];
-        clearTimeout(this.debounceTimer);
-        await this.splitImage();
+        this.errorDetails = null;
       };
       reader.readAsDataURL(file);
     } else {
       this.selectedImage = null;
       this.splitTiles = [];
+      this.errorDetails = null;
     }
   }
 
   async splitImage(): Promise<void> {
+    this.errorDetails = null;
     if (!this.selectedImage) {
       console.warn("No image has been selected to split.");
       this.splitTiles = [];
@@ -123,7 +134,7 @@ export class ImageSplitComponent implements OnDestroy {
       // Clear previous tiles
       this.splitTiles = [];
 
-      // Calculate which tiles to include based on ignore settings
+      // Calculate which tiles to include based on ignored settings
       const startTileIndex = this.ignoreFirstN;
       const endTileIndex = totalTiles - this.ignoreLastN;
 
@@ -132,7 +143,7 @@ export class ImageSplitComponent implements OnDestroy {
         for (let x = 0; x < this.numTilesX; x++) {
           const tileIndex = y * this.numTilesX + x;
 
-          // Skip tiles based on ignore settings
+          // Skip tiles based on ignored settings
           if (tileIndex < startTileIndex || tileIndex >= endTileIndex) {
             continue;
           }
@@ -158,16 +169,12 @@ export class ImageSplitComponent implements OnDestroy {
     } catch (error) {
       console.error('Error during image splitting:', error);
       this.splitTiles = [];
-    }
-  }
-
-  onSettingsChange(): void {
-    clearTimeout(this.debounceTimer); // Clear any existing timer
-    this.debounceTimer = setTimeout(() => {
-      if (this.form.valid) {
-        this.splitImage();
+      if (error instanceof Error) {
+        this.errorDetails = error.message;
+      } else {
+        this.errorDetails = String(error);
       }
-    }, 1000); // Wait for 1 second (1000 milliseconds)
+    }
   }
 
   async downloadSplitTiles(): Promise<void> {
@@ -215,10 +222,11 @@ export class ImageSplitComponent implements OnDestroy {
       URL.revokeObjectURL(link.href);
     } catch (error) {
       console.error('Error creating zip file:', error);
+      if (error instanceof Error) {
+        this.errorDetails = error.message;
+      } else {
+        this.errorDetails = String(error);
+      }
     }
-  }
-
-  ngOnDestroy() {
-    clearTimeout(this.debounceTimer);
   }
 }
