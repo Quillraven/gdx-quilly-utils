@@ -5,10 +5,24 @@
 This repository contains a set of utilities that are typically needed for a 2D game using LibGDX.
 It is hosted as a GitHub page under following [link](https://quillraven.github.io/gdx-quilly-utils/).
 
-### Tile Extruder
+## Tile Extruder
 
-tbd
+A utility to prevent texture bleeding in tiled games by adding padding around each tile in your tileset. This ensures clean rendering when tiles are placed next to each other in a game world.
 
-### Spritesheet Splitter
+Features:
+- Upload your tileset image
+- Configure tile width, height, margin, spacing, and extrusion amount
+- Preview the extruded tileset
+- Download the processed image for use in your game
 
-tbd
+## Spritesheet Splitter
+
+A tool to split a spritesheet into individual image tiles. This utility divides your spritesheet into a grid of tiles based on the number of rows and columns you specify.
+
+Features:
+- Upload your spritesheet image
+- Configure the number of tiles on x-axis and y-axis
+- Options to ignore first n and last n tiles
+- Set a base filename for the output tiles
+- Preview all extracted tiles
+- Download all tiles as a ZIP file
