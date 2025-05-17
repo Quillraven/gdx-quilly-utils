@@ -151,7 +151,7 @@
     <h3 class="text-xl font-semibold mb-2">{{ tilesBaseFileName }} Images:</h3>
     @if (splitTiles.length > 0) {
       <div class="grid gap-2"
-           [style.grid-template-columns]="'repeat(' + (form.get('numTilesX')?.value >= 1 ? form.get('numTilesX')?.value : 2) + ', minmax(0, 1fr))'"
+           [style.grid-template-columns]="'repeat(' + (genTilesX) + ', minmax(0, 1fr))'"
       >
         @for (tile of splitTiles; track $index) {
           <div class="border rounded p-1 bg-base-200">

@@ -28,6 +28,7 @@ export class ImageSplitComponent {
   selectedImage: string | null = null;
   splitTiles: string[] = [];
   errorDetails: string | null = null;
+  genTilesX: number = 0;
 
   // Form group for validation
   form: FormGroup;
@@ -68,7 +69,7 @@ export class ImageSplitComponent {
     const value = control.value;
     if (!value) return null;
 
-    // Check for invalid characters in filename
+    // Check for invalid characters in the filename
     const invalidChars = /[<>:"/\\|?*\x00-\x1F]/g;
     if (invalidChars.test(value)) {
       return {invalidFilename: true};
@@ -127,6 +128,7 @@ export class ImageSplitComponent {
       const image = await Jimp.read(this.selectedImage);
 
       // Calculate the number of tiles in the image
+      this.genTilesX = this.numTilesX;
       const tileW = Math.floor(image.bitmap.width / this.numTilesX);
       const tileH = Math.floor(image.bitmap.height / this.numTilesY);
       const totalTiles = this.numTilesX * this.numTilesY;
