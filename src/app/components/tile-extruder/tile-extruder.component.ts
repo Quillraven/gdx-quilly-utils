@@ -80,22 +80,19 @@ export class TileExtruderComponent {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      this.originalFileName = file.name;
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.selectedImage = reader.result as string;
-        this.extrudedImageUrl = null;
-        this.errorDetails = null;
-      };
-      reader.readAsDataURL(file);
-    } else {
-      this.selectedImage = null;
-      this.extrudedImageUrl = null;
-      this.originalFileName = '';
-      this.errorDetails = null;
+    if (!(input.files && input.files.length > 0)) {
+      return;
     }
+
+    const file = input.files[0];
+    this.originalFileName = file.name;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.selectedImage = reader.result as string;
+      this.extrudedImageUrl = null;
+      this.errorDetails = null;
+    };
+    reader.readAsDataURL(file);
   }
 
   async extrudeImage(): Promise<void> {

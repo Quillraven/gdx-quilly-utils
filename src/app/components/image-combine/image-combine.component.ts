@@ -41,7 +41,7 @@ export class ImageCombineComponent {
   }
 
   get gridHeight(): number {
-    return this.form.get('gridHeight')?.value || 1;
+    return this.form.get('gridHeight')?.value || 2;
   }
 
   get outputFileName(): string {
@@ -50,8 +50,8 @@ export class ImageCombineComponent {
 
   constructor(private fb: FormBuilder, private downloadService: DownloadService) {
     this.form = this.fb.group({
-      gridWidth: [1, [Validators.required, Validators.min(1), this.integerValidator]],
-      gridHeight: [1, [Validators.required, Validators.min(1), this.integerValidator]],
+      gridWidth: [2, [Validators.required, Validators.min(1), this.integerValidator]],
+      gridHeight: [2, [Validators.required, Validators.min(1), this.integerValidator]],
       outputFileName: ['Combined', [Validators.required, Validators.minLength(1), this.validFilenameValidator]]
     });
   }
@@ -93,27 +93,22 @@ export class ImageCombineComponent {
 
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedImages = [];
-      this.originalFileNames = [];
-      this.combinedImageUrl = null;
-      this.errorDetails = null;
-
-      // Process each selected file
-      Array.from(input.files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          this.selectedImages.push(reader.result as string);
-          this.originalFileNames.push(file.name);
-        };
-        reader.readAsDataURL(file);
-      });
-    } else {
-      this.selectedImages = [];
-      this.originalFileNames = [];
-      this.combinedImageUrl = null;
-      this.errorDetails = null;
+    if (!(input.files && input.files.length > 0)) {
+      return;
     }
+
+    this.selectedImages = [];
+    this.originalFileNames = [];
+    this.combinedImageUrl = null;
+    this.errorDetails = null;
+    Array.from(input.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.selectedImages.push(reader.result as string);
+        this.originalFileNames.push(file.name);
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   async combineImages(): Promise<void> {
@@ -176,22 +171,23 @@ export class ImageCombineComponent {
 
       // Place each image in the grid
       imageIndex = 0;
+      let currentY = 0;
       for (let y = 0; y < this.gridHeight; y++) {
         let currentX = 0;
+        let prevMaxHeight = 0;
         for (let x = 0; x < this.gridWidth; x++) {
           if (imageIndex < jimpImages.length) {
             // Use blit to copy the image to the correct position in the grid
-            let currentY = 0;
-            let z = imageIndex - this.gridWidth;
-            while (z >= 0) {
-              currentY += jimpImages[z].bitmap.height;
-              z -= this.gridWidth;
+            if (jimpImages[imageIndex].bitmap.height > prevMaxHeight) {
+              prevMaxHeight = jimpImages[imageIndex].bitmap.height;
             }
+
             combinedImage.blit({src: jimpImages[imageIndex], x: currentX, y: currentY});
             currentX += jimpImages[imageIndex].bitmap.width;
             imageIndex++;
           }
         }
+        currentY += prevMaxHeight;
       }
 
       // Convert the combined image to a data URL

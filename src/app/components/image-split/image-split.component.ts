@@ -100,20 +100,18 @@ export class ImageSplitComponent {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.selectedImage = reader.result as string;
-        this.splitTiles = [];
-        this.errorDetails = null;
-      };
-      reader.readAsDataURL(file);
-    } else {
-      this.selectedImage = null;
+    if (!(input.files && input.files.length > 0)) {
+      return;
+    }
+
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.selectedImage = reader.result as string;
       this.splitTiles = [];
       this.errorDetails = null;
-    }
+    };
+    reader.readAsDataURL(file);
   }
 
   async splitImage(): Promise<void> {
