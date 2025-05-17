@@ -9,7 +9,7 @@
 
   <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
     <div>
-      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-md border p-4 md:mt-5">
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-md border p-4 md:mt-12">
         <legend class="fieldset-legend">Settings</legend>
 
         <form [formGroup]="form" class="grid grid-cols-4 gap-x-4 gap-y-2">
@@ -106,10 +106,32 @@
 
     <div>
       <h3 class="text-xl font-semibold mb-2">Selected Images:</h3>
+      <p class="text-sm text-gray-500 mb-2">Drag and drop to reorder images</p>
       @if (selectedImages.length > 0) {
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-4 gap-2">
           @for (image of selectedImages; track $index) {
-            <div class="border rounded p-1 bg-base-200">
+            <div
+              class="border rounded p-1 cursor-move transition-all duration-200 image-item"
+              [ngClass]="{
+                'bg-base-200 hover:shadow-md': draggedIndex !== $index && dragOverIndex !== $index,
+                'opacity-50 bg-base-300 dragged': draggedIndex === $index,
+                'border-primary border-2 bg-primary/10 drag-over': dragOverIndex === $index
+              }"
+              draggable="true"
+              (dragstart)="onDragStart($index)"
+              (dragover)="onDragOver($event, $index)"
+              (dragleave)="onDragLeave()"
+              (dragend)="onDragEnd()"
+              (drop)="onDrop($event, $index)">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs text-gray-500"># {{ $index + 1 }}</span>
+                <span class="text-xs text-gray-500 drag-handle">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                       stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                  </svg>
+                </span>
+              </div>
               <img [src]="image" [alt]="'Image ' + $index" class="max-w-[100px] max-h-[100px] w-auto h-auto">
               <div class="text-center text-xs mt-1">{{ originalFileNames[$index] }}</div>
             </div>

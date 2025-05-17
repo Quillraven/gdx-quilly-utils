@@ -29,6 +29,8 @@ export class ImageCombineComponent {
   originalFileNames: string[] = [];
   combinedImageUrl: string | null = null;
   errorDetails: string | null = null;
+  draggedIndex: number = -1;
+  dragOverIndex: number = -1;
 
   // Form group for validation
   form: FormGroup;
@@ -223,5 +225,48 @@ export class ImageCombineComponent {
         this.errorDetails = String(error);
       }
     }
+  }
+
+  // Drag and drop methods
+  onDragStart(index: number): void {
+    this.draggedIndex = index;
+    document.body.classList.add('dragging');
+  }
+
+  onDragOver(event: DragEvent, index: number): void {
+    event.preventDefault();
+    if (this.draggedIndex !== index) {
+      this.dragOverIndex = index;
+    }
+  }
+
+  onDragLeave(): void {
+    this.dragOverIndex = -1;
+  }
+
+  onDragEnd(): void {
+    this.draggedIndex = -1;
+    this.dragOverIndex = -1;
+    document.body.classList.remove('dragging');
+  }
+
+  onDrop(event: DragEvent, targetIndex: number): void {
+    event.preventDefault();
+    if (this.draggedIndex === -1 || this.draggedIndex === targetIndex) {
+      this.dragOverIndex = -1;
+      document.body.classList.remove('dragging');
+      return;
+    }
+
+    // Swap the images and file names
+    [this.selectedImages[this.draggedIndex], this.selectedImages[targetIndex]] = [this.selectedImages[targetIndex], this.selectedImages[this.draggedIndex]];
+    [this.originalFileNames[this.draggedIndex], this.originalFileNames[targetIndex]] = [this.originalFileNames[targetIndex], this.originalFileNames[this.draggedIndex]];
+
+    // Reset the indices
+    this.draggedIndex = -1;
+    this.dragOverIndex = -1;
+
+    // Remove dragging class from body
+    document.body.classList.remove('dragging');
   }
 }

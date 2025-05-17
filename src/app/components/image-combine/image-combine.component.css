@@ -1,0 +1,21 @@
+/* Drag and drop styles */
+.drag-handle {
+  cursor: grab;
+}
+
+.dragging {
+  cursor: grabbing !important;
+}
+
+/* Smooth transitions for drag and drop */
+.image-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.image-item.drag-over {
+  transform: scale(1.02);
+}
+
+.image-item.dragged {
+  transform: scale(0.98);
+}
