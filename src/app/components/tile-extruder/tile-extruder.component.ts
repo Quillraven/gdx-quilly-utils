@@ -1,17 +1,10 @@
 import {Component} from '@angular/core';
 import {extrudeTilesetToBuffer} from 'tile-extruder';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators
-} from '@angular/forms';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
+import {ValidationService} from '../../services/validation.service';
 
 @Component({
   selector: 'app-tile-extruder',
@@ -54,28 +47,18 @@ export class TileExtruderComponent {
     return this.form.get('extrusion')?.value || 4;
   }
 
-  constructor(private fb: FormBuilder, private downloadService: DownloadService) {
+  constructor(
+    private fb: FormBuilder,
+    private downloadService: DownloadService,
+    private validationService: ValidationService
+  ) {
     this.form = this.fb.group({
-      tileWidth: [16, [Validators.required, Validators.min(1), this.integerValidator]],
-      tileHeight: [16, [Validators.required, Validators.min(1), this.integerValidator]],
-      margin: [0, [this.integerValidator]],
-      spacing: [0, [this.integerValidator]],
-      extrusion: [4, [Validators.required, Validators.min(1), this.integerValidator]]
+      tileWidth: [16, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
+      tileHeight: [16, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
+      margin: [0, [this.validationService.integerValidator]],
+      spacing: [0, [this.validationService.integerValidator]],
+      extrusion: [4, [Validators.required, Validators.min(1), this.validationService.integerValidator]]
     });
-  }
-
-  // Custom validator for integers
-  integerValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value;
-    if (value === null || value === undefined || value === '') {
-      return null;
-    }
-
-    if (!Number.isInteger(value)) {
-      return {notAnInteger: true};
-    }
-
-    return null;
   }
 
   onFileSelected(event: Event): void {

@@ -1,18 +1,11 @@
 import {Component} from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators
-} from '@angular/forms';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CropOptions, Jimp} from 'jimp';
 import JSZip from 'jszip';
 import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
+import {ValidationService} from '../../services/validation.service';
 
 @Component({
   selector: 'app-image-split',
@@ -55,46 +48,18 @@ export class ImageSplitComponent {
     return this.form.get('ignoreLastN')?.value || 0;
   }
 
-  constructor(private fb: FormBuilder, private downloadService: DownloadService) {
+  constructor(
+    private fb: FormBuilder,
+    private downloadService: DownloadService,
+    private validationService: ValidationService
+  ) {
     this.form = this.fb.group({
-      numTilesX: [4, [Validators.required, Validators.min(1), this.integerValidator]],
-      numTilesY: [4, [Validators.required, Validators.min(1), this.integerValidator]],
-      ignoreFirstN: [0, [this.integerValidator]],
-      ignoreLastN: [0, [this.integerValidator]],
-      tilesBaseFileName: ['Tile', [Validators.required, Validators.minLength(1), this.validFilenameValidator]]
+      numTilesX: [4, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
+      numTilesY: [4, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
+      ignoreFirstN: [0, [this.validationService.integerValidator]],
+      ignoreLastN: [0, [this.validationService.integerValidator]],
+      tilesBaseFileName: ['Tile', [Validators.required, Validators.minLength(1), this.validationService.validFilenameValidator]]
     });
-  }
-
-  // Custom validator for valid filename
-  validFilenameValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value;
-    if (!value) return null;
-
-    // Check for invalid characters in the filename
-    const invalidChars = /[<>:"/\\|?*\x00-\x1F]/g;
-    if (invalidChars.test(value)) {
-      return {invalidFilename: true};
-    }
-
-    // Check if the filename is just whitespace
-    if (value.trim() === '') {
-      return {blankFilename: true};
-    }
-
-    return null;
-  }
-
-  integerValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value;
-    if (value === null || value === undefined || value === '') {
-      return null;
-    }
-
-    if (!Number.isInteger(value)) {
-      return {notAnInteger: true};
-    }
-
-    return null;
   }
 
 

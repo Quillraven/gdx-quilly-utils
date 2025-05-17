@@ -1,17 +1,10 @@
 import {Component} from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators
-} from '@angular/forms';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Jimp} from 'jimp';
 import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
+import {ValidationService} from '../../services/validation.service';
 
 @Component({
   selector: 'app-image-combine',
@@ -48,47 +41,16 @@ export class ImageCombineComponent {
     return this.form.get('outputFileName')?.value || 'Combined';
   }
 
-  constructor(private fb: FormBuilder, private downloadService: DownloadService) {
+  constructor(
+    private fb: FormBuilder,
+    private downloadService: DownloadService,
+    private validationService: ValidationService
+  ) {
     this.form = this.fb.group({
-      gridWidth: [2, [Validators.required, Validators.min(1), this.integerValidator]],
-      gridHeight: [2, [Validators.required, Validators.min(1), this.integerValidator]],
-      outputFileName: ['Combined', [Validators.required, Validators.minLength(1), this.validFilenameValidator]]
+      gridWidth: [2, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
+      gridHeight: [2, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
+      outputFileName: ['Combined', [Validators.required, Validators.minLength(1), this.validationService.validFilenameValidator]]
     });
-  }
-
-  // Custom validator for integers
-  integerValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value;
-    if (value === null || value === undefined || value === '') {
-      return null;
-    }
-
-    if (!Number.isInteger(value)) {
-      return {notAnInteger: true};
-    }
-
-    return null;
-  }
-
-  // Custom validator for filenames
-  validFilenameValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value;
-    if (value === null || value === undefined || value === '') {
-      return null;
-    }
-
-    // Check for invalid characters in the filename
-    const invalidChars = /[<>:"\/\\|?*]/;
-    if (invalidChars.test(value)) {
-      return {invalidFilename: true};
-    }
-
-    // Check if the filename is just whitespace
-    if (value.trim() === '') {
-      return {blankFilename: true};
-    }
-
-    return null;
   }
 
   onFilesSelected(event: Event): void {
