@@ -12,6 +12,7 @@ import {CropOptions, Jimp} from 'jimp';
 import JSZip from 'jszip';
 import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
+import {DownloadService} from '../../services/download.service';
 
 @Component({
   selector: 'app-image-split',
@@ -54,7 +55,7 @@ export class ImageSplitComponent {
     return this.form.get('ignoreLastN')?.value || 0;
   }
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private downloadService: DownloadService) {
     this.form = this.fb.group({
       numTilesX: [4, [Validators.required, Validators.min(1), this.integerValidator]],
       numTilesY: [4, [Validators.required, Validators.min(1), this.integerValidator]],
@@ -179,55 +180,6 @@ export class ImageSplitComponent {
     }
   }
 
-  async downloadViaFilePicker(suggestedName: string, zipBlob: Blob): Promise<boolean> {
-    if (!(window as any).showSaveFilePicker) {
-      // API not available
-      return false;
-    }
-
-    try {
-      const fileHandle = await (window as any).showSaveFilePicker({
-        suggestedName: suggestedName,
-        types: [
-          {
-            description: 'ZIP Archive',
-            accept: {'application/zip': ['.zip']},
-          },
-        ],
-      });
-
-      const writable = await fileHandle.createWritable();
-      await writable.write(zipBlob);
-      await writable.close();
-      return true;
-    } catch (err: any) {
-      if (err.name === 'AbortError') {
-        // User cancelled save dialog -> don't download
-        return true;
-      }
-
-      // User did not cancel the save dialog
-      console.error('downloadViaFilePicker failed', err);
-      return false;
-    }
-  }
-
-  downloadDirectly(zipBlob: Blob) {
-    // Create a download link
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(zipBlob);
-
-    link.download = `${this.tilesBaseFileName}.zip`;
-
-    // Trigger the download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Clean up
-    URL.revokeObjectURL(link.href);
-  }
-
   async downloadSplitTiles(): Promise<void> {
     if (this.splitTiles.length === 0 || this.form.invalid) {
       console.warn('No split tiles available to download or form is invalid.');
@@ -256,18 +208,11 @@ export class ImageSplitComponent {
       }
 
       // Generate the zip file
-      const suggestedName = `${this.tilesBaseFileName}.zip`;
+      const filename = `${this.tilesBaseFileName}.zip`;
       const zipBlob = await zip.generateAsync({type: 'blob'});
 
-      // Try to use showSaveFilePicker API
-      const downloaded = await this.downloadViaFilePicker(suggestedName, zipBlob);
-      if (downloaded) {
-        // already downloaded via file chooser API or file chooser dialog canceled
-        return;
-      }
-
-      // download directly without a file chooser
-      this.downloadDirectly(zipBlob);
+      // Download the zip file using the service
+      await this.downloadService.downloadZip(zipBlob, filename);
     } catch (error) {
       console.error('Error creating zip file:', error);
       if (error instanceof Error) {

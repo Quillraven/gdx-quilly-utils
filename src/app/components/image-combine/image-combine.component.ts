@@ -11,6 +11,7 @@ import {
 import {Jimp} from 'jimp';
 import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
+import {DownloadService} from '../../services/download.service';
 
 @Component({
   selector: 'app-image-combine',
@@ -45,7 +46,7 @@ export class ImageCombineComponent {
     return this.form.get('outputFileName')?.value || 'Combined';
   }
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private downloadService: DownloadService) {
     this.form = this.fb.group({
       gridWidth: [1, [Validators.required, Validators.min(1), this.integerValidator]],
       gridHeight: [1, [Validators.required, Validators.min(1), this.integerValidator]],
@@ -206,49 +207,6 @@ export class ImageCombineComponent {
     }
   }
 
-  async downloadViaFilePicker(suggestedName: string, blob: Blob): Promise<boolean> {
-    try {
-      // @ts-ignore
-      if (window.showSaveFilePicker) {
-        // @ts-ignore
-        const fileHandle = await window.showSaveFilePicker({
-          suggestedName,
-          types: [{
-            description: 'PNG Image',
-            accept: {'image/png': ['.png']}
-          }]
-        });
-
-        const writable = await fileHandle.createWritable();
-        await writable.write(blob);
-        await writable.close();
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error using File System Access API:', error);
-      // If the user cancels the file picker, it throws an error
-      // We'll return true to indicate we attempted to use the file picker
-      return false;
-    }
-  }
-
-  downloadDirectly(blob: Blob) {
-    // Create a download link
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-
-    link.download = `${this.outputFileName}.png`;
-
-    // Trigger the download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Clean up
-    URL.revokeObjectURL(link.href);
-  }
-
   async downloadCombinedImage(): Promise<void> {
     if (!this.combinedImageUrl) {
       console.warn('No combined image available to download.');
@@ -256,19 +214,7 @@ export class ImageCombineComponent {
     }
 
     try {
-      // Convert data URL to blob
-      const response = await fetch(this.combinedImageUrl);
-      const blob = await response.blob();
-
-      // Try to use showSaveFilePicker API
-      const downloaded = await this.downloadViaFilePicker(`${this.outputFileName}.png`, blob);
-      if (downloaded) {
-        // already downloaded via file chooser API or file chooser dialog canceled
-        return;
-      }
-
-      // download directly without a file chooser
-      this.downloadDirectly(blob);
+      await this.downloadService.downloadImage(this.combinedImageUrl, `${this.outputFileName}.png`);
     } catch (error) {
       console.error('Error downloading combined image:', error);
       if (error instanceof Error) {

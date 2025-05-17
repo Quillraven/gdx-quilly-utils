@@ -11,6 +11,7 @@ import {
 } from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
+import {DownloadService} from '../../services/download.service';
 
 @Component({
   selector: 'app-tile-extruder',
@@ -53,7 +54,7 @@ export class TileExtruderComponent {
     return this.form.get('extrusion')?.value || 4;
   }
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private downloadService: DownloadService) {
     this.form = this.fb.group({
       tileWidth: [16, [Validators.required, Validators.min(1), this.integerValidator]],
       tileHeight: [16, [Validators.required, Validators.min(1), this.integerValidator]],
@@ -138,28 +139,28 @@ export class TileExtruderComponent {
     }
   }
 
-  downloadExtrudedImage(): void {
+  async downloadExtrudedImage(): Promise<void> {
     if (!this.extrudedImageUrl) {
       console.warn('No extruded image available to download.');
       return;
     }
 
-    // Create a temporary anchor element
-    const link = document.createElement('a');
+    try {
+      // Suggest a filename
+      const nameParts = this.originalFileName.split('.');
+      const extension = nameParts.pop();
+      const baseName = nameParts.join('.');
+      const filename = `${baseName}-extruded.${extension || 'png'}`;
 
-    // Set the href to the data URL of the extruded image
-    link.href = this.extrudedImageUrl;
-
-    // Suggest a filename
-    const nameParts = this.originalFileName.split('.');
-    const extension = nameParts.pop();
-    const baseName = nameParts.join('.');
-    link.download = `${baseName}-extruded.${extension || 'png'}`;
-
-    // Append to the document, click, and remove
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      await this.downloadService.downloadImage(this.extrudedImageUrl, filename);
+    } catch (error) {
+      console.error('Error downloading extruded image:', error);
+      if (error instanceof Error) {
+        this.errorDetails = error.message;
+      } else {
+        this.errorDetails = String(error);
+      }
+    }
   }
 
 }
