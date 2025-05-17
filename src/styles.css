@@ -2,3 +2,7 @@
 @plugin "daisyui" {
   themes: fantasy --default, night --prefersdark;
 }
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
