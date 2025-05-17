@@ -1,4 +1,4 @@
-import {Component, OnDestroy} from '@angular/core';
+import {Component} from '@angular/core';
 import {extrudeTilesetToBuffer} from 'tile-extruder';
 import {FormsModule} from '@angular/forms';
 
@@ -10,7 +10,7 @@ import {FormsModule} from '@angular/forms';
   templateUrl: './tile-extruder.component.html',
   styleUrl: './tile-extruder.component.css'
 })
-export class TileExtruderComponent implements OnDestroy {
+export class TileExtruderComponent {
   selectedImage: string | null = null;
   originalFileName: string = '';
   extrudedImageUrl: string | null = null;
@@ -21,7 +21,7 @@ export class TileExtruderComponent implements OnDestroy {
   spacing: number = 0;
   extrusion: number = 4;
 
-  private debounceTimer: any;
+  errorDetails: string | null = null;
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -29,21 +29,22 @@ export class TileExtruderComponent implements OnDestroy {
       const file = input.files[0];
       this.originalFileName = file.name;
       const reader = new FileReader();
-      reader.onload = async () => {
+      reader.onload = () => {
         this.selectedImage = reader.result as string;
         this.extrudedImageUrl = null;
-        clearTimeout(this.debounceTimer);
-        await this.extrudeImage();
+        this.errorDetails = null;
       };
       reader.readAsDataURL(file);
     } else {
       this.selectedImage = null;
       this.extrudedImageUrl = null;
       this.originalFileName = '';
+      this.errorDetails = null;
     }
   }
 
   async extrudeImage(): Promise<void> {
+    this.errorDetails = null;
     if (!this.selectedImage) {
       console.warn("No image has been selected to extrude.");
       this.extrudedImageUrl = null;
@@ -69,14 +70,12 @@ export class TileExtruderComponent implements OnDestroy {
     } catch (error) {
       console.error('Error during tile extrusion:', error);
       this.extrudedImageUrl = null;
+      if (error instanceof Error) {
+        this.errorDetails = error.message;
+      } else {
+        this.errorDetails = String(error);
+      }
     }
-  }
-
-  onSettingsChange(): void {
-    clearTimeout(this.debounceTimer); // Clear any existing timer
-    this.debounceTimer = setTimeout(() => {
-      this.extrudeImage();
-    }, 1000); // Wait for 1 second (1000 milliseconds)
   }
 
   downloadExtrudedImage(): void {
@@ -101,10 +100,6 @@ export class TileExtruderComponent implements OnDestroy {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
-
-  ngOnDestroy() {
-    clearTimeout(this.debounceTimer);
   }
 
 }

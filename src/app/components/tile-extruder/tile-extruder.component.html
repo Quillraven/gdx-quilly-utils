@@ -1,61 +1,93 @@
 <div class="container mx-auto p-4">
-  <h2 class="text-2xl font-bold mb-4">Tileset Extruder</h2>
+  <h2 class="text-2xl font-bold mb-2">Tileset Extruder</h2>
+  <p class="mb-4 text-gray-600">Prevent texture bleeding in tiled games by adding padding around each tile in your tileset.
+    <br>
+    This ensures clean rendering when tiles are placed next to each other in a game world.
+    <br>
+    Upload your tileset first, then configure the settings and click on <strong>Extrude</strong> to generate the
+    extruded tileset.</p>
 
-  <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-    <legend class="fieldset-legend">Settings</legend>
+  <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
+    <div>
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 md:mt-5">
+        <legend class="fieldset-legend">Settings</legend>
 
-    <div class="grid grid-cols-4 gap-x-4 gap-y-2">
-      <label class="label" for="tileWidth">Tile Width</label>
-      <input id="tileWidth" type="number" class="input" [(ngModel)]="tileWidth" (ngModelChange)="onSettingsChange()">
+        <div class="grid grid-cols-4 gap-x-4 gap-y-2">
+          <label class="btn btn-secondary col-span-4">
+            Upload tileset
+            <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+          </label>
 
-      <label class="label" for="tileHeight">Tile Height</label>
-      <input id="tileHeight" type="number" class="input" [(ngModel)]="tileHeight" (ngModelChange)="onSettingsChange()">
+          <label class="label" for="tileWidth">Tile Width</label>
+          <input id="tileWidth" type="number" class="input" [(ngModel)]="tileWidth">
 
-      <label class="label" for="margin">Margin</label>
-      <input id="margin" type="number" class="input" [(ngModel)]="margin" (ngModelChange)="onSettingsChange()">
+          <label class="label" for="tileHeight">Tile Height</label>
+          <input id="tileHeight" type="number" class="input" [(ngModel)]="tileHeight">
 
-      <label class="label" for="spacing">Spacing</label>
-      <input id="spacing" type="number" class="input" [(ngModel)]="spacing" (ngModelChange)="onSettingsChange()">
+          <label class="label" for="margin">Margin</label>
+          <input id="margin" type="number" class="input" [(ngModel)]="margin">
 
-      <div class="col-span-4">
-        <label class="label" for="extrusion">Extrusion:</label>
-        <input id="extrusion" type="number" class="input" [(ngModel)]="extrusion" (ngModelChange)="onSettingsChange()">
-      </div>
+          <label class="label" for="spacing">Spacing</label>
+          <input id="spacing" type="number" class="input" [(ngModel)]="spacing">
+
+          <label class="label" for="extrusion">Extrusion:</label>
+          <input id="extrusion" type="number" class="input" [(ngModel)]="extrusion">
+
+          <div class="flex justify-end col-span-2">
+            <button class="btn btn-primary"
+                    (click)="extrudeImage()"
+                    [disabled]="!selectedImage">
+              Extrude
+            </button>
+          </div>
+        </div>
+      </fieldset>
+
+      @if (errorDetails) {
+        <div role="alert" class="alert alert-error alert-horizontal mt-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none"
+               viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div>
+            <h3 class="font-bold">Error</h3>
+            <div class="text-xs">Hover for more details.</div>
+          </div>
+          <div class="tooltip" [attr.data-tip]="errorDetails">
+            <button class="btn btn-sm">Hover</button>
+          </div>
+        </div>
+      }
+
+      <button class="btn btn-secondary mt-2"
+              (click)="downloadExtrudedImage()"
+              [disabled]="!extrudedImageUrl">
+        Download extruded tileset
+      </button>
     </div>
-  </fieldset>
 
-  <div class="mb-6 mt-4 flex flex-wrap gap-4 items-center">
-    <label class="btn btn-primary">
-      Upload tileset
-      <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
-    </label>
-
-    <button class="btn btn-secondary"
-            (click)="downloadExtrudedImage()"
-            [disabled]="!extrudedImageUrl">
-      Download extruded tileset
-    </button>
+    <div>
+      <h3 class="text-xl font-semibold mb-2">Original Tileset:</h3>
+      @if (selectedImage) {
+        <img [src]="selectedImage" alt="Original Tileset"
+             class="max-w-[300px] max-h-[300px] w-auto h-auto rounded border shadow">
+      } @else {
+        <div class="skeleton h-32 w-32"></div>
+      }
+    </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div>
-      <h3 class="text-xl font-semibold mb-2">Original Image:</h3>
-      @if (selectedImage) {
-        <img [src]="selectedImage" alt="Original Tileset" class="max-w-full h-auto rounded border shadow">
-      } @else {
-        <div class="skeleton h-32 w-32"></div>
-      }
-    </div>
-    <div>
-      <h3 class="text-xl font-semibold mb-2">Extruded Image:</h3>
-      @if (extrudedImageUrl) {
-        <img [src]="extrudedImageUrl" alt="Extruded Tileset" class="max-w-full h-auto rounded border shadow">
-      } @else if (selectedImage) {
-        <p class="text-gray-500">Processing or waiting for parameters...</p>
-        <div class="skeleton h-32 w-32"></div>
-      } @else {
-        <div class="skeleton h-32 w-32"></div>
-      }
-    </div>
+  <div class="mt-6">
+    <h3 class="text-xl font-semibold mb-2">Extruded Tileset:</h3>
+    @if (extrudedImageUrl) {
+      <img [src]="extrudedImageUrl" alt="Extruded Tileset"
+           class="max-w-[600px] max-h-[600px] w-auto h-auto rounded border shadow">
+    } @else if (selectedImage) {
+      <p class="text-gray-500">Click the Extrude button to generate the extruded image.</p>
+      <div class="skeleton h-32 w-32"></div>
+    } @else {
+      <div class="skeleton h-32 w-32"></div>
+    }
   </div>
 </div>
