@@ -118,7 +118,7 @@
           <div class="flex justify-end col-span-2">
             <button class="btn btn-primary"
                     (click)="splitImage()"
-                    [disabled]="!selectedImage">
+                    [disabled]="!selectedImage || form.invalid">
               Split Image
             </button>
           </div>
