@@ -182,7 +182,7 @@ export class ImageSplitComponent {
   async downloadViaFilePicker(suggestedName: string, zipBlob: Blob): Promise<boolean> {
     if (!(window as any).showSaveFilePicker) {
       // API not available
-      return Promise.resolve(false);
+      return false;
     }
 
     try {
