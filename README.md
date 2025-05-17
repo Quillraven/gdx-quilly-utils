@@ -26,3 +26,15 @@ Features:
 - Set a base filename for the output tiles
 - Preview all extracted tiles
 - Download all tiles as a ZIP file
+
+## Image Combiner
+
+A tool to combine multiple images into a single grid layout. This utility arranges your uploaded images in a grid based on the dimensions you specify.
+
+Features:
+- Upload multiple images
+- Configure grid width and height for arrangement
+- Drag and drop to reorder images
+- Preview the combined image
+- Set a custom filename for the output
+- Download the combined image
