@@ -1,11 +1,13 @@
 import {Component} from '@angular/core';
 import {extrudeTilesetToBuffer} from 'tile-extruder';
 import {FormsModule} from '@angular/forms';
+import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 
 @Component({
   selector: 'app-tile-extruder',
   imports: [
-    FormsModule
+    FormsModule,
+    ErrorAlertComponent
   ],
   templateUrl: './tile-extruder.component.html',
   styleUrl: './tile-extruder.component.css'
