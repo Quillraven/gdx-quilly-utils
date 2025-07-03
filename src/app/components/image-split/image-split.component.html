@@ -12,110 +12,48 @@
       <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-md border p-4 md:mt-5">
         <legend class="fieldset-legend">Settings</legend>
 
-        <form [formGroup]="form" class="grid grid-cols-4 gap-x-4 gap-y-2">
-          <label class="btn btn-secondary col-span-4">
+        <form [formGroup]="form" class="grid grid-cols-2 gap-x-4 gap-y-2">
+          <label class="btn btn-secondary col-span-2">
             Upload spritesheet
             <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
           </label>
 
-          <label class="label" for="numTilesX">Num tiles on x-axis</label>
-          <div class="flex flex-col">
-            <input
-              id="numTilesX"
-              type="number"
-              formControlName="numTilesX"
-              class="input"
-              [ngClass]="{'input-error': form.get('numTilesX')?.invalid && (form.get('numTilesX')?.touched || form.get('numTilesX')?.dirty)}">
-            @if (form.get('numTilesX')?.invalid && (form.get('numTilesX')?.touched || form.get('numTilesX')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('numTilesX')?.errors?.['required']) {
-                  <span>This field is required</span>
-                } @else if (form.get('numTilesX')?.errors?.['min']) {
-                  <span>Value must be at least 1</span>
-                } @else if (form.get('numTilesX')?.errors?.['notAnInteger']) {
-                  <span>Value must be an integer</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Num tiles on x-axis"
+            input-id="numTilesX"
+            [form-control]="form.get('numTilesX')"
+            type="number"
+          />
 
-          <label class="label" for="numTilesY">Num tiles on y-axis</label>
-          <div class="flex flex-col">
-            <input
-              id="numTilesY"
-              type="number"
-              formControlName="numTilesY"
-              class="input"
-              [ngClass]="{'input-error': form.get('numTilesY')?.invalid && (form.get('numTilesY')?.touched || form.get('numTilesY')?.dirty)}">
-            @if (form.get('numTilesY')?.invalid && (form.get('numTilesY')?.touched || form.get('numTilesY')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('numTilesY')?.errors?.['required']) {
-                  <span>This field is required</span>
-                } @else if (form.get('numTilesY')?.errors?.['min']) {
-                  <span>Value must be at least 1</span>
-                } @else if (form.get('numTilesY')?.errors?.['notAnInteger']) {
-                  <span>Value must be an integer</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Num tiles on y-axis"
+            input-id="numTilesY"
+            [form-control]="form.get('numTilesY')"
+            type="number"
+          />
 
-          <label class="label" for="ignoreFirstN">Ignore first n tiles</label>
-          <div class="flex flex-col">
-            <input
-              id="ignoreFirstN"
-              type="number"
-              formControlName="ignoreFirstN"
-              class="input">
-            @if (form.get('ignoreFirstN')?.invalid && (form.get('ignoreFirstN')?.touched || form.get('ignoreFirstN')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('ignoreFirstN')?.errors?.['notAnInteger']) {
-                  <span>Value must be an integer</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Ignore first n tiles"
+            input-id="ignoreFirstN"
+            [form-control]="form.get('ignoreFirstN')"
+            type="number"
+          />
 
-          <label class="label" for="ignoreLastN">Ignore last n tiles</label>
-          <div class="flex flex-col">
-            <input
-              id="ignoreLastN"
-              type="number"
-              formControlName="ignoreLastN"
-              class="input">
-            @if (form.get('ignoreLastN')?.invalid && (form.get('ignoreLastN')?.touched || form.get('ignoreLastN')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('ignoreLastN')?.errors?.['notAnInteger']) {
-                  <span>Value must be an integer</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Ignore last n tiles"
+            input-id="ignoreLastN"
+            [form-control]="form.get('ignoreLastN')"
+            type="number"
+          />
 
-          <label class="label" for="tilesBaseFileName">Tiles base name</label>
-          <div class="flex flex-col">
-            <input
-              id="tilesBaseFileName"
-              type="text"
-              formControlName="tilesBaseFileName"
-              class="input"
-              [ngClass]="{'input-error': form.get('tilesBaseFileName')?.invalid && (form.get('tilesBaseFileName')?.touched || form.get('tilesBaseFileName')?.dirty)}">
-            @if (form.get('tilesBaseFileName')?.invalid && (form.get('tilesBaseFileName')?.touched || form.get('tilesBaseFileName')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('tilesBaseFileName')?.errors?.['required']) {
-                  <span>This field is required</span>
-                } @else if (form.get('tilesBaseFileName')?.errors?.['minlength']) {
-                  <span>Name cannot be empty</span>
-                } @else if (form.get('tilesBaseFileName')?.errors?.['invalidFilename']) {
-                  <span>Invalid filename. Cannot contain: < > : " / \ | ? *</span>
-                } @else if (form.get('tilesBaseFileName')?.errors?.['blankFilename']) {
-                  <span>Filename cannot be just whitespace</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Tiles base name"
+            input-id="tilesBaseFileName"
+            [form-control]="form.get('tilesBaseFileName')"
+            type="text"
+          />
 
-          <div class="flex justify-end col-span-2">
+          <div class="flex justify-end">
             <button class="btn btn-primary"
                     (click)="splitImage()"
                     [disabled]="!selectedImage || form.invalid">

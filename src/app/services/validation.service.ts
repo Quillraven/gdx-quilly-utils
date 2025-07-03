@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { AbstractControl, ValidationErrors } from '@angular/forms';
+import {Injectable} from '@angular/core';
+import {AbstractControl, ValidationErrors} from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +17,8 @@ export class ValidationService {
       return null;
     }
 
-    if (!Number.isInteger(value)) {
+    const isInt = /^-?\d+$/.test(String(value));
+    if (!isInt) {
       return { notAnInteger: true };
     }
 
@@ -47,5 +48,28 @@ export class ValidationService {
     }
 
     return null;
+  }
+
+  errorHint(control: AbstractControl): string {
+    const errors = control.errors;
+    if (!errors) {
+      return '';
+    }
+
+    if (errors['required']) {
+      return 'This field is mandatory';
+    } else if (errors['min']) {
+      return 'Value must be greater than ' + errors['min'].min;
+    } else if (errors['notAnInteger']) {
+      return 'Value must be an integer';
+    } else if (errors['minLength']) {
+      return 'Value must be at least ' + errors['minLength'] + " characters long";
+    } else if (errors['invalidFilename']) {
+      return 'Value is not a valid file name. Cannot contain: < > : " / \\ | ? *';
+    } else if (errors['blankFilename']) {
+      return 'File name cannot be empty';
+    }
+
+    return 'Unknown error';
   }
 }
