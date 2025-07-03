@@ -17,8 +17,7 @@ export class ValidationService {
       return null;
     }
 
-    const isInt = /^-?\d+$/.test(String(value));
-    if (!isInt) {
+    if (!Number.isInteger(value)) {
       return { notAnInteger: true };
     }
 

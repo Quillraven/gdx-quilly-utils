@@ -1,13 +1,25 @@
 <div class="grid grid-flow-row grid-cols-2 gap-x-4">
   <label class="label" for="{{inputId}}">{{ label }}</label>
   <div class="flex flex-col">
-    <input
-      [id]="inputId"
-      [type]="type"
-      [formControl]="control"
-      class="input"
-      [ngClass]="{'input-error': hasErrors()}">
-    @if (hasErrors()) {
+      <!-- type cannot be dynamically set because of how Angular internally creates stuff. -->
+      <!-- Therefore, we do conditional rendering as a workaround to avoid that numbers are string values in the .ts classes   -->
+      @if (type === 'number') {
+          <input
+                  [id]="inputId"
+                  type="number"
+                  [formControl]="control"
+                  class="input"
+                  [ngClass]="{'input-error': hasErrors()}"/>
+      } @else {
+          <input
+                  [id]="inputId"
+                  type="text"
+                  [formControl]="control"
+                  class="input"
+                  [ngClass]="{'input-error': hasErrors()}"/>
+      }
+
+      @if (hasErrors()) {
       <div class="text-error text-xs mt-1">
         <span>{{ errorHint() }}</span>
       </div>

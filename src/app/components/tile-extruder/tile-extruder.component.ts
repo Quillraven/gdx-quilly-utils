@@ -96,10 +96,8 @@ export class TileExtruderComponent {
 
     try {
       const outputBuffer: Buffer = await extrudeTilesetToBuffer(
-        // the tile attributes are strings since the app-form-field refactoring.
-        // I don't understand why but we can convert them to numbers again by adding a unary plus
-        +this.tileWidth,
-        +this.tileHeight,
+        this.tileWidth,
+        this.tileHeight,
         this.selectedImage,
         {
           margin: this.margin,
