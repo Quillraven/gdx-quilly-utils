@@ -12,78 +12,34 @@
       <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-md border p-4 md:mt-12">
         <legend class="fieldset-legend">Settings</legend>
 
-        <form [formGroup]="form" class="grid grid-cols-4 gap-x-4 gap-y-2">
-          <label class="btn btn-secondary col-span-4">
+        <form [formGroup]="form" class="grid grid-cols-2 gap-x-4 gap-y-2">
+          <label class="btn btn-secondary col-span-2">
             Upload images
             <input type="file" class="hidden" accept="image/*" multiple (change)="onFilesSelected($event)">
           </label>
 
-          <label class="label" for="gridWidth">Grid Width</label>
-          <div class="flex flex-col">
-            <input
-              id="gridWidth"
-              type="number"
-              formControlName="gridWidth"
-              class="input"
-              [ngClass]="{'input-error': form.get('gridWidth')?.invalid && (form.get('gridWidth')?.touched || form.get('gridWidth')?.dirty)}">
-            @if (form.get('gridWidth')?.invalid && (form.get('gridWidth')?.touched || form.get('gridWidth')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('gridWidth')?.errors?.['required']) {
-                  <span>This field is required</span>
-                } @else if (form.get('gridWidth')?.errors?.['min']) {
-                  <span>Value must be at least 1</span>
-                } @else if (form.get('gridWidth')?.errors?.['notAnInteger']) {
-                  <span>Value must be an integer</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Grid Width"
+            input-id="gridWidth"
+            [form-control]="form.get('gridWidth')"
+            type="number"
+          />
 
-          <label class="label" for="gridHeight">Grid Height</label>
-          <div class="flex flex-col">
-            <input
-              id="gridHeight"
-              type="number"
-              formControlName="gridHeight"
-              class="input"
-              [ngClass]="{'input-error': form.get('gridHeight')?.invalid && (form.get('gridHeight')?.touched || form.get('gridHeight')?.dirty)}">
-            @if (form.get('gridHeight')?.invalid && (form.get('gridHeight')?.touched || form.get('gridHeight')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('gridHeight')?.errors?.['required']) {
-                  <span>This field is required</span>
-                } @else if (form.get('gridHeight')?.errors?.['min']) {
-                  <span>Value must be at least 1</span>
-                } @else if (form.get('gridHeight')?.errors?.['notAnInteger']) {
-                  <span>Value must be an integer</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Grid Height"
+            input-id="gridHeight"
+            [form-control]="form.get('gridHeight')"
+            type="number"
+          />
 
-          <label class="label" for="outputFileName">Output File Name</label>
-          <div class="flex flex-col">
-            <input
-              id="outputFileName"
-              type="text"
-              formControlName="outputFileName"
-              class="input"
-              [ngClass]="{'input-error': form.get('outputFileName')?.invalid && (form.get('outputFileName')?.touched || form.get('outputFileName')?.dirty)}">
-            @if (form.get('outputFileName')?.invalid && (form.get('outputFileName')?.touched || form.get('outputFileName')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('outputFileName')?.errors?.['required']) {
-                  <span>This field is required</span>
-                } @else if (form.get('outputFileName')?.errors?.['minlength']) {
-                  <span>Name cannot be empty</span>
-                } @else if (form.get('outputFileName')?.errors?.['invalidFilename']) {
-                  <span>Invalid filename. Cannot contain: < > : " / \ | ? *</span>
-                } @else if (form.get('outputFileName')?.errors?.['blankFilename']) {
-                  <span>Filename cannot be just whitespace</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Output File Name"
+            input-id="outputFileName"
+            [form-control]="form.get('outputFileName')"
+            type="text"
+          />
 
-          <div class="flex justify-end col-span-2">
+          <div class="flex justify-end">
             <button class="btn btn-primary"
                     (click)="combineImages()"
                     [disabled]="selectedImages.length === 0 || form.invalid">

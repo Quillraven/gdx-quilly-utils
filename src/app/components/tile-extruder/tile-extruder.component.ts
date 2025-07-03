@@ -5,6 +5,7 @@ import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
+import {FormFieldComponent} from '../form-field/form-field.component';
 
 @Component({
   selector: 'app-tile-extruder',
@@ -12,7 +13,8 @@ import {ValidationService} from '../../services/validation.service';
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
-    ErrorAlertComponent
+    ErrorAlertComponent,
+    FormFieldComponent
   ],
   templateUrl: './tile-extruder.component.html',
   styleUrl: './tile-extruder.component.css'
@@ -94,8 +96,10 @@ export class TileExtruderComponent {
 
     try {
       const outputBuffer: Buffer = await extrudeTilesetToBuffer(
-        this.tileWidth,
-        this.tileHeight,
+        // the tile attributes are strings since the app-form-field refactoring.
+        // I don't understand why but we can convert them to numbers again by adding a unary plus
+        +this.tileWidth,
+        +this.tileHeight,
         this.selectedImage,
         {
           margin: this.margin,

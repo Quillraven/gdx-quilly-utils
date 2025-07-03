@@ -5,6 +5,7 @@ import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
+import {FormFieldComponent} from '../form-field/form-field.component';
 
 @Component({
   selector: 'app-image-combine',
@@ -12,7 +13,8 @@ import {ValidationService} from '../../services/validation.service';
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
-    ErrorAlertComponent
+    ErrorAlertComponent,
+    FormFieldComponent
   ],
   templateUrl: './image-combine.component.html',
   styleUrl: './image-combine.component.css'

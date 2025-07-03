@@ -12,110 +12,48 @@
       <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 md:mt-5">
         <legend class="fieldset-legend">Settings</legend>
 
-        <form [formGroup]="form" class="grid grid-cols-4 gap-x-4 gap-y-2">
-          <label class="btn btn-secondary col-span-4">
+        <form [formGroup]="form" class="grid grid-cols-2 gap-x-4 gap-y-2 w-sm">
+          <label class="btn btn-secondary col-span-2">
             Upload tileset
             <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
           </label>
 
-          <label class="label" for="tileWidth">Tile Width</label>
-          <div class="flex flex-col">
-            <input
-              id="tileWidth"
-              type="number"
-              formControlName="tileWidth"
-              class="input"
-              [ngClass]="{'input-error': form.get('tileWidth')?.invalid && (form.get('tileWidth')?.touched || form.get('tileWidth')?.dirty)}">
-            @if (form.get('tileWidth')?.invalid && (form.get('tileWidth')?.touched || form.get('tileWidth')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('tileWidth')?.errors?.['required']) {
-                  <span>This field is required</span>
-                } @else if (form.get('tileWidth')?.errors?.['min']) {
-                  <span>Value must be at least 1</span>
-                } @else if (form.get('tileWidth')?.errors?.['notAnInteger']) {
-                  <span>Value must be an integer</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Tile Width"
+            input-id="tileWidth"
+            [form-control]="form.get('tileWidth')"
+            type="number"
+          />
 
-          <label class="label" for="tileHeight">Tile Height</label>
-          <div class="flex flex-col">
-            <input
-              id="tileHeight"
-              type="number"
-              formControlName="tileHeight"
-              class="input"
-              [ngClass]="{'input-error': form.get('tileHeight')?.invalid && (form.get('tileHeight')?.touched || form.get('tileHeight')?.dirty)}">
-            @if (form.get('tileHeight')?.invalid && (form.get('tileHeight')?.touched || form.get('tileHeight')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('tileHeight')?.errors?.['required']) {
-                  <span>This field is required</span>
-                } @else if (form.get('tileHeight')?.errors?.['min']) {
-                  <span>Value must be at least 1</span>
-                } @else if (form.get('tileHeight')?.errors?.['notAnInteger']) {
-                  <span>Value must be an integer</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Tile Height"
+            input-id="tileHeight"
+            [form-control]="form.get('tileHeight')"
+            type="number"
+          />
 
-          <label class="label" for="margin">Margin</label>
-          <div class="flex flex-col">
-            <input
-              id="margin"
-              type="number"
-              formControlName="margin"
-              class="input"
-              [ngClass]="{'input-error': form.get('margin')?.invalid && (form.get('margin')?.touched || form.get('margin')?.dirty)}">
-            @if (form.get('margin')?.invalid && (form.get('margin')?.touched || form.get('margin')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('margin')?.errors?.['notAnInteger']) {
-                  <span>Value must be an integer</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Margin"
+            input-id="margin"
+            [form-control]="form.get('margin')"
+            type="number"
+          />
 
-          <label class="label" for="spacing">Spacing</label>
-          <div class="flex flex-col">
-            <input
-              id="spacing"
-              type="number"
-              formControlName="spacing"
-              class="input"
-              [ngClass]="{'input-error': form.get('spacing')?.invalid && (form.get('spacing')?.touched || form.get('spacing')?.dirty)}">
-            @if (form.get('spacing')?.invalid && (form.get('spacing')?.touched || form.get('spacing')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('spacing')?.errors?.['notAnInteger']) {
-                  <span>Value must be an integer</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Spacing"
+            input-id="spacing"
+            [form-control]="form.get('spacing')"
+            type="number"
+          />
 
-          <label class="label" for="extrusion">Extrusion</label>
-          <div class="flex flex-col">
-            <input
-              id="extrusion"
-              type="number"
-              formControlName="extrusion"
-              class="input"
-              [ngClass]="{'input-error': form.get('extrusion')?.invalid && (form.get('extrusion')?.touched || form.get('extrusion')?.dirty)}">
-            @if (form.get('extrusion')?.invalid && (form.get('extrusion')?.touched || form.get('extrusion')?.dirty)) {
-              <div class="text-error text-xs mt-1">
-                @if (form.get('extrusion')?.errors?.['required']) {
-                  <span>This field is required</span>
-                } @else if (form.get('extrusion')?.errors?.['min']) {
-                  <span>Value must be at least 1</span>
-                } @else if (form.get('extrusion')?.errors?.['notAnInteger']) {
-                  <span>Value must be an integer</span>
-                }
-              </div>
-            }
-          </div>
+          <app-form-field
+            label="Extrusion"
+            input-id="extrusion"
+            [form-control]="form.get('extrusion')"
+            type="number"
+          />
 
-          <div class="flex justify-end col-span-2">
+          <div class="flex justify-end">
             <button class="btn btn-primary"
                     (click)="extrudeImage()"
                     [disabled]="!selectedImage || form.invalid">
