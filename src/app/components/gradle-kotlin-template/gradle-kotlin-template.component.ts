@@ -5,7 +5,7 @@ import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent} from '../form-field/form-field.component';
-import * as JSZip from 'jszip';
+import JSZip from 'jszip';
 
 @Component({
   selector: 'app-gradle-kotlin-template',
@@ -41,7 +41,8 @@ export class GradleKotlinTemplateComponent {
     this.form = this.fb.group({
       projectName: ['MyGdxGame', [Validators.required, this.validationService.noSpacesValidator]],
       packageName: ['com.example.game', [Validators.required, this.validationService.packageNameValidator]],
-      javaVersion: ['17', Validators.required]
+      javaVersion: ['17', Validators.required],
+      mainClassName: ['GdxGame', [Validators.required, this.validationService.noSpacesValidator]]
     });
   }
 
@@ -65,12 +66,63 @@ export class GradleKotlinTemplateComponent {
 
       const zipBlob = await response.blob();
 
-      // Generate a filename based on the project name
+      // Load the zip file with JSZip
+      const jszip = new JSZip();
+      const zip = await jszip.loadAsync(zipBlob);
+
+      // Get form values
       const projectName = this.form.get('projectName')?.value || 'MyGdxGame';
+      const mainClassName = this.form.get('mainClassName')?.value || 'GdxGame';
+
+      // Modify the libs.versions.toml file
+      const libsVersionsPath = 'gdx-kotlin-template-master/gradle/libs.versions.toml';
+      if (zip.files[libsVersionsPath]) {
+        // Get the content of the file
+        const content = await zip.files[libsVersionsPath].async('text');
+
+        // Remove the specified lines
+        const modifiedContent = content
+          .split('\n')
+          .filter(line =>
+            !line.trim().startsWith('fleksVersion') &&
+            !line.trim().startsWith('# ecs') &&
+            !line.trim().startsWith('fleks = { module'))
+          .join('\n');
+
+        // Update the file in the zip
+        zip.file(libsVersionsPath, modifiedContent);
+      }
+
+      // Find and update files that reference the default main class name
+      for (const filePath in zip.files) {
+        if (!zip.files[filePath].dir) {
+          // Skip directories and binary files
+          const extension = filePath.split('.').pop()?.toLowerCase();
+          if (extension && ['kt', 'java', 'gradle', 'kts', 'properties', 'xml', 'txt', 'md'].includes(extension)) {
+            try {
+              const content = await zip.files[filePath].async('text');
+
+              // Replace occurrences of the default class name with the new one
+              if (content.includes('GdxGame')) {
+                const modifiedContent = content.replace(/GdxGame/g, mainClassName);
+                zip.file(filePath, modifiedContent);
+              }
+            } catch (e) {
+              // Skip files that can't be processed as text
+              console.warn(`Skipping file ${filePath}: ${e}`);
+            }
+          }
+        }
+      }
+
+      // Generate a filename based on the project name
       const filename = `${projectName}.zip`;
 
-      // Download the zip file
-      await this.downloadService.downloadZip(zipBlob, filename);
+      // Generate the modified zip
+      const modifiedZipBlob = await zip.generateAsync({ type: 'blob' });
+
+      // Download the modified zip file
+      await this.downloadService.downloadZip(modifiedZipBlob, filename);
     } catch (error) {
       console.error('Error downloading template:', error);
       if (error instanceof Error) {
