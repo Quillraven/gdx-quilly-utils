@@ -1,0 +1,53 @@
+<div class="container mx-auto p-4">
+  <h2 class="text-2xl font-bold mb-2">Gradle Kotlin Template</h2>
+  <p class="mb-4 text-gray-600">
+    A template for creating libGDX projects using Kotlin and Gradle.
+    <br>
+    Configure your project settings below and click on <strong>Download</strong> to get the template.
+    <br>
+    <strong>!! ATTENTION !! This site is still under construction</strong>
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
+    <div>
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 md:mt-5">
+        <legend class="fieldset-legend">Settings</legend>
+
+        <form [formGroup]="form" class="grid grid-cols-1 gap-y-2 w-sm">
+          <app-form-field
+            label="Project Name"
+            input-id="projectName"
+            [form-control]="form.get('projectName')"
+            type="text"
+          />
+
+          <app-form-field
+            label="Package Name"
+            input-id="packageName"
+            [form-control]="form.get('packageName')"
+            type="text"
+          />
+
+          <app-form-field
+            label="Java Version"
+            input-id="javaVersion"
+            [form-control]="form.get('javaVersion')"
+            type="select"
+          />
+
+          <div class="flex justify-end mt-4">
+            <button class="btn btn-primary"
+                    (click)="downloadTemplate()"
+                    [disabled]="form.invalid">
+              Download
+            </button>
+          </div>
+        </form>
+      </fieldset>
+
+      @if (errorDetails) {
+        <app-error-alert [errorDetails]="errorDetails"></app-error-alert>
+      }
+    </div>
+  </div>
+</div>

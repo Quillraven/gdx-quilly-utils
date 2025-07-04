@@ -5,6 +5,43 @@ import {AbstractControl, ValidationErrors} from '@angular/forms';
   providedIn: 'root'
 })
 export class ValidationService {
+  /**
+   * Validates that a value does not contain spaces.
+   * @param control The form control to validate
+   * @returns ValidationErrors or null if valid
+   */
+  noSpacesValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    if (/\s/.test(value)) {
+      return {containsSpaces: true};
+    }
+
+    return null;
+  }
+
+  /**
+   * Validates that a value is a valid Java package name.
+   * @param control The form control to validate
+   * @returns ValidationErrors or null if valid
+   */
+  packageNameValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    // Package name should be in the format: com.example.myapp
+    const packageRegex = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*$/;
+    if (!packageRegex.test(value)) {
+      return {invalidPackageName: true};
+    }
+
+    return null;
+  }
 
   /**
    * Validates that a value is an integer.
@@ -67,6 +104,10 @@ export class ValidationService {
       return 'Value is not a valid file name. Cannot contain: < > : " / \\ | ? *';
     } else if (errors['blankFilename']) {
       return 'File name cannot be empty';
+    } else if (errors['containsSpaces']) {
+      return 'Value cannot contain spaces';
+    } else if (errors['invalidPackageName']) {
+      return 'Value is not a valid package name. Format should be: com.example.myapp';
     }
 
     return 'Unknown error';
