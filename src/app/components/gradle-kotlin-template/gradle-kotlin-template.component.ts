@@ -25,12 +25,12 @@ export class GradleKotlinTemplateComponent {
   // Form group for validation
   form: FormGroup;
 
-  // Java version options for the dropdown
+  // Java version options for the radio buttons
   javaVersionOptions = [
     { value: '8', label: 'Java 8' },
     { value: '11', label: 'Java 11' },
     { value: '17', label: 'Java 17' },
-    { value: '21', label: 'Java 21' }
+    {value: '24', label: 'Java 24'}
   ];
 
   constructor(
@@ -40,9 +40,20 @@ export class GradleKotlinTemplateComponent {
   ) {
     this.form = this.fb.group({
       projectName: ['MyGdxGame', [Validators.required, this.validationService.noSpacesValidator]],
-      packageName: ['com.example.game', [Validators.required, this.validationService.packageNameValidator]],
+      packageName: ['io.github', [Validators.required, this.validationService.packageNameValidator]],
       javaVersion: ['17', Validators.required],
-      mainClassName: ['GdxGame', [Validators.required, this.validationService.noSpacesValidator]]
+      mainClassName: ['GdxGame', [Validators.required, this.validationService.noSpacesValidator]],
+      // launcher options
+      desktopLauncher: [true],
+      teaVmLauncher: [false],
+      // dependency options
+      gdxAiDep: [false],
+      fleksDep: [true],
+      b2dDep: [true],
+      freetypeDep: [true],
+      ktxTiledDep: [true],
+      ktxPrefsDep: [false],
+      ktxI18nDep: [false],
     });
   }
 

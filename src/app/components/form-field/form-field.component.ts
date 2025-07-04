@@ -3,6 +3,10 @@ import {AbstractControl, FormControl, ReactiveFormsModule} from '@angular/forms'
 import {NgClass} from '@angular/common';
 import {ValidationService} from '../../services/validation.service';
 
+interface FormFieldOption {
+  label: string;
+  value: string;
+}
 
 function transformInputControl(control: AbstractControl | null): FormControl {
   if (!control) {
@@ -26,8 +30,10 @@ function transformInputControl(control: AbstractControl | null): FormControl {
 export class FormFieldComponent {
   @Input({required: true}) label!: string;
   @Input({required: true, alias: 'input-id'}) inputId!: string;
-  @Input({required: true}) type!: string;
+  @Input({required: true}) type!: 'text' | 'number' | 'checkbox' | 'radio';
   @Input({required: true, alias: 'form-control', transform: transformInputControl}) control!: FormControl;
+  @Input() options: FormFieldOption[] = []
+  @Input() gridClass: string = 'grid-cols-2';
 
   constructor(private readonly validationService: ValidationService) {
   }

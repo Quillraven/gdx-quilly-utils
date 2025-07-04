@@ -3,9 +3,7 @@
   <p class="mb-4 text-gray-600">
     A template for creating libGDX projects using Kotlin and Gradle.
     <br>
-    Configure your project settings below and click on <strong>Download</strong> to get the template.
-    <br>
-    <strong>!! ATTENTION !! This site is still under construction</strong>
+    Configure your project settings below and click on <strong>Download template .zip</strong> to get the template.
   </p>
 
   <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
@@ -19,42 +17,127 @@
             input-id="projectName"
             [form-control]="form.get('projectName')"
             type="text"
+            gridClass="grid-cols-[0.2fr_0.8fr]"
           />
 
           <app-form-field
-            label="Main class name"
+            label="Main class"
             input-id="mainClassName"
             [form-control]="form.get('mainClassName')"
             type="text"
+            gridClass="grid-cols-[0.2fr_0.8fr]"
           />
 
           <app-form-field
-            label="Package Name"
+            label="Package"
             input-id="packageName"
             [form-control]="form.get('packageName')"
             type="text"
+            gridClass="grid-cols-[0.2fr_0.8fr]"
           />
 
           <app-form-field
             label="Java Version"
             input-id="javaVersion"
             [form-control]="form.get('javaVersion')"
-            type="select"
+            type="radio"
+            [options]="javaVersionOptions"
+            gridClass="grid-cols-[0.2fr_0.8fr]"
           />
 
-          <div class="flex justify-end mt-4">
-            <button class="btn btn-primary"
-                    (click)="downloadTemplate()"
-                    [disabled]="form.invalid">
-              Download
-            </button>
+          <div class="divider divider-neutral">Launcher</div>
+
+          <div class="grid grid-cols-3 gap-x-4 gap-y-2">
+            <app-form-field
+              label="Desktop"
+              input-id="desktopLauncher"
+              [form-control]="form.get('desktopLauncher')"
+              type="checkbox"
+            />
+
+            <div class="tooltip" data-tip="Launcher to run your game in the browser">
+              <app-form-field
+                label="TeaVM"
+                input-id="teaVmLauncher"
+                [form-control]="form.get('teaVmLauncher')"
+                type="checkbox"
+              />
+            </div>
           </div>
+
+          <div class="divider divider-neutral">Dependencies</div>
+
+          <div class="grid grid-cols-3 gap-x-4 gap-y-2">
+            <app-form-field
+              label="Gdx-AI"
+              input-id="gdxAiDep"
+              [form-control]="form.get('gdxAiDep')"
+              type="checkbox"
+            />
+
+            <div class="tooltip" data-tip="An entity component system for Kotlin">
+              <app-form-field
+                label="Fleks"
+                input-id="fleksDep"
+                [form-control]="form.get('fleksDep')"
+                type="checkbox"
+              />
+            </div>
+
+            <div class="tooltip" data-tip="A 2D physics engine">
+              <app-form-field
+                label="Box2D"
+                input-id="b2dDep"
+                [form-control]="form.get('b2dDep')"
+                type="checkbox"
+              />
+            </div>
+
+            <app-form-field
+              class="col-span-3"
+              label="Freetype Font"
+              input-id="freetypeDep"
+              [form-control]="form.get('freetypeDep')"
+              type="checkbox"
+            />
+
+            <div class="tooltip" data-tip="extensions for the Tiled map editor">
+              <app-form-field
+                label="KTX Tiled"
+                input-id="ktxTiledDep"
+                [form-control]="form.get('ktxTiledDep')"
+                type="checkbox"
+              />
+            </div>
+
+            <app-form-field
+              label="KTX Preferences"
+              input-id="ktxPrefsDep"
+              [form-control]="form.get('ktxPrefsDep')"
+              type="checkbox"
+            />
+
+            <app-form-field
+              label="KTX I18n"
+              input-id="ktxI18nDep"
+              [form-control]="form.get('ktxI18nDep')"
+              type="checkbox"
+            />
+          </div>
+
         </form>
       </fieldset>
 
       @if (errorDetails) {
         <app-error-alert [errorDetails]="errorDetails"></app-error-alert>
       }
+
+      <button class="btn btn-secondary mt-2"
+              (click)="downloadTemplate()"
+              [disabled]="form.invalid">
+        Download template .zip
+      </button>
+
     </div>
   </div>
 </div>
