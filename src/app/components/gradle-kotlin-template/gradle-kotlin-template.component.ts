@@ -8,7 +8,7 @@ import {FormFieldComponent, FormFieldOption} from '../form-field/form-field.comp
 import JSZip from 'jszip';
 
 const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
-const LINE_ENDING = '\r\n';
+const LINE_ENDING = '\n';
 
 @Component({
   selector: 'app-gradle-kotlin-template',
