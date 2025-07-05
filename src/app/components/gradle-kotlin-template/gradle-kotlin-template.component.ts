@@ -8,6 +8,7 @@ import {FormFieldComponent, FormFieldOption} from '../form-field/form-field.comp
 import JSZip from 'jszip';
 
 const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
+const LINE_ENDING = '\r\n';
 
 @Component({
   selector: 'app-gradle-kotlin-template',
@@ -312,107 +313,107 @@ export class GradleKotlinTemplateComponent {
         // keep GDX-AI ?
         if (!gdxAi) {
           modifiedContent = modifiedContent
-            .split('\n')
+            .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('gdxAi') &&
               !line.startsWith('# ai') &&
               !line.startsWith('aiBundle') &&
               !line.startsWith('ktxAi'))
-            .join('\n');
+            .join(LINE_ENDING);
         }
 
         // keep Fleks ECS ?
         if (!fleksDep) {
           modifiedContent = modifiedContent
-            .split('\n')
+            .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('fleks') &&
               !line.startsWith('# ecs'))
-            .join('\n');
+            .join(LINE_ENDING);
         }
 
         // keep Box2D ?
         if (!b2dDep) {
           modifiedContent = modifiedContent
-            .split('\n')
+            .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('gdxBox2d') &&
               !line.startsWith('# box2d') &&
               !line.startsWith('ktxBox2d') &&
               !line.startsWith('box2dBundle'))
-            .join('\n');
+            .join(LINE_ENDING);
         }
 
         // keep freetype ?
         if (!freetypeDep) {
           modifiedContent = modifiedContent
-            .split('\n')
+            .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('gdxFreetype') &&
               !line.startsWith('# freetype') &&
               !line.startsWith('ktxFreetype') &&
               !line.startsWith('gdxTeaVmFreetype') &&
               !line.startsWith('freetypeBundle'))
-            .join('\n');
+            .join(LINE_ENDING);
         }
 
         // keep ktx tiled ?
         if (!ktxTiledDep) {
           modifiedContent = modifiedContent
-            .split('\n')
+            .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('ktxTiled'))
-            .join('\n');
+            .join(LINE_ENDING);
         }
 
         // keep ktx preferences ?
         if (!ktxPrefsDep) {
           modifiedContent = modifiedContent
-            .split('\n')
+            .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('ktxPreferences'))
-            .join('\n');
+            .join(LINE_ENDING);
         }
 
         // keep ktx i18n ?
         if (!ktxPrefsDep) {
           modifiedContent = modifiedContent
-            .split('\n')
+            .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('ktxI18n'))
-            .join('\n');
+            .join(LINE_ENDING);
         }
 
         // remove other ktx extension comment if necessary
         if (!ktxTiledDep && !ktxPrefsDep && !ktxI18nDep) {
           modifiedContent = modifiedContent
-            .split('\n')
+            .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('# other ktx'))
-            .join('\n');
+            .join(LINE_ENDING);
         }
 
         // keep desktop launcher ?
         if (!desktopLauncher) {
           modifiedContent = modifiedContent
-            .split('\n')
+            .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('gdxBackendLwjgl3') &&
               !line.startsWith('gdxPlatform'))
-            .join('\n');
+            .join(LINE_ENDING);
         }
 
         // keep teavm launcher ?
         if (!teaVmLauncher) {
           modifiedContent = modifiedContent
-            .split('\n')
+            .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('gretty') &&
               !line.startsWith('gdxTeaVm') &&
               !line.startsWith('teaVm') &&
               !line.startsWith('# teavm') &&
               !line.startsWith('[plugins]'))
-            .join('\n');
+            .join(LINE_ENDING);
         }
 
         // Update the file in the zip
@@ -482,51 +483,51 @@ export class GradleKotlinTemplateComponent {
 
     if (!b2dDep) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('box2d'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     if (!freetypeDep) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('freetype'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     if (!gdxAi) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('aiBundle'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     if (!ktxTiledDep) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('ktxTiled'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     if (!ktxPrefsDep) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('ktxPreferences'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     if (!ktxI18nDep) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('ktxI18n'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     if (!fleksDep) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('fleks'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     zip.file(filePath, modifiedContent);
@@ -541,26 +542,26 @@ export class GradleKotlinTemplateComponent {
 
     if (!desktopLauncher) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('lwjgl3'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     if (!teaVmLauncher) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('teavm') &&
           !line.includes('TeaVM') &&
           !line.includes('jitpack'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     if (!fleksDep) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('Fleks') &&
           !line.includes('s01.oss.sonatype'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     zip.file(filePath, modifiedContent);
@@ -573,7 +574,7 @@ export class GradleKotlinTemplateComponent {
     let modifiedContent = await zip.files[filePath].async('text');
 
     if (!b2dDep) {
-      const lines = modifiedContent.split('\n');
+      const lines = modifiedContent.split(LINE_ENDING);
       const newContent = [];
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -584,11 +585,11 @@ export class GradleKotlinTemplateComponent {
 
         newContent.push(line);
       }
-      modifiedContent = newContent.join('\n');
+      modifiedContent = newContent.join(LINE_ENDING);
     }
 
     if (!freetypeDep) {
-      const lines = modifiedContent.split('\n');
+      const lines = modifiedContent.split(LINE_ENDING);
       const newContent = [];
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -599,7 +600,7 @@ export class GradleKotlinTemplateComponent {
 
         newContent.push(line);
       }
-      modifiedContent = newContent.join('\n');
+      modifiedContent = newContent.join(LINE_ENDING);
     }
 
     zip.file(filePath, modifiedContent);
@@ -613,16 +614,16 @@ export class GradleKotlinTemplateComponent {
 
     if (!b2dDep) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('Box2d'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     if (!freetypeDep) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('Freetype'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     zip.file(filePath, modifiedContent);
@@ -635,10 +636,10 @@ export class GradleKotlinTemplateComponent {
 
     if (!freetypeDep) {
       modifiedContent = modifiedContent
-        .split('\n')
+        .split(LINE_ENDING)
         .filter(line => !line.includes('TeaAssetPreloadListener') &&
           !line.includes('freetype'))
-        .join('\n');
+        .join(LINE_ENDING);
     }
 
     zip.file(filePath, modifiedContent);
