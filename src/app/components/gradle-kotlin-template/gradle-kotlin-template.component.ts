@@ -65,7 +65,7 @@ export class GradleKotlinTemplateComponent {
     this.errorDetails = null;
 
     if (this.form.invalid) {
-      console.warn("Form is invalid. Please correct the errors.");
+      this.errorDetails = "Form is invalid. Please correct the errors.";
       return;
     }
 
@@ -176,6 +176,7 @@ export class GradleKotlinTemplateComponent {
     }
 
     // Find and update files that reference the default main class name
+    let mainClassFileToRemove = null;
     for (const filePath in zip.files) {
       if (zip.files[filePath].dir) {
         // ignore directories
@@ -200,12 +201,15 @@ export class GradleKotlinTemplateComponent {
         if (filePath.endsWith(`/${defaultMainClass}.kt`)) {
           const newPath = filePath.replace(`/${defaultMainClass}.kt`, `/${mainClassName}.kt`);
           zip.file(newPath, content.replace(new RegExp(defaultMainClass, 'g'), mainClassName));
-          zip.remove(filePath);
+          mainClassFileToRemove = filePath;
         }
       } catch (e) {
-        // Skip files that can't be processed as text
-        console.warn(`Skipping file ${filePath}: ${e}`);
+        throw new Error(`Skipping file ${filePath}: ${e}`);
       }
+    }
+
+    if (mainClassFileToRemove) {
+      zip.remove(mainClassFileToRemove);
     }
   }
 
@@ -272,8 +276,7 @@ export class GradleKotlinTemplateComponent {
           }
         }
       } catch (e) {
-        // Skip files that can't be processed as text
-        console.warn(`Skipping file ${filePath}: ${e}`);
+        throw new Error(`Skipping file ${filePath}: ${e}`);
       }
     }
 
@@ -419,7 +422,7 @@ export class GradleKotlinTemplateComponent {
         // Update the file in the zip
         zip.file(filePath, modifiedContent);
       } catch (e) {
-        console.warn(`Error updating Java version in ${filePath}: ${e}`);
+        throw new Error(`Error updating Java version in ${filePath}: ${e}`);
       }
 
       // file found and updated -> end loop
@@ -461,7 +464,7 @@ export class GradleKotlinTemplateComponent {
           await this.updateTeaVmLauncher(zip, filePath)
         }
       } catch (e) {
-        console.warn(`Error updating Java version in ${filePath}: ${e}`);
+        throw new Error(`Error updating Java version in ${filePath}: ${e}`);
       }
     }
 
