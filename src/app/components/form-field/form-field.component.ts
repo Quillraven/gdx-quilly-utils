@@ -3,7 +3,7 @@ import {AbstractControl, FormControl, ReactiveFormsModule} from '@angular/forms'
 import {NgClass} from '@angular/common';
 import {ValidationService} from '../../services/validation.service';
 
-interface FormFieldOption {
+export interface FormFieldOption {
   label: string;
   value: string;
 }

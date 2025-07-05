@@ -4,7 +4,7 @@ import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
-import {FormFieldComponent} from '../form-field/form-field.component';
+import {FormFieldComponent, FormFieldOption} from '../form-field/form-field.component';
 import JSZip from 'jszip';
 
 @Component({
@@ -26,7 +26,7 @@ export class GradleKotlinTemplateComponent {
   form: FormGroup;
 
   // Java version options for the radio buttons
-  javaVersionOptions = [
+  javaVersionOptions : FormFieldOption[] = [
     { value: '8', label: 'Java 8' },
     { value: '11', label: 'Java 11' },
     { value: '17', label: 'Java 17' },
