@@ -7,6 +7,8 @@ import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent, FormFieldOption} from '../form-field/form-field.component';
 import JSZip from 'jszip';
 
+const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
+
 @Component({
   selector: 'app-gradle-kotlin-template',
   imports: [
@@ -20,6 +22,7 @@ import JSZip from 'jszip';
   styleUrl: './gradle-kotlin-template.component.css'
 })
 export class GradleKotlinTemplateComponent {
+
   errorDetails: string | null = null;
 
   // Form group for validation
@@ -65,6 +68,13 @@ export class GradleKotlinTemplateComponent {
       return;
     }
 
+    const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
+    const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
+    if (!desktopLauncher && !teaVmLauncher) {
+      this.errorDetails = "Please select at least one launcher option";
+      return;
+    }
+
     try {
       // URL to the template zip file in public folder
       const templateUrl = 'gdx-kotlin-template-master.zip';
@@ -72,9 +82,9 @@ export class GradleKotlinTemplateComponent {
       // Fetch the template zip file
       const response = await fetch(templateUrl);
       if (!response.ok) {
-        throw new Error(`Failed to fetch template: ${response.statusText}`);
+        this.errorDetails = `Failed to fetch template: ${response.statusText}`;
+        return;
       }
-
       const zipBlob = await response.blob();
 
       // Load the zip file with JSZip
@@ -83,48 +93,21 @@ export class GradleKotlinTemplateComponent {
 
       // Get form values
       const projectName = this.form.get('projectName')?.value || 'MyGdxGame';
-      const mainClassName = this.form.get('mainClassName')?.value || 'GdxGame';
 
-      // Modify the libs.versions.toml file
-      const libsVersionsPath = 'gdx-kotlin-template-master/gradle/libs.versions.toml';
-      if (zip.files[libsVersionsPath]) {
-        // Get the content of the file
-        const content = await zip.files[libsVersionsPath].async('text');
+      // Update package name
+      await this.updatePackageName(zip);
 
-        // Remove the specified lines
-        const modifiedContent = content
-          .split('\n')
-          .filter(line =>
-            !line.trim().startsWith('fleksVersion') &&
-            !line.trim().startsWith('# ecs') &&
-            !line.trim().startsWith('fleks = { module'))
-          .join('\n');
+      // Update main class
+      await this.updateMainClass(zip);
 
-        // Update the file in the zip
-        zip.file(libsVersionsPath, modifiedContent);
-      }
+      // Update the root folder name
+      await this.updateRootFolderName(zip, projectName);
 
-      // Find and update files that reference the default main class name
-      for (const filePath in zip.files) {
-        if (!zip.files[filePath].dir) {
-          // Skip directories and binary files
-          const extension = filePath.split('.').pop()?.toLowerCase();
-          if (extension && ['kt', 'java', 'gradle', 'kts', 'properties', 'xml', 'txt', 'md'].includes(extension)) {
-            try {
-              const content = await zip.files[filePath].async('text');
+      // Update version catalog
+      await this.updateVersionCatalog(zip);
 
-              // Replace occurrences of the default class name with the new one
-              if (content.includes('GdxGame')) {
-                const modifiedContent = content.replace(/GdxGame/g, mainClassName);
-                zip.file(filePath, modifiedContent);
-              }
-            } catch (e) {
-              // Skip files that can't be processed as text
-              console.warn(`Skipping file ${filePath}: ${e}`);
-            }
-          }
-        }
-      }
+      // Update dependencies
+      await this.updateDependencies(zip);
 
       // Generate a filename based on the project name
       const filename = `${projectName}.zip`;
@@ -142,5 +125,522 @@ export class GradleKotlinTemplateComponent {
         this.errorDetails = String(error);
       }
     }
+  }
+
+  private async updateRootFolderName(zip: JSZip, projectName: string) {
+    const oldPath = "gdx-kotlin-template-master/";
+    const newPath = `${projectName}/`;
+    if (oldPath === newPath) {
+      return;
+    }
+
+    const filesToMove = [];
+
+    // Ensure the paths end with a slash to correctly identify folder contents
+    const oldFolder = oldPath.endsWith('/') ? oldPath : oldPath + '/';
+    const newFolder = newPath.endsWith('/') ? newPath : newPath + '/';
+
+    // Find all files and folders under the old path
+    for (const filePath in zip.files) {
+      if (filePath.startsWith(oldFolder)) {
+        filesToMove.push(filePath);
+      }
+    }
+
+    // Create new files and folders with the new path
+    for (const filePath of filesToMove) {
+      const file = zip.files[filePath];
+      const newFilePath = filePath.replace(oldFolder, newFolder);
+
+      if (file.dir) {
+        zip.folder(newFilePath);
+      } else {
+        const content = await file.async('arraybuffer');
+        zip.file(newFilePath, content);
+      }
+    }
+
+    // Remove the old files and folders
+    for (const filePath of filesToMove) {
+      zip.remove(filePath);
+    }
+  }
+
+  private async updateMainClass(zip: JSZip) {
+    const defaultMainClass = 'GdxGame';
+    const mainClassName = this.form.get('mainClassName')?.value || 'GdxGame';
+    if (defaultMainClass === mainClassName) {
+      // nothing to do because main class name remains the same
+      return;
+    }
+
+    // Find and update files that reference the default main class name
+    for (const filePath in zip.files) {
+      if (zip.files[filePath].dir) {
+        // ignore directories
+        continue;
+      }
+
+      const extension = filePath.split('.').pop()?.toLowerCase();
+      if (!(extension && FILES_TO_UPDATE.includes(extension))) {
+        continue;
+      }
+
+      try {
+        const content = await zip.files[filePath].async('text');
+
+        // Replace occurrences of the default class name with the new one
+        if (content.includes(defaultMainClass)) {
+          const modifiedContent = content.replace(new RegExp(defaultMainClass, 'g'), mainClassName);
+          zip.file(filePath, modifiedContent);
+        }
+
+        // Rename the main class file if found
+        if (filePath.endsWith(`/${defaultMainClass}.kt`)) {
+          const newPath = filePath.replace(`/${defaultMainClass}.kt`, `/${mainClassName}.kt`);
+          zip.file(newPath, content.replace(new RegExp(defaultMainClass, 'g'), mainClassName));
+          zip.remove(filePath);
+        }
+      } catch (e) {
+        // Skip files that can't be processed as text
+        console.warn(`Skipping file ${filePath}: ${e}`);
+      }
+    }
+  }
+
+  private async updatePackageName(zip: JSZip) {
+    const packageName = this.form.get('packageName')?.value || 'io.github';
+    const defaultPackage = 'io.github';
+    if (defaultPackage === packageName) {
+      // nothing to do because package remains the same
+      return
+    }
+
+    const defaultPackagePath = defaultPackage.replace(/\./g, '/');
+    const newPackagePath = packageName.replace(/\./g, '/');
+    const filesToRemove = [];
+
+    // Find and update files that reference the default package name
+    for (const filePath in zip.files) {
+      if (zip.files[filePath].dir) {
+        if (filePath.includes(`/kotlin/io/`)) {
+          // remove original io.github folders
+          filesToRemove.push(filePath);
+        }
+        continue;
+      }
+
+      const extension = filePath.split('.').pop()?.toLowerCase();
+      if (!(extension && FILES_TO_UPDATE.includes(extension))) {
+        continue;
+      }
+
+      try {
+        const content = await zip.files[filePath].async('text');
+
+        // Replace package declarations, imports and usage in gradle files like group or main class definition
+        let modifiedContent = content;
+        if (content.includes(defaultPackage)) {
+          modifiedContent = content.replace(new RegExp(`package\\s+${defaultPackage}`, 'g'), `package ${packageName}`);
+          modifiedContent = modifiedContent.replace(new RegExp(`import\\s+${defaultPackage}\\.`, 'g'), `import ${packageName}.`);
+          modifiedContent = modifiedContent.replace(new RegExp(`"${defaultPackage}`, 'g'), `"${packageName}`);
+          zip.file(filePath, modifiedContent);
+        }
+
+        // Rename package directories if they match the pattern
+        if (filePath.includes(`/kotlin/${defaultPackagePath}/`)) {
+          const newPath = filePath.replace(`/kotlin/${defaultPackagePath}/`, `/kotlin/${newPackagePath}/`);
+
+          // Create the new directory structure if needed
+          const dirParts = newPath.split('/');
+          let currentPath = '';
+          for (let i = 0; i < dirParts.length - 1; i++) {
+            currentPath += dirParts[i] + '/';
+            if (!zip.files[currentPath]) {
+              zip.folder(currentPath);
+            }
+          }
+
+          // Add the file to the new path
+          zip.file(newPath, modifiedContent);
+
+          // Mark the old file for removal
+          // We'll remove it after processing all files to avoid issues with iteration
+          if (newPath !== filePath) {
+            filesToRemove.push(filePath);
+          }
+        }
+      } catch (e) {
+        // Skip files that can't be processed as text
+        console.warn(`Skipping file ${filePath}: ${e}`);
+      }
+    }
+
+    // Remove the old files and folders
+    for (const filePath of filesToRemove) {
+      zip.remove(filePath);
+    }
+  }
+
+  private async updateVersionCatalog(zip: JSZip) {
+    const javaVersion = this.form.get('javaVersion')?.value || '17';
+    const gdxAi: boolean = this.form.get('gdxAiDep')?.value === true;
+    const fleksDep: boolean = this.form.get('fleksDep')?.value === true;
+    const b2dDep: boolean = this.form.get('b2dDep')?.value === true;
+    const freetypeDep: boolean = this.form.get('freetypeDep')?.value === true;
+    const ktxTiledDep: boolean = this.form.get('ktxTiledDep')?.value === true;
+    const ktxPrefsDep: boolean = this.form.get('ktxPrefsDep')?.value === true;
+    const ktxI18nDep: boolean = this.form.get('ktxI18nDep')?.value === true;
+    const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
+    const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
+
+    // Find the libs.versions.toml file
+    for (const filePath in zip.files) {
+      if (!filePath.endsWith('/gradle/libs.versions.toml') || zip.files[filePath].dir) {
+        continue;
+      }
+
+      try {
+        const content = await zip.files[filePath].async('text');
+
+        // Update the jvmToolchainVersion
+        let modifiedContent = content.replace(
+          /jvmToolchainVersion\s*=\s*["'](\d+)["']/,
+          `jvmToolchainVersion = "${javaVersion}"`
+        );
+
+        // keep GDX-AI ?
+        if (!gdxAi) {
+          modifiedContent = modifiedContent
+            .split('\n')
+            .filter(line =>
+              !line.startsWith('gdxAi') &&
+              !line.startsWith('# ai') &&
+              !line.startsWith('aiBundle') &&
+              !line.startsWith('ktxAi'))
+            .join('\n');
+        }
+
+        // keep Fleks ECS ?
+        if (!fleksDep) {
+          modifiedContent = modifiedContent
+            .split('\n')
+            .filter(line =>
+              !line.startsWith('fleks') &&
+              !line.startsWith('# ecs'))
+            .join('\n');
+        }
+
+        // keep Box2D ?
+        if (!b2dDep) {
+          modifiedContent = modifiedContent
+            .split('\n')
+            .filter(line =>
+              !line.startsWith('gdxBox2d') &&
+              !line.startsWith('# box2d') &&
+              !line.startsWith('ktxBox2d') &&
+              !line.startsWith('box2dBundle'))
+            .join('\n');
+        }
+
+        // keep freetype ?
+        if (!freetypeDep) {
+          modifiedContent = modifiedContent
+            .split('\n')
+            .filter(line =>
+              !line.startsWith('gdxFreetype') &&
+              !line.startsWith('# freetype') &&
+              !line.startsWith('ktxFreetype') &&
+              !line.startsWith('gdxTeaVmFreetype') &&
+              !line.startsWith('freetypeBundle'))
+            .join('\n');
+        }
+
+        // keep ktx tiled ?
+        if (!ktxTiledDep) {
+          modifiedContent = modifiedContent
+            .split('\n')
+            .filter(line =>
+              !line.startsWith('ktxTiled'))
+            .join('\n');
+        }
+
+        // keep ktx preferences ?
+        if (!ktxPrefsDep) {
+          modifiedContent = modifiedContent
+            .split('\n')
+            .filter(line =>
+              !line.startsWith('ktxPreferences'))
+            .join('\n');
+        }
+
+        // keep ktx i18n ?
+        if (!ktxPrefsDep) {
+          modifiedContent = modifiedContent
+            .split('\n')
+            .filter(line =>
+              !line.startsWith('ktxI18n'))
+            .join('\n');
+        }
+
+        // remove other ktx extension comment if necessary
+        if (!ktxTiledDep && !ktxPrefsDep && !ktxI18nDep) {
+          modifiedContent = modifiedContent
+            .split('\n')
+            .filter(line =>
+              !line.startsWith('# other ktx'))
+            .join('\n');
+        }
+
+        // keep desktop launcher ?
+        if (!desktopLauncher) {
+          modifiedContent = modifiedContent
+            .split('\n')
+            .filter(line =>
+              !line.startsWith('gdxBackendLwjgl3') &&
+              !line.startsWith('gdxPlatform'))
+            .join('\n');
+        }
+
+        // keep teavm launcher ?
+        if (!teaVmLauncher) {
+          modifiedContent = modifiedContent
+            .split('\n')
+            .filter(line =>
+              !line.startsWith('gretty') &&
+              !line.startsWith('gdxTeaVm') &&
+              !line.startsWith('teaVm') &&
+              !line.startsWith('# teavm') &&
+              !line.startsWith('[plugins]'))
+            .join('\n');
+        }
+
+        // Update the file in the zip
+        zip.file(filePath, modifiedContent);
+      } catch (e) {
+        console.warn(`Error updating Java version in ${filePath}: ${e}`);
+      }
+
+      // file found and updated -> end loop
+      return;
+    }
+  }
+
+  private async updateDependencies(zip: JSZip) {
+    const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
+    const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
+
+    const filesToRemove = [];
+
+    for (const filePath in zip.files) {
+      try {
+        if (filePath.endsWith('/core/build.gradle.kts')) {
+          await this.updateCoreBuildGradle(zip, filePath)
+          continue;
+        }
+
+        if (filePath.endsWith('/settings.gradle.kts') && !filePath.includes('buildSrc')) {
+          await this.updateRootSettingsGradle(zip, filePath)
+          continue;
+        }
+
+        if (!desktopLauncher && filePath.includes('lwjgl3')) {
+          filesToRemove.push(filePath);
+          continue;
+        } else if (desktopLauncher && filePath.endsWith('/lwjgl3/build.gradle.kts')) {
+          await this.updateDesktopBuildGradle(zip, filePath)
+          continue;
+        }
+
+        if (!teaVmLauncher && filePath.includes('teavm')) {
+          filesToRemove.push(filePath);
+        } else if (teaVmLauncher && filePath.endsWith('/teavm/build.gradle.kts')) {
+          await this.updateTeaVmBuildGradle(zip, filePath)
+        } else if (teaVmLauncher && filePath.endsWith('/TeaVMLauncher.kt')) {
+          await this.updateTeaVmLauncher(zip, filePath)
+        }
+      } catch (e) {
+        console.warn(`Error updating Java version in ${filePath}: ${e}`);
+      }
+    }
+
+    for (let filePath of filesToRemove) {
+      zip.remove(filePath);
+    }
+  }
+
+  private async updateCoreBuildGradle(zip: JSZip, filePath: string) {
+    const gdxAi: boolean = this.form.get('gdxAiDep')?.value === true;
+    const fleksDep: boolean = this.form.get('fleksDep')?.value === true;
+    const b2dDep: boolean = this.form.get('b2dDep')?.value === true;
+    const freetypeDep: boolean = this.form.get('freetypeDep')?.value === true;
+    const ktxTiledDep: boolean = this.form.get('ktxTiledDep')?.value === true;
+    const ktxPrefsDep: boolean = this.form.get('ktxPrefsDep')?.value === true;
+    const ktxI18nDep: boolean = this.form.get('ktxI18nDep')?.value === true;
+
+    let modifiedContent = await zip.files[filePath].async('text');
+
+    if (!b2dDep) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('box2d'))
+        .join('\n');
+    }
+
+    if (!freetypeDep) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('freetype'))
+        .join('\n');
+    }
+
+    if (!gdxAi) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('aiBundle'))
+        .join('\n');
+    }
+
+    if (!ktxTiledDep) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('ktxTiled'))
+        .join('\n');
+    }
+
+    if (!ktxPrefsDep) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('ktxPreferences'))
+        .join('\n');
+    }
+
+    if (!ktxI18nDep) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('ktxI18n'))
+        .join('\n');
+    }
+
+    if (!fleksDep) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('fleks'))
+        .join('\n');
+    }
+
+    zip.file(filePath, modifiedContent);
+  }
+
+  private async updateRootSettingsGradle(zip: JSZip, filePath: string) {
+    const fleksDep: boolean = this.form.get('fleksDep')?.value === true;
+    const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
+    const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
+
+    let modifiedContent = await zip.files[filePath].async('text');
+
+    if (!desktopLauncher) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('lwjgl3'))
+        .join('\n');
+    }
+
+    if (!teaVmLauncher) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('teavm') &&
+          !line.includes('TeaVM') &&
+          !line.includes('jitpack'))
+        .join('\n');
+    }
+
+    if (!fleksDep) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('Fleks') &&
+          !line.includes('s01.oss.sonatype'))
+        .join('\n');
+    }
+
+    zip.file(filePath, modifiedContent);
+  }
+
+  private async updateDesktopBuildGradle(zip: JSZip, filePath: string) {
+    const b2dDep: boolean = this.form.get('b2dDep')?.value === true;
+    const freetypeDep: boolean = this.form.get('freetypeDep')?.value === true;
+
+    let modifiedContent = await zip.files[filePath].async('text');
+
+    if (!b2dDep) {
+      const lines = modifiedContent.split('\n');
+      const newContent = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.includes('Box2d')) {
+          i += 2;
+          continue;
+        }
+
+        newContent.push(line);
+      }
+      modifiedContent = newContent.join('\n');
+    }
+
+    if (!freetypeDep) {
+      const lines = modifiedContent.split('\n');
+      const newContent = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.includes('Freetype')) {
+          i += 2;
+          continue;
+        }
+
+        newContent.push(line);
+      }
+      modifiedContent = newContent.join('\n');
+    }
+
+    zip.file(filePath, modifiedContent);
+  }
+
+  private async updateTeaVmBuildGradle(zip: JSZip, filePath: string) {
+    const b2dDep: boolean = this.form.get('b2dDep')?.value === true;
+    const freetypeDep: boolean = this.form.get('freetypeDep')?.value === true;
+
+    let modifiedContent = await zip.files[filePath].async('text');
+
+    if (!b2dDep) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('Box2d'))
+        .join('\n');
+    }
+
+    if (!freetypeDep) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('Freetype'))
+        .join('\n');
+    }
+
+    zip.file(filePath, modifiedContent);
+  }
+
+  private async updateTeaVmLauncher(zip: JSZip, filePath: string) {
+    const freetypeDep: boolean = this.form.get('freetypeDep')?.value === true;
+
+    let modifiedContent = await zip.files[filePath].async('text');
+
+    if (!freetypeDep) {
+      modifiedContent = modifiedContent
+        .split('\n')
+        .filter(line => !line.includes('TeaAssetPreloadListener') &&
+          !line.includes('freetype'))
+        .join('\n');
+    }
+
+    zip.file(filePath, modifiedContent);
   }
 }

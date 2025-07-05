@@ -38,3 +38,8 @@ Features:
 - Preview the combined image
 - Set a custom filename for the output
 - Download the combined image
+
+## Gradle Kotlin Template
+
+A modern Gradle Kotlin DSL based template for creating LibGDX projects using Kotlin.
+It uses a version catalog and buildSrc directory for convention plugins.
