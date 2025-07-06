@@ -97,7 +97,7 @@ export class GradleKotlinTemplateComponent {
 
       // 1. update file content without structural changes
       await this.updateVersionCatalog(zip);
-      await this.updateDependencies(zip);
+      await this.updateDependencies(zip, projectName);
       await this.updateMainClass(zip);
 
       // 2. update structure
@@ -431,7 +431,7 @@ export class GradleKotlinTemplateComponent {
     }
   }
 
-  private async updateDependencies(zip: JSZip) {
+  private async updateDependencies(zip: JSZip, projectName: string) {
     const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
 
@@ -445,7 +445,7 @@ export class GradleKotlinTemplateComponent {
         }
 
         if (filePath.endsWith('/settings.gradle.kts') && !filePath.includes('buildSrc')) {
-          await this.updateRootSettingsGradle(zip, filePath)
+          await this.updateRootSettingsGradle(zip, filePath, projectName)
           continue;
         }
 
@@ -537,12 +537,13 @@ export class GradleKotlinTemplateComponent {
     zip.file(filePath, modifiedContent);
   }
 
-  private async updateRootSettingsGradle(zip: JSZip, filePath: string) {
+  private async updateRootSettingsGradle(zip: JSZip, filePath: string, projectName: string) {
     const fleksDep: boolean = this.form.get('fleksDep')?.value === true;
     const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
 
-    let modifiedContent = await zip.files[filePath].async('text');
+    const content = await zip.files[filePath].async('text');
+    let modifiedContent = content.replace(new RegExp("gdx-template", 'g'), projectName);
 
     if (!desktopLauncher) {
       modifiedContent = modifiedContent
