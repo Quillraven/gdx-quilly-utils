@@ -77,15 +77,6 @@
               type="checkbox"
             />
 
-            <div class="tooltip" data-tip="An entity component system for Kotlin">
-              <app-form-field
-                label="Fleks"
-                input-id="fleksDep"
-                [form-control]="form.get('fleksDep')"
-                type="checkbox"
-              />
-            </div>
-
             <div class="tooltip" data-tip="A 2D physics engine">
               <app-form-field
                 label="Box2D"
@@ -96,12 +87,20 @@
             </div>
 
             <app-form-field
-              class="col-span-3"
               label="Freetype Font"
               input-id="freetypeDep"
               [form-control]="form.get('freetypeDep')"
               type="checkbox"
             />
+
+            <div class="tooltip col-span-3" data-tip="An entity component system for Kotlin">
+              <app-form-field
+                label="Fleks"
+                input-id="fleksDep"
+                [form-control]="form.get('fleksDep')"
+                type="checkbox"
+              />
+            </div>
 
             <div class="tooltip tooltip-right" data-tip="extensions for the Tiled map editor">
               <app-form-field
