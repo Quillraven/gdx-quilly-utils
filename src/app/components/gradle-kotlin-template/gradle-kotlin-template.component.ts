@@ -30,10 +30,10 @@ export class GradleKotlinTemplateComponent {
   form: FormGroup;
 
   // Java version options for the radio buttons
-  javaVersionOptions : FormFieldOption[] = [
-    { value: '8', label: 'Java 8' },
-    { value: '11', label: 'Java 11' },
-    { value: '17', label: 'Java 17' },
+  javaVersionOptions: FormFieldOption[] = [
+    {value: '8', label: 'Java 8'},
+    {value: '11', label: 'Java 11'},
+    {value: '17', label: 'Java 17'},
     {value: '24', label: 'Java 24'}
   ];
 
@@ -95,26 +95,20 @@ export class GradleKotlinTemplateComponent {
       // Get form values
       const projectName = this.form.get('projectName')?.value || 'MyGdxGame';
 
-      // Update package name
-      await this.updatePackageName(zip);
-
-      // Update main class
+      // 1. update file content without structural changes
+      await this.updateVersionCatalog(zip);
+      await this.updateDependencies(zip);
       await this.updateMainClass(zip);
 
-      // Update the root folder name
+      // 2. update structure
+      await this.updatePackageName(zip);
       await this.updateRootFolderName(zip, projectName);
-
-      // Update version catalog
-      await this.updateVersionCatalog(zip);
-
-      // Update dependencies
-      await this.updateDependencies(zip);
 
       // Generate a filename based on the project name
       const filename = `${projectName}.zip`;
 
       // Generate the modified zip
-      const modifiedZipBlob = await zip.generateAsync({ type: 'blob' });
+      const modifiedZipBlob = await zip.generateAsync({type: 'blob'});
 
       // Download the modified zip file
       await this.downloadService.downloadZip(modifiedZipBlob, filename);
@@ -223,23 +217,27 @@ export class GradleKotlinTemplateComponent {
 
     const defaultPackagePath = defaultPackage.replace(/\./g, '/');
     const newPackagePath = packageName.replace(/\./g, '/');
-    const filesToRemove = [];
+    const foldersToRemove = [];
+    const filesToProcess = [];
 
     // Find and update files that reference the default package name
     for (const filePath in zip.files) {
       if (zip.files[filePath].dir) {
         if (filePath.includes(`/kotlin/io/`)) {
           // remove original io.github folders
-          filesToRemove.push(filePath);
+          foldersToRemove.push(filePath);
         }
         continue;
       }
 
       const extension = filePath.split('.').pop()?.toLowerCase();
-      if (!(extension && FILES_TO_UPDATE.includes(extension))) {
-        continue;
+      if (extension && FILES_TO_UPDATE.includes(extension)) {
+        filesToProcess.push(filePath);
       }
+    }
 
+    const filesToRemove = [];
+    for (const filePath of filesToProcess) {
       try {
         const content = await zip.files[filePath].async('text');
 
@@ -249,7 +247,6 @@ export class GradleKotlinTemplateComponent {
           modifiedContent = content.replace(new RegExp(`package\\s+${defaultPackage}`, 'g'), `package ${packageName}`);
           modifiedContent = modifiedContent.replace(new RegExp(`import\\s+${defaultPackage}\\.`, 'g'), `import ${packageName}.`);
           modifiedContent = modifiedContent.replace(new RegExp(`"${defaultPackage}`, 'g'), `"${packageName}`);
-          zip.file(filePath, modifiedContent);
         }
 
         // Rename package directories if they match the pattern
@@ -274,6 +271,9 @@ export class GradleKotlinTemplateComponent {
           if (newPath !== filePath) {
             filesToRemove.push(filePath);
           }
+        } else {
+          // update existing file in place
+          zip.file(filePath, modifiedContent);
         }
       } catch (e) {
         throw new Error(`Skipping file ${filePath}: ${e}`);
@@ -281,7 +281,7 @@ export class GradleKotlinTemplateComponent {
     }
 
     // Remove the old files and folders
-    for (const filePath of filesToRemove) {
+    for (const filePath of [...filesToRemove, ...foldersToRemove]) {
       zip.remove(filePath);
     }
   }
@@ -413,6 +413,7 @@ export class GradleKotlinTemplateComponent {
             .filter(line =>
               !line.startsWith('gretty') &&
               !line.startsWith('gdxTeaVm') &&
+              !line.startsWith('gdxBox2dGwt') &&
               !line.startsWith('teaVm') &&
               !line.startsWith('# teavm') &&
               !line.startsWith('[plugins]'))
