@@ -34,6 +34,7 @@ export class FormFieldComponent {
   @Input({required: true, alias: 'form-control', transform: transformInputControl}) control!: FormControl;
   @Input() options: FormFieldOption[] = []
   @Input() gridClass: string = 'grid-cols-2';
+  @Input({alias: 'tool-tip'}) toolTip: string = '';
 
   constructor(private readonly validationService: ValidationService) {
   }

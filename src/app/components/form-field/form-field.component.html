@@ -1,35 +1,38 @@
 <div class="grid grid-flow-row gap-x-4" [ngClass]="gridClass">
 
   @if (type !== 'checkbox') {
-    <label class="label" for="{{inputId}}">{{ label }}</label>
+    <div class="tooltip" [attr.data-tip]="toolTip">
+      <label class="label" for="{{inputId}}">{{ label }}</label>
+    </div>
   }
 
   <div class="flex flex-col">
-      <!-- type cannot be dynamically set because of how Angular internally creates stuff. -->
-      <!-- Therefore, we do conditional rendering as a workaround to avoid that numbers are string values in the .ts classes   -->
-      @if (type === 'number') {
-          <input
-                  [id]="inputId"
-                  type="number"
-                  [formControl]="control"
-                  class="input"
-                  [ngClass]="{'input-error': hasErrors()}"/>
-      } @else if (type === 'radio') {
-        <div class="flex flex-row gap-4">
-          @for (option of options; track option.value) {
-            <div class="flex items-start">
-              <input
-                type="radio"
-                [id]="inputId + '_' + option.value"
-                [value]="option.value"
-                [formControl]="control"
-                class="radio radio-xs"
-              />
-              <label [for]="inputId + '_' + option.value" class="text-sm ml-1">{{ option.value }}</label>
-            </div>
-          }
-        </div>
-      } @else if (type === 'checkbox') {
+    <!-- type cannot be dynamically set because of how Angular internally creates stuff. -->
+    <!-- Therefore, we do conditional rendering as a workaround to avoid that numbers are string values in the .ts classes   -->
+    @if (type === 'number') {
+      <input
+        [id]="inputId"
+        type="number"
+        [formControl]="control"
+        class="input"
+        [ngClass]="{'input-error': hasErrors()}"/>
+    } @else if (type === 'radio') {
+      <div class="flex flex-row gap-4">
+        @for (option of options; track option.value) {
+          <div class="flex items-start">
+            <input
+              type="radio"
+              [id]="inputId + '_' + option.value"
+              [value]="option.value"
+              [formControl]="control"
+              class="radio radio-xs"
+            />
+            <label [for]="inputId + '_' + option.value" class="text-sm ml-1">{{ option.value }}</label>
+          </div>
+        }
+      </div>
+    } @else if (type === 'checkbox') {
+      <div class="tooltip tooltip-right" [attr.data-tip]="toolTip">
         <label class="label">
           <input
             [id]="inputId"
@@ -38,16 +41,17 @@
             class="checkbox checkbox-xs checkbox-neutral"/>
           {{ label }}
         </label>
-      } @else {
-          <input
-                  [id]="inputId"
-                  type="text"
-                  [formControl]="control"
-                  class="input"
-                  [ngClass]="{'input-error': hasErrors()}"/>
-      }
+      </div>
+    } @else {
+      <input
+        [id]="inputId"
+        type="text"
+        [formControl]="control"
+        class="input"
+        [ngClass]="{'input-error': hasErrors()}"/>
+    }
 
-      @if (hasErrors()) {
+    @if (hasErrors()) {
       <div class="text-error text-xs mt-1">
         <span>{{ errorHint() }}</span>
       </div>
