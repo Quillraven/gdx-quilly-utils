@@ -34,6 +34,7 @@ export class GradleKotlinTemplateComponent {
     {value: '8', label: 'Java 8'},
     {value: '11', label: 'Java 11'},
     {value: '17', label: 'Java 17'},
+    {value: '21', label: 'Java 21'},
     {value: '24', label: 'Java 24'}
   ];
 
