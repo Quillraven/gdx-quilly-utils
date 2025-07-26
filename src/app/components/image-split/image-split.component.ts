@@ -6,7 +6,7 @@ import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
-import {FormFieldComponent} from '../form-field/form-field.component';
+import {FormFieldComponent, FormFieldOption} from '../form-field/form-field.component';
 
 @Component({
   selector: 'app-image-split',
@@ -26,6 +26,12 @@ export class ImageSplitComponent {
   errorDetails: string | null = null;
   genTilesX: number = 0;
 
+  // Split mode options
+  splitModeOptions: FormFieldOption[] = [
+    { label: 'num tiles', value: 'num tiles' },
+    { label: 'by size', value: 'size' }
+  ];
+
   // Form group for validation
   form: FormGroup;
 
@@ -34,12 +40,24 @@ export class ImageSplitComponent {
     return this.form.get('tilesBaseFileName')?.value || 'Tile';
   }
 
+  get splitMode(): string {
+    return this.form.get('splitMode')?.value || 'num tiles';
+  }
+
   get numTilesX(): number {
     return this.form.get('numTilesX')?.value || 4;
   }
 
   get numTilesY(): number {
     return this.form.get('numTilesY')?.value || 4;
+  }
+
+  get tileSizeWidth(): number {
+    return this.form.get('tileSizeWidth')?.value || 32;
+  }
+
+  get tileSizeHeight(): number {
+    return this.form.get('tileSizeHeight')?.value || 32;
   }
 
   get ignoreFirstN(): number {
@@ -56,8 +74,11 @@ export class ImageSplitComponent {
     private validationService: ValidationService
   ) {
     this.form = this.fb.group({
+      splitMode: ['num tiles', [Validators.required]],
       numTilesX: [4, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
       numTilesY: [4, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
+      tileSizeWidth: [32, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
+      tileSizeHeight: [32, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
       ignoreFirstN: [0, [this.validationService.integerValidator]],
       ignoreLastN: [0, [this.validationService.integerValidator]],
       tilesBaseFileName: ['Tile', [Validators.required, Validators.minLength(1), this.validationService.validFilenameValidator]]
@@ -93,11 +114,31 @@ export class ImageSplitComponent {
       // Load the image using Jimp
       const image = await Jimp.read(this.selectedImage);
 
-      // Calculate the number of tiles in the image
-      this.genTilesX = this.numTilesX;
-      const tileW = Math.floor(image.bitmap.width / this.numTilesX);
-      const tileH = Math.floor(image.bitmap.height / this.numTilesY);
-      const totalTiles = this.numTilesX * this.numTilesY;
+      let tileW: number;
+      let tileH: number;
+      let numTilesX: number;
+      let numTilesY: number;
+
+      // Calculate tile dimensions based on the selected split mode
+      if (this.splitMode === 'num tiles') {
+        // Split by number of tiles (original functionality)
+        numTilesX = this.numTilesX;
+        numTilesY = this.numTilesY;
+        tileW = Math.floor(image.bitmap.width / numTilesX);
+        tileH = Math.floor(image.bitmap.height / numTilesY);
+      } else {
+        // Split by tile size (new functionality)
+        tileW = this.tileSizeWidth;
+        tileH = this.tileSizeHeight;
+        numTilesX = Math.floor(image.bitmap.width / tileW);
+        numTilesY = Math.floor(image.bitmap.height / tileH);
+      }
+
+      // Store the number of tiles on x-axis for the grid display
+      this.genTilesX = numTilesX;
+
+      // Calculate total number of tiles
+      const totalTiles = numTilesX * numTilesY;
 
       // Clear previous tiles
       this.splitTiles = [];
@@ -107,9 +148,9 @@ export class ImageSplitComponent {
       const endTileIndex = totalTiles - this.ignoreLastN;
 
       // Split the image into tiles
-      for (let y = 0; y < this.numTilesY; y++) {
-        for (let x = 0; x < this.numTilesX; x++) {
-          const tileIndex = y * this.numTilesX + x;
+      for (let y = 0; y < numTilesY; y++) {
+        for (let x = 0; x < numTilesX; x++) {
+          const tileIndex = y * numTilesX + x;
 
           // Skip tiles based on ignored settings
           if (tileIndex < startTileIndex || tileIndex >= endTileIndex) {
