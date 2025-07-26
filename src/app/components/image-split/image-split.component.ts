@@ -6,7 +6,7 @@ import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
-import {FormFieldComponent, FormFieldOption} from '../form-field/form-field.component';
+import {FormFieldComponent} from '../form-field/form-field.component';
 
 @Component({
   selector: 'app-image-split',
@@ -27,10 +27,7 @@ export class ImageSplitComponent {
   genTilesX: number = 0;
 
   // Split mode options
-  splitModeOptions: FormFieldOption[] = [
-    { label: 'num tiles', value: 'num tiles' },
-    { label: 'by size', value: 'size' }
-  ];
+  splitModeOptions: string[] = ['num tiles', 'size'];
 
   // Form group for validation
   form: FormGroup;

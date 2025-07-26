@@ -18,16 +18,16 @@
         [ngClass]="{'input-error': hasErrors()}"/>
     } @else if (type === 'radio') {
       <div class="flex flex-row gap-4">
-        @for (option of options; track option.value) {
+        @for (option of options; track option) {
           <div class="flex items-start">
             <input
               type="radio"
-              [id]="inputId + '_' + option.value"
-              [value]="option.value"
+              [id]="inputId + '_' + option"
+              [value]="option"
               [formControl]="control"
               class="radio radio-xs"
             />
-            <label [for]="inputId + '_' + option.value" class="text-sm ml-1">{{ option.value }}</label>
+            <label [for]="inputId + '_' + option" class="text-sm ml-1">{{ option }}</label>
           </div>
         }
       </div>

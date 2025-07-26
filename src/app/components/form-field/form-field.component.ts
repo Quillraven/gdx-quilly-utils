@@ -3,11 +3,6 @@ import {AbstractControl, FormControl, ReactiveFormsModule} from '@angular/forms'
 import {NgClass} from '@angular/common';
 import {ValidationService} from '../../services/validation.service';
 
-export interface FormFieldOption {
-  label: string;
-  value: string;
-}
-
 function transformInputControl(control: AbstractControl | null): FormControl {
   if (!control) {
     throw new Error('control must be not null for an app-form-field');
@@ -32,7 +27,7 @@ export class FormFieldComponent {
   @Input({required: true, alias: 'input-id'}) inputId!: string;
   @Input({required: true}) type!: 'text' | 'number' | 'checkbox' | 'radio';
   @Input({required: true, alias: 'form-control', transform: transformInputControl}) control!: FormControl;
-  @Input() options: FormFieldOption[] = []
+  @Input() options: string[] = []
   @Input() gridClass: string = 'grid-cols-2';
   @Input({alias: 'tool-tip'}) toolTip: string = '';
 

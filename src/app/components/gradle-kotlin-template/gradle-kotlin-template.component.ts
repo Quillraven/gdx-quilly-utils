@@ -4,7 +4,7 @@ import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
-import {FormFieldComponent, FormFieldOption} from '../form-field/form-field.component';
+import {FormFieldComponent} from '../form-field/form-field.component';
 import JSZip from 'jszip';
 
 const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
@@ -30,13 +30,7 @@ export class GradleKotlinTemplateComponent {
   form: FormGroup;
 
   // Java version options for the radio buttons
-  javaVersionOptions: FormFieldOption[] = [
-    {value: '8', label: 'Java 8'},
-    {value: '11', label: 'Java 11'},
-    {value: '17', label: 'Java 17'},
-    {value: '21', label: 'Java 21'},
-    {value: '24', label: 'Java 24'}
-  ];
+  javaVersionOptions: string[] = ['8', '11', '17', '21', '24'];
 
   constructor(
     private fb: FormBuilder,
