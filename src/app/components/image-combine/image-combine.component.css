@@ -1,10 +1,5 @@
-/* Drag and drop styles */
 .drag-handle {
   cursor: grab;
-}
-
-.dragging {
-  cursor: grabbing !important;
 }
 
 /* Smooth transitions for drag and drop */
