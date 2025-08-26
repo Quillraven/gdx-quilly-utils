@@ -216,8 +216,14 @@ export class GradleKotlinTemplateComponent {
     const filesToProcess = [];
 
     // Find and update files that reference the default package name
+    const keepDefaultBaseFolders = packageName.startsWith(defaultPackage);
     for (const filePath in zip.files) {
       if (zip.files[filePath].dir) {
+        if (keepDefaultBaseFolders && (filePath.endsWith("io/") || filePath.endsWith("github/"))) {
+          // if new package starts with the default "io.github" then we need to keep the io/github folders
+          continue;
+        }
+
         if (filePath.includes(`/kotlin/io/`)) {
           // remove original io.github folders
           foldersToRemove.push(filePath);
