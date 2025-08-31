@@ -1,4 +1,4 @@
-<div class="container mx-auto p-4">
+<div class="container p-4">
   <h2 class="text-2xl font-bold mb-2">Image Combiner</h2>
   <p class="mb-4 text-gray-600">Combine multiple images into a grid layout.
     <br>
@@ -70,7 +70,7 @@
         <h3 class="text-xl font-semibold mb-2">Combined Image:</h3>
         @if (combinedImageUrl) {
           <img [src]="combinedImageUrl" alt="Combined Image"
-               class="max-w-[600px] max-h-[600px] w-auto h-auto rounded border shadow">
+               class="min-w-[160px] min-h-[160px] max-w-[640px] max-h-[640px] w-auto h-auto rounded border shadow">
         } @else if (selectedImages.length > 0) {
           <p class="text-gray-500">Click the Combine Images button to generate the combined image.</p>
           <div class="skeleton h-32 w-32"></div>
@@ -100,16 +100,16 @@
               (dragend)="onDragEnd()"
               (drop)="onDrop($event, $index)">
               <div class="flex justify-between items-center mb-1">
-                <span class="text-xs text-gray-500"># {{ $index + 1 }}</span>
-                <span class="text-xs text-gray-500 drag-handle">
+                <span class="text-sm text-gray-500"># {{ $index + 1 }}</span>
+                <span class="text-sm text-gray-500 drag-handle">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
                        stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
                   </svg>
                 </span>
               </div>
-              <img [src]="image" [alt]="'Image ' + $index" class="max-w-[100px] max-h-[100px] w-auto h-auto">
-              <div class="text-center text-xs mt-1">{{ originalFileNames[$index] }}</div>
+              <img [src]="image" [alt]="'Image ' + $index" class="min-w-[64px] min-h-[64px] max-w-[128px] max-h-[128px] w-auto h-auto">
+              <div class="text-center text-sm mt-1">{{ originalFileNames[$index] }}</div>
             </div>
           }
         </div>
