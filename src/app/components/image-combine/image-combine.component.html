@@ -53,18 +53,38 @@
         <app-error-alert [errorDetails]="errorDetails"></app-error-alert>
       }
 
-      <button class="btn btn-secondary mt-2"
-              (click)="downloadCombinedImage()"
-              [disabled]="!combinedImageUrl">
-        Download Combined Image
-      </button>
+      <div class="flex items-center gap-2 mt-2">
+        <button class="btn btn-secondary"
+                (click)="downloadCombinedImage()"
+                [disabled]="!combinedImageUrl">
+          Download Combined Image
+        </button>
+        <button class="btn btn-secondary"
+                (click)="clearImages()"
+                [disabled]="selectedImages.length === 0">
+          Clear Selected Images
+        </button>
+      </div>
+
+      <div class="mt-4">
+        <h3 class="text-xl font-semibold mb-2">Combined Image:</h3>
+        @if (combinedImageUrl) {
+          <img [src]="combinedImageUrl" alt="Combined Image"
+               class="max-w-[600px] max-h-[600px] w-auto h-auto rounded border shadow">
+        } @else if (selectedImages.length > 0) {
+          <p class="text-gray-500">Click the Combine Images button to generate the combined image.</p>
+          <div class="skeleton h-32 w-32"></div>
+        } @else {
+          <div class="skeleton h-32 w-32"></div>
+        }
+      </div>
     </div>
 
     <div>
       <h3 class="text-xl font-semibold mb-2">Selected Images:</h3>
       <p class="text-sm text-gray-500 mb-2">Drag and drop to reorder images</p>
       @if (selectedImages.length > 0) {
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2">
           @for (image of selectedImages; track $index) {
             <div
               class="border rounded p-1 cursor-move transition-all duration-200 image-item"
@@ -99,16 +119,4 @@
     </div>
   </div>
 
-  <div class="mt-6">
-    <h3 class="text-xl font-semibold mb-2">Combined Image:</h3>
-    @if (combinedImageUrl) {
-      <img [src]="combinedImageUrl" alt="Combined Image"
-           class="max-w-[600px] max-h-[600px] w-auto h-auto rounded border shadow">
-    } @else if (selectedImages.length > 0) {
-      <p class="text-gray-500">Click the Combine Images button to generate the combined image.</p>
-      <div class="skeleton h-32 w-32"></div>
-    } @else {
-      <div class="skeleton h-32 w-32"></div>
-    }
-  </div>
 </div>

@@ -61,10 +61,9 @@ export class ImageCombineComponent {
       return;
     }
 
-    this.selectedImages = [];
-    this.originalFileNames = [];
-    this.combinedImageUrl = null;
     this.errorDetails = null;
+    // New selection invalidates current combined output
+    this.combinedImageUrl = null;
     Array.from(input.files).forEach(file => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -73,6 +72,14 @@ export class ImageCombineComponent {
       };
       reader.readAsDataURL(file);
     });
+  }
+
+  clearImages(): void {
+    this.selectedImages = [];
+    this.originalFileNames = [];
+    this.draggedIndex = -1;
+    this.dragOverIndex = -1;
+    this.errorDetails = null;
   }
 
   async combineImages(): Promise<void> {
