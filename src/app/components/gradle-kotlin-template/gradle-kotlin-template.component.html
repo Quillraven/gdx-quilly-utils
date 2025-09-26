@@ -39,6 +39,14 @@
           />
 
           <app-form-field
+            label="Kotlin Version"
+            input-id="kotlinVersion"
+            [form-control]="form.get('kotlinVersion')"
+            type="text"
+            gridClass="grid-cols-[0.2fr_1fr]"
+          />
+
+          <app-form-field
             label="Java Version"
             input-id="javaVersion"
             [form-control]="form.get('javaVersion')"

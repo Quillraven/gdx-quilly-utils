@@ -55,7 +55,7 @@ export class ValidationService {
     }
 
     if (!Number.isInteger(value)) {
-      return { notAnInteger: true };
+      return {notAnInteger: true};
     }
 
     return null;
@@ -75,12 +75,26 @@ export class ValidationService {
     // Check for invalid characters in the filename
     const invalidChars = /[<>:"\/\\|?*\x00-\x1F]/;
     if (invalidChars.test(value)) {
-      return { invalidFilename: true };
+      return {invalidFilename: true};
     }
 
     // Check if the filename is just whitespace
     if (value.trim() === '') {
-      return { blankFilename: true };
+      return {blankFilename: true};
+    }
+
+    return null;
+  }
+
+  validKotlinVersionValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const versionRegex = /^\d+\.\d+(?:\.\d+)?(?:-(?i:M\d+|alpha|beta|rc|eap)\d*)?$/
+    if (!versionRegex.test(value)) {
+      return {invalidKotlinVersion: true};
     }
 
     return null;
@@ -108,6 +122,8 @@ export class ValidationService {
       return 'Value cannot contain spaces';
     } else if (errors['invalidPackageName']) {
       return 'Value is not a valid package name. Format should be: com.example.myapp';
+    } else if (errors['invalidKotlinVersion']) {
+      return "Value is not a valid Kotlin version";
     }
 
     return 'Unknown error';

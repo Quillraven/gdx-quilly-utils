@@ -9,6 +9,7 @@ import JSZip from 'jszip';
 
 const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
 const LINE_ENDING = '\n';
+const KOTLIN_DEFAULT_VERSION = '2.2.20';
 
 @Component({
   selector: 'app-gradle-kotlin-template',
@@ -23,7 +24,6 @@ const LINE_ENDING = '\n';
   styleUrl: './gradle-kotlin-template.component.css'
 })
 export class GradleKotlinTemplateComponent {
-
   errorDetails: string | null = null;
 
   // Form group for validation
@@ -41,6 +41,7 @@ export class GradleKotlinTemplateComponent {
       projectName: ['MyGdxGame', [Validators.required, this.validationService.noSpacesValidator]],
       packageName: ['io.github', [Validators.required, this.validationService.packageNameValidator]],
       javaVersion: ['17', Validators.required],
+      kotlinVersion: [KOTLIN_DEFAULT_VERSION, [Validators.required, this.validationService.validKotlinVersionValidator]],
       mainClassName: ['GdxGame', [Validators.required, this.validationService.noSpacesValidator]],
       // launcher options
       desktopLauncher: [true],
@@ -308,10 +309,18 @@ export class GradleKotlinTemplateComponent {
       try {
         const content = await zip.files[filePath].async('text');
 
+        const kotlinVersion = this.form.get('kotlinVersion')?.value || KOTLIN_DEFAULT_VERSION;
+
         // Update the jvmToolchainVersion
         let modifiedContent = content.replace(
           /jvmToolchainVersion\s*=\s*["'](\d+)["']/,
           `jvmToolchainVersion = "${javaVersion}"`
+        );
+
+        // Update the kotlinVersion in the version catalog
+        modifiedContent = modifiedContent.replace(
+          /kotlinVersion\s*=\s*['"][^'"]+['"]/,
+          `kotlinVersion = "${kotlinVersion}"`
         );
 
         // keep GDX-AI ?
