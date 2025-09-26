@@ -30,7 +30,7 @@ export class GradleKotlinTemplateComponent {
   form: FormGroup;
 
   // Java version options for the radio buttons
-  javaVersionOptions: string[] = ['8', '11', '17', '21', '24'];
+  javaVersionOptions: string[] = ['8', '11', '17', '21', '25'];
 
   constructor(
     private fb: FormBuilder,
@@ -585,7 +585,6 @@ export class GradleKotlinTemplateComponent {
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         if (line.includes('Box2d')) {
-          i += 2;
           continue;
         }
 
@@ -600,7 +599,6 @@ export class GradleKotlinTemplateComponent {
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         if (line.includes('Freetype')) {
-          i += 2;
           continue;
         }
 
