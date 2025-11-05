@@ -1,6 +1,6 @@
 # Quilly's GDX Utilities
 
-![Angular](https://img.shields.io/badge/Angular-20.3.7-purple?logo=angular)
+![Angular](https://img.shields.io/badge/Angular-20.3.9-purple?logo=angular)
 
 This repository contains a set of utilities that are typically needed for a 2D game using LibGDX.
 It is hosted as a GitHub page under following [link](https://quillraven.github.io/gdx-quilly-utils/).
