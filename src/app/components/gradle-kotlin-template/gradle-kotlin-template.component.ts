@@ -30,7 +30,7 @@ export class GradleKotlinTemplateComponent {
   form: FormGroup;
 
   // Java version options for the radio buttons
-  javaVersionOptions: string[] = ['8', '11', '17', '21', '25'];
+  javaVersionOptions: string[] = ['8', '11', '17', '21', '24'];
 
   constructor(
     private fb: FormBuilder,
