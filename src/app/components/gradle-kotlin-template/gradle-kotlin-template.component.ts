@@ -30,7 +30,7 @@ export class GradleKotlinTemplateComponent {
   form: FormGroup;
 
   // Java version options for the radio buttons
-  javaVersionOptions: string[] = ['8', '11', '17', '21', '24'];
+  javaVersionOptions: string[] = ['17', '21', '25'];
 
   constructor(
     private fb: FormBuilder,
@@ -459,6 +459,11 @@ export class GradleKotlinTemplateComponent {
           continue;
         }
 
+        if (filePath.endsWith('/gradle.properties')) {
+          await this.updateRootGradleProperties(zip, filePath);
+          continue;
+        }
+
         if (!desktopLauncher && filePath.includes('lwjgl3')) {
           filesToRemove.push(filePath);
           continue;
@@ -579,6 +584,20 @@ export class GradleKotlinTemplateComponent {
         .join(LINE_ENDING);
     }
 
+    zip.file(filePath, modifiedContent);
+  }
+
+  private async updateRootGradleProperties(zip: JSZip, filePath: string) {
+    const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
+
+    const content = await zip.files[filePath].async('text');
+    if (teaVmLauncher) {
+      // nothing to update because configuration-cache is disabled per default
+      zip.file(filePath, content);
+      return;
+    }
+
+    let modifiedContent = content.replace(new RegExp("org.gradle.configuration-cache=false", 'g'), "org.gradle.configuration-cache=true");
     zip.file(filePath, modifiedContent);
   }
 
