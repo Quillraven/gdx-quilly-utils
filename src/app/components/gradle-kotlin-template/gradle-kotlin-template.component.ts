@@ -412,7 +412,8 @@ export class GradleKotlinTemplateComponent {
             .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('gdxBackendLwjgl3') &&
-              !line.startsWith('gdxPlatform'))
+              !line.startsWith('gdxPlatform') &&
+              !line.startsWith('construo'))
             .join(LINE_ENDING);
         }
 
