@@ -247,7 +247,7 @@ export class GradleKotlinTemplateComponent {
         let modifiedContent = content;
         if (content.includes(defaultPackage)) {
           modifiedContent = content.replace(new RegExp(`package\\s+${defaultPackage}`, 'g'), `package ${packageName}`);
-          modifiedContent = modifiedContent.replace(new RegExp(`import\\s+${defaultPackage}\\.`, 'g'), `import ${packageName}.`);
+          modifiedContent = modifiedContent.replace(new RegExp(`import\\s+${defaultPackage}\\.(?!fourlastor\\.construo\\.Target)`, 'g'), `import ${packageName}.`);
           modifiedContent = modifiedContent.replace(new RegExp(`"${defaultPackage}`, 'g'), `"${packageName}`);
         }
 
