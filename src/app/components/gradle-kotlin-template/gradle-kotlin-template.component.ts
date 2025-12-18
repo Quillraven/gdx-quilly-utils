@@ -9,7 +9,7 @@ import JSZip from 'jszip';
 
 const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
 const LINE_ENDING = '\n';
-const KOTLIN_DEFAULT_VERSION = '2.2.21';
+const KOTLIN_DEFAULT_VERSION = '2.3.0';
 
 @Component({
   selector: 'app-gradle-kotlin-template',
@@ -40,7 +40,7 @@ export class GradleKotlinTemplateComponent {
     this.form = this.fb.group({
       projectName: ['MyGdxGame', [Validators.required, this.validationService.noSpacesValidator]],
       packageName: ['io.github', [Validators.required, this.validationService.packageNameValidator]],
-      javaVersion: ['17', Validators.required],
+      javaVersion: ['25', Validators.required],
       kotlinVersion: [KOTLIN_DEFAULT_VERSION, [Validators.required, this.validationService.validKotlinVersionValidator]],
       mainClassName: ['GdxGame', [Validators.required, this.validationService.noSpacesValidator]],
       // launcher options
@@ -426,8 +426,7 @@ export class GradleKotlinTemplateComponent {
               !line.startsWith('gdxTeaVm') &&
               !line.startsWith('gdxBox2dGwt') &&
               !line.startsWith('teaVm') &&
-              !line.startsWith('# teavm') &&
-              !line.startsWith('[plugins]'))
+              !line.startsWith('# teavm'))
             .join(LINE_ENDING);
         }
 
