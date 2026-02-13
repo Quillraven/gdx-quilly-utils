@@ -9,7 +9,7 @@ import JSZip from 'jszip';
 
 const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
 const LINE_ENDING = '\n';
-const KOTLIN_DEFAULT_VERSION = '2.3.0';
+const KOTLIN_DEFAULT_VERSION = '2.3.10';
 
 @Component({
   selector: 'app-gradle-kotlin-template',
@@ -422,7 +422,6 @@ export class GradleKotlinTemplateComponent {
           modifiedContent = modifiedContent
             .split(LINE_ENDING)
             .filter(line =>
-              !line.startsWith('gretty') &&
               !line.startsWith('gdxTeaVm') &&
               !line.startsWith('gdxBox2dGwt') &&
               !line.startsWith('teaVm') &&
