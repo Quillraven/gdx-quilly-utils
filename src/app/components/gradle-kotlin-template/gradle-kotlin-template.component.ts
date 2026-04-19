@@ -467,7 +467,10 @@ export class GradleKotlinTemplateComponent {
           filesToRemove.push(filePath);
           continue;
         } else if (desktopLauncher && filePath.endsWith('/lwjgl3/build.gradle.kts')) {
-          await this.updateDesktopBuildGradle(zip, filePath)
+          await this.updateDesktopBuildGradle(zip, filePath, projectName)
+          continue;
+        } else if (desktopLauncher && filePath.endsWith('/Lwjgl3Launcher.kt')) {
+          await this.updateLwjgl3Launcher(zip, filePath, projectName)
           continue;
         }
 
@@ -600,11 +603,13 @@ export class GradleKotlinTemplateComponent {
     zip.file(filePath, modifiedContent);
   }
 
-  private async updateDesktopBuildGradle(zip: JSZip, filePath: string) {
+  private async updateDesktopBuildGradle(zip: JSZip, filePath: string, projectName: string) {
     const b2dDep: boolean = this.form.get('b2dDep')?.value === true;
     const freetypeDep: boolean = this.form.get('freetypeDep')?.value === true;
 
     let modifiedContent = await zip.files[filePath].async('text');
+
+    modifiedContent = modifiedContent.replace('applicationName = "GdxGame"', `applicationName = "${projectName}"`);
 
     if (!b2dDep) {
       const lines = modifiedContent.split(LINE_ENDING);
@@ -673,6 +678,12 @@ export class GradleKotlinTemplateComponent {
         .join(LINE_ENDING);
     }
 
+    zip.file(filePath, modifiedContent);
+  }
+
+  private async updateLwjgl3Launcher(zip: JSZip, filePath: string, projectName: string) {
+    let modifiedContent = await zip.files[filePath].async('text');
+    modifiedContent = modifiedContent.replace('setTitle("GdxGame")', `setTitle("${projectName}")`);
     zip.file(filePath, modifiedContent);
   }
 }
