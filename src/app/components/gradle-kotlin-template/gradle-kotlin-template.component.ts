@@ -54,6 +54,7 @@ export class GradleKotlinTemplateComponent {
       ktxTiledDep: [true],
       ktxPrefsDep: [false],
       ktxI18nDep: [false],
+      ktxScene2dDep: [false],
     });
   }
 
@@ -297,6 +298,7 @@ export class GradleKotlinTemplateComponent {
     const ktxTiledDep: boolean = this.form.get('ktxTiledDep')?.value === true;
     const ktxPrefsDep: boolean = this.form.get('ktxPrefsDep')?.value === true;
     const ktxI18nDep: boolean = this.form.get('ktxI18nDep')?.value === true;
+    const ktxScene2dDep: boolean = this.form.get('ktxScene2dDep')?.value === true;
     const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
 
@@ -389,12 +391,22 @@ export class GradleKotlinTemplateComponent {
         }
 
         // keep ktx i18n ?
-        if (!ktxPrefsDep) {
+        if (!ktxI18nDep) {
           modifiedContent = modifiedContent
             .split(LINE_ENDING)
             .filter(line =>
               !line.startsWith('ktxI18n'))
             .join(LINE_ENDING);
+        }
+
+        // keep ktx scene2d ?
+        if (!ktxScene2dDep) {
+          modifiedContent = modifiedContent
+            .split(LINE_ENDING)
+            .filter(line =>
+              !line.startsWith('ktxScene2d'))
+            .join(LINE_ENDING);
+          modifiedContent = modifiedContent.replace(', "ktxScene2d"', '');
         }
 
         // remove other ktx extension comment if necessary
@@ -499,6 +511,7 @@ export class GradleKotlinTemplateComponent {
     const ktxTiledDep: boolean = this.form.get('ktxTiledDep')?.value === true;
     const ktxPrefsDep: boolean = this.form.get('ktxPrefsDep')?.value === true;
     const ktxI18nDep: boolean = this.form.get('ktxI18nDep')?.value === true;
+    const ktxScene2dDep: boolean = this.form.get('ktxScene2dDep')?.value === true;
 
     let modifiedContent = await zip.files[filePath].async('text');
 
@@ -541,6 +554,13 @@ export class GradleKotlinTemplateComponent {
       modifiedContent = modifiedContent
         .split(LINE_ENDING)
         .filter(line => !line.includes('ktxI18n'))
+        .join(LINE_ENDING);
+    }
+
+    if (!ktxScene2dDep) {
+      modifiedContent = modifiedContent
+        .split(LINE_ENDING)
+        .filter(line => !line.includes('ktxScene2d'))
         .join(LINE_ENDING);
     }
 
