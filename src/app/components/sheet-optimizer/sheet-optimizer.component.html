@@ -1,0 +1,93 @@
+<div class="container p-4">
+  <h2 class="text-2xl font-bold mb-2">Sheet Optimizer</h2>
+  <p class="text-gray-600 mb-4">
+    Optimize a spritesheet by trimming transparent borders from each frame and re-centering them to the tightest
+    bounding box. Upload your spritesheet, configure the grid, and click <strong>Optimize</strong> to process it.
+    The resulting <strong>frame dimension</strong> values are shown after optimization.
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
+    <div>
+      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-md border p-4 md:mt-5">
+        <legend class="fieldset-legend">Settings</legend>
+
+        <form [formGroup]="form" class="grid grid-cols-2 gap-x-4 gap-y-2">
+          <label class="btn btn-secondary col-span-2">
+            Upload spritesheet
+            <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+          </label>
+
+          <app-form-field
+            label="Columns (x-axis)"
+            input-id="numCols"
+            [form-control]="form.get('numCols')"
+            type="number"
+          />
+
+          <app-form-field
+            label="Rows (y-axis)"
+            input-id="numRows"
+            [form-control]="form.get('numRows')"
+            type="number"
+          />
+
+          <app-form-field
+            label="Output filename"
+            input-id="outputFileName"
+            [form-control]="form.get('outputFileName')"
+            type="text"
+          />
+
+          <div class="flex justify-end">
+            <button class="btn btn-primary"
+                    (click)="optimizeSheet()"
+                    [disabled]="!selectedImage || form.invalid">
+              Optimize
+            </button>
+          </div>
+        </form>
+      </fieldset>
+
+      @if (errorDetails) {
+        <app-error-alert [errorDetails]="errorDetails"></app-error-alert>
+      }
+
+      @if (optimizedTileWidth !== null && optimizedTileHeight !== null) {
+        <div class="mt-4 p-4 bg-base-200 rounded-box border border-base-300">
+          <p class="font-semibold mb-1">Optimized frame dimension values:</p>
+          <p>Width: <span class="font-mono font-bold">{{ optimizedTileWidth }}</span></p>
+          <p>Height: <span class="font-mono font-bold">{{ optimizedTileHeight }}</span></p>
+        </div>
+      }
+
+      <button class="btn btn-secondary mt-2"
+              (click)="downloadOptimized()"
+              [disabled]="!optimizedImage">
+        Download optimized sheet
+      </button>
+    </div>
+
+    <div>
+      <h3 class="text-xl font-semibold mb-2">Original Image:</h3>
+      @if (selectedImage) {
+        <img [src]="selectedImage" alt="Original spritesheet"
+             class="max-w-[300px] max-h-[300px] w-auto h-auto rounded border shadow">
+      } @else {
+        <div class="skeleton h-32 w-32"></div>
+      }
+    </div>
+
+    <div class="mt-6">
+      <h3 class="text-xl font-semibold mt-4 mb-2">Optimized Image:</h3>
+      @if (optimizedImage) {
+        <img [src]="optimizedImage" alt="Optimized spritesheet"
+             class="max-w-[300px] max-h-[300px] w-auto h-auto rounded border shadow">
+      } @else if (selectedImage) {
+        <p class="text-gray-500">Click Optimize to generate the result.</p>
+        <div class="skeleton h-32 w-32"></div>
+      } @else {
+        <div class="skeleton h-32 w-32"></div>
+      }
+    </div>
+  </div>
+</div>

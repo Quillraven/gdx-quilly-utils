@@ -39,6 +39,17 @@ Features:
 - Set a custom filename for the output
 - Download the combined image
 
+## Sheet Optimizer
+
+A tool to remove empty space around each frame of a sprite sheet.
+
+Features:
+- Upload a sprite sheet
+- Configure grid of frames
+- Set an output filename
+- Preview the optimized sheet including the new dimensions of each frame
+- Download the optimized sheet
+
 ## Gradle Kotlin Template
 
 A modern Gradle Kotlin DSL based template for creating LibGDX projects using Kotlin.
