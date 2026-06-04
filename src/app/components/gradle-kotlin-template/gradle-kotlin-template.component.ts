@@ -9,7 +9,7 @@ import JSZip from 'jszip';
 
 const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
 const LINE_ENDING = '\n';
-const KOTLIN_DEFAULT_VERSION = '2.3.21';
+const KOTLIN_DEFAULT_VERSION = '2.4.0';
 
 @Component({
   selector: 'app-gradle-kotlin-template',
