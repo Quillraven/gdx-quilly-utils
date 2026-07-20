@@ -1,0 +1,11 @@
+{
+  "/codeload/**": {
+    "target": "https://codeload.github.com",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/codeload": ""
+    },
+    "logLevel": "debug"
+  }
+}
