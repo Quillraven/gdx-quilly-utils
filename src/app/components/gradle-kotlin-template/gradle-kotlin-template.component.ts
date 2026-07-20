@@ -1,41 +1,11 @@
-import {Component, inject, isDevMode} from '@angular/core';
+import {Component} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CommonModule} from '@angular/common';
-import {HttpClient} from '@angular/common/http';
-import {firstValueFrom} from 'rxjs';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent} from '../form-field/form-field.component';
 import JSZip from 'jszip';
-
-/**
- * codeload.github.com serves the actual zip bytes but restricts CORS to render.githubusercontent.com,
- * so browsers cannot fetch it directly from a GitHub Pages origin.
- *
- * In dev (ng serve) we route through a local proxy entry (/codeload/*) that forwards to
- * codeload.github.com server-side, so CORS is never involved.
- *
- * In production (GitHub Pages) we must go through the GitHub API endpoint which does allow
- * all origins (access-control-allow-origin: *) and redirects to codeload. The browser
- * follows that redirect, but the redirect target (codeload) does NOT allow *.
- * Therefore in production we use a GitHub API redirect but fetch it via a no-cors-safe
- * intermediary — the simplest approach is to use the /zipball/ API URL with a GitHub
- * personal access token header if needed, OR we can use a public CORS proxy.
- * The cleanest zero-cost approach: use the jsDelivr CDN, which mirrors GitHub releases
- * and sets permissive CORS headers.
- *
- * jsDelivr URL format: https://cdn.jsdelivr.net/gh/:user/:repo@:branch/:file
- * There is no direct "download whole repo as zip" via jsDelivr, so we keep the approach
- * of fetching via the proxy in dev and document that prod requires a backend or PAT.
- *
- * For now: dev uses proxy, prod uses the GitHub API URL (works if GitHub Pages CORS allows it
- * for the authenticated redirect — needs testing).
- */
-const GITHUB_ZIP_URL_DEV = '/codeload/Quillraven/gdx-kotlin-template/legacy.zip/refs/heads/master';
-const GITHUB_ZIP_URL_PROD = 'https://api.github.com/repos/Quillraven/gdx-kotlin-template/zipball/master';
-
-const GITHUB_ZIP_URL = isDevMode() ? GITHUB_ZIP_URL_DEV : GITHUB_ZIP_URL_PROD;
 
 const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
 const LINE_ENDING = '\n';
@@ -64,7 +34,6 @@ export class GradleKotlinTemplateComponent {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
     private downloadService: DownloadService,
     private validationService: ValidationService
   ) {
@@ -105,13 +74,16 @@ export class GradleKotlinTemplateComponent {
     }
 
     try {
-      // Fetch the template zip from GitHub API.
-      // In dev mode the request goes through the local proxy (proxy.conf.json) which
-      // follows the redirect server-side to avoid CORS issues.
-      // In production the GitHub API CORS headers allow the browser to follow the redirect.
-      const zipBlob = await firstValueFrom(
-        this.http.get(GITHUB_ZIP_URL, {responseType: 'blob'})
-      );
+      // URL to the template zip file in public folder
+      const templateUrl = 'gdx-kotlin-template-master.zip';
+
+      // Fetch the template zip file
+      const response = await fetch(templateUrl);
+      if (!response.ok) {
+        this.errorDetails = `Failed to fetch template: ${response.statusText}`;
+        return;
+      }
+      const zipBlob = await response.blob();
 
       // Load the zip file with JSZip
       const jszip = new JSZip();
@@ -148,11 +120,9 @@ export class GradleKotlinTemplateComponent {
   }
 
   private async updateRootFolderName(zip: JSZip, projectName: string) {
-    // The GitHub API zipball uses "Owner-repo-<sha>/" as the root folder name, so we
-    // detect it dynamically instead of hardcoding "gdx-kotlin-template-master/".
-    const oldPath = Object.keys(zip.files).find(p => zip.files[p].dir && !p.slice(0, -1).includes('/')) ?? '';
+    const oldPath = "gdx-kotlin-template-master/";
     const newPath = `${projectName}/`;
-    if (!oldPath || oldPath === newPath) {
+    if (oldPath === newPath) {
       return;
     }
 
