@@ -9,7 +9,7 @@ import JSZip from 'jszip';
 
 const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
 const LINE_ENDING = '\n';
-const KOTLIN_DEFAULT_VERSION = '2.4.0';
+const KOTLIN_DEFAULT_VERSION = '2.4.10';
 
 @Component({
   selector: 'app-gradle-kotlin-template',
@@ -678,7 +678,7 @@ export class GradleKotlinTemplateComponent {
     if (!freetypeDep) {
       modifiedContent = modifiedContent
         .split(LINE_ENDING)
-        .filter(line => !line.includes('Freetype'))
+        .filter(line => !line.toLowerCase().includes('freetype'))
         .join(LINE_ENDING);
     }
 
