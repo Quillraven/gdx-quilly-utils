@@ -465,7 +465,7 @@ export class GradleKotlinTemplateComponent {
           continue;
         }
 
-        if (filePath.endsWith('/settings.gradle.kts') && !filePath.includes('buildSrc')) {
+        if (filePath.endsWith('/settings.gradle.kts') && !filePath.includes('buildSrc') && !filePath.includes('build-logic')) {
           await this.updateRootSettingsGradle(zip, filePath, projectName)
           continue;
         }

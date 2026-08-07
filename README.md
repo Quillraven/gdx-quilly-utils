@@ -53,4 +53,4 @@ Features:
 ## Gradle Kotlin Template
 
 A modern Gradle Kotlin DSL based template for creating LibGDX projects using Kotlin.
-It uses a version catalog and buildSrc directory for convention plugins.
+It uses a version catalog and build-logic directory for convention plugins.
