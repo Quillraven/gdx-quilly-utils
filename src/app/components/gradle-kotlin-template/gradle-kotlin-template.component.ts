@@ -74,8 +74,8 @@ export class GradleKotlinTemplateComponent {
     }
 
     try {
-      // URL to the template zip file in public folder
-      const templateUrl = 'gdx-kotlin-template-master.zip';
+      // URL to the template zip file hosted on GitHub Pages
+      const templateUrl = `https://quillraven.github.io/gdx-kotlin-template/gdx-kotlin-template-master.zip?v=${Date.now()}`;
 
       // Fetch the template zip file
       const response = await fetch(templateUrl);
