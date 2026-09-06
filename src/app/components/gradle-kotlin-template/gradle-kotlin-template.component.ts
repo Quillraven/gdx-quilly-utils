@@ -667,11 +667,16 @@ export class GradleKotlinTemplateComponent {
           continue;
         }
 
-        // enable the textra Font and Styles imports
+        // enable the textra Font and Styles imports unless TextraTypist is disabled as well
         if (trimmed.startsWith('// import com.github.tommyettinger.textra.Font') ||
             trimmed.startsWith('// import com.github.tommyettinger.textra.Styles')) {
-          result.push(line.replace('// ', ''));
-          i++;
+          if (!textraTypistDep) {
+            // both TextraTypist and FreeTypist are disabled -> remove the imports
+            i++;
+          } else {
+            result.push(line.replace('// ', ''));
+            i++;
+          }
           continue;
         }
 
@@ -709,14 +714,17 @@ export class GradleKotlinTemplateComponent {
         }
 
         if (trimmed.startsWith('// return Skin')) {
-          // enable the five normal skin lines
+          // enable the normal scene2d skin lines
           result.push(line.replace('// ', ''));
           i++;
           result.push(lines[i].replace('// ', ''));
           i++;
           result.push(lines[i].replace('// ', ''));
           i++;
-          result.push(lines[i].replace('// ', ''));
+          if (textraTypistDep) {
+            // the Styles.LabelStyle line is only used by TextraTypist
+            result.push(lines[i].replace('// ', ''));
+          }
           i++;
           result.push(lines[i].replace('// ', ''));
           i++;
