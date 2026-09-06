@@ -78,6 +78,14 @@
 
           <div class="grid grid-cols-3 gap-x-4 gap-y-2">
             <app-form-field
+              label="Fleks"
+              input-id="fleksDep"
+              [form-control]="form.get('fleksDep')"
+              type="checkbox"
+              tool-tip="An entity component system for Kotlin"
+            />
+
+            <app-form-field
               label="Gdx-AI"
               input-id="gdxAiDep"
               [form-control]="form.get('gdxAiDep')"
@@ -91,23 +99,6 @@
               type="checkbox"
               tool-tip="A 2D physics engine"
             />
-
-            <app-form-field
-              label="Freetype Font"
-              input-id="freetypeDep"
-              [form-control]="form.get('freetypeDep')"
-              type="checkbox"
-            />
-
-            <app-form-field
-              label="Fleks"
-              input-id="fleksDep"
-              [form-control]="form.get('fleksDep')"
-              type="checkbox"
-              tool-tip="An entity component system for Kotlin"
-            />
-
-            <div class="col-span-2"></div>
 
             <app-form-field
               label="KTX Tiled"
@@ -124,6 +115,8 @@
               type="checkbox"
             />
 
+            <div></div>
+
             <app-form-field
               label="KTX I18n"
               input-id="ktxI18nDep"
@@ -135,6 +128,15 @@
               label="KTX Scene2D"
               input-id="ktxScene2dDep"
               [form-control]="form.get('ktxScene2dDep')"
+              type="checkbox"
+            />
+
+            <div></div>
+
+            <app-form-field
+              label="Freetype Font"
+              input-id="freetypeDep"
+              [form-control]="form.get('freetypeDep')"
               type="checkbox"
             />
 

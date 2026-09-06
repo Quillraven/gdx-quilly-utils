@@ -52,7 +52,7 @@ export class GradleKotlinTemplateComponent {
       b2dDep: [false],
       freetypeDep: [true],
       ktxTiledDep: [true],
-      ktxPrefsDep: [false],
+      ktxPrefsDep: [true],
       ktxI18nDep: [false],
       ktxScene2dDep: [false],
       textraTypistDep: [true],
