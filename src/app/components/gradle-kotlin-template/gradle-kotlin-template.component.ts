@@ -45,16 +45,18 @@ export class GradleKotlinTemplateComponent {
       mainClassName: ['GdxGame', [Validators.required, this.validationService.noSpacesValidator]],
       // launcher options
       desktopLauncher: [true],
-      teaVmLauncher: [false],
+      teaVmLauncher: [true],
       // dependency options
       gdxAiDep: [false],
       fleksDep: [true],
-      b2dDep: [true],
+      b2dDep: [false],
       freetypeDep: [true],
       ktxTiledDep: [true],
       ktxPrefsDep: [false],
       ktxI18nDep: [false],
       ktxScene2dDep: [false],
+      textraTypistDep: [true],
+      freeTypistDep: [true],
     });
   }
 
@@ -299,6 +301,8 @@ export class GradleKotlinTemplateComponent {
     const ktxPrefsDep: boolean = this.form.get('ktxPrefsDep')?.value === true;
     const ktxI18nDep: boolean = this.form.get('ktxI18nDep')?.value === true;
     const ktxScene2dDep: boolean = this.form.get('ktxScene2dDep')?.value === true;
+    const textraTypistDep: boolean = this.form.get('textraTypistDep')?.value === true;
+    const freeTypistDep: boolean = this.form.get('freeTypistDep')?.value === true;
     const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
 
@@ -409,6 +413,22 @@ export class GradleKotlinTemplateComponent {
           modifiedContent = modifiedContent.replace(', "ktxScene2d"', '');
         }
 
+        // keep TextraTypist ?
+        if (!textraTypistDep) {
+          modifiedContent = modifiedContent
+            .split(LINE_ENDING)
+            .filter(line => !line.toLowerCase().includes('textratypist'))
+            .join(LINE_ENDING);
+        }
+
+        // keep FreeTypist ?
+        if (!freeTypistDep) {
+          modifiedContent = modifiedContent
+            .split(LINE_ENDING)
+            .filter(line => !line.toLowerCase().includes('freetypist'))
+            .join(LINE_ENDING);
+        }
+
         // remove other ktx extension comment if necessary
         if (!ktxTiledDep && !ktxPrefsDep && !ktxI18nDep) {
           modifiedContent = modifiedContent
@@ -455,6 +475,7 @@ export class GradleKotlinTemplateComponent {
   private async updateDependencies(zip: JSZip, projectName: string) {
     const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
+    const freeTypistDep: boolean = this.form.get('freeTypistDep')?.value === true;
 
     const filesToRemove = [];
 
@@ -462,6 +483,16 @@ export class GradleKotlinTemplateComponent {
       try {
         if (filePath.endsWith('/core/build.gradle.kts')) {
           await this.updateCoreBuildGradle(zip, filePath)
+          continue;
+        }
+
+        if (filePath.endsWith('/GameScreen.kt')) {
+          await this.updateGameScreen(zip, filePath);
+          continue;
+        }
+
+        if (!freeTypistDep && (filePath.endsWith('/assets/NovaMono-Regular.ttf') || filePath.endsWith('/assets/skin.json'))) {
+          filesToRemove.push(filePath);
           continue;
         }
 
@@ -512,6 +543,8 @@ export class GradleKotlinTemplateComponent {
     const ktxPrefsDep: boolean = this.form.get('ktxPrefsDep')?.value === true;
     const ktxI18nDep: boolean = this.form.get('ktxI18nDep')?.value === true;
     const ktxScene2dDep: boolean = this.form.get('ktxScene2dDep')?.value === true;
+    const textraTypistDep: boolean = this.form.get('textraTypistDep')?.value === true;
+    const freeTypistDep: boolean = this.form.get('freeTypistDep')?.value === true;
 
     let modifiedContent = await zip.files[filePath].async('text');
 
@@ -571,7 +604,151 @@ export class GradleKotlinTemplateComponent {
         .join(LINE_ENDING);
     }
 
+    if (!textraTypistDep) {
+      modifiedContent = modifiedContent
+        .split(LINE_ENDING)
+        .filter(line => !line.toLowerCase().includes('textratypist'))
+        .join(LINE_ENDING);
+    }
+
+    if (!freeTypistDep) {
+      modifiedContent = modifiedContent
+        .split(LINE_ENDING)
+        .filter(line => !line.toLowerCase().includes('freetypist'))
+        .join(LINE_ENDING);
+    }
+
     zip.file(filePath, modifiedContent);
+  }
+
+  private async updateGameScreen(zip: JSZip, filePath: string) {
+    const textraTypistDep: boolean = this.form.get('textraTypistDep')?.value === true;
+    const freeTypistDep: boolean = this.form.get('freeTypistDep')?.value === true;
+
+    const content = await zip.files[filePath].async('text');
+    const lines = content.split(LINE_ENDING);
+    const result: string[] = [];
+
+    let inCreateSkin = false;
+    let inCreateLabel = false;
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      // if both TextraTypist and FreeTypist are enabled then remove the commented out imports
+      if (textraTypistDep && freeTypistDep && trimmed.startsWith('// import')) {
+        i++;
+        continue;
+      }
+
+      if (!textraTypistDep || !freeTypistDep) {
+        // enable the normal scene2d Label import
+        if (trimmed.startsWith('// import com.badlogic.gdx.scenes.scene2d.ui.Label')) {
+          result.push(line.replace('// ', ''));
+          i++;
+          continue;
+        }
+      }
+
+      if (!textraTypistDep) {
+        // remove the TypingLabel import
+        if (line.includes('com.github.tommyettinger.textra.TypingLabel')) {
+          i++;
+          continue;
+        }
+      }
+
+      if (!freeTypistDep) {
+        // enable the BitmapFont import
+        if (trimmed.startsWith('// import com.badlogic.gdx.graphics.g2d.BitmapFont')) {
+          result.push(line.replace('// ', ''));
+          i++;
+          continue;
+        }
+
+        // enable the textra Font and Styles imports
+        if (trimmed.startsWith('// import com.github.tommyettinger.textra.Font') ||
+            trimmed.startsWith('// import com.github.tommyettinger.textra.Styles')) {
+          result.push(line.replace('// ', ''));
+          i++;
+          continue;
+        }
+
+        // remove the FreeTypistSkin and toInternalFile imports
+        if (line.includes('com.github.tommyettinger.freetypist.FreeTypistSkin') ||
+            line.includes('ktx.assets.toInternalFile')) {
+          i++;
+          continue;
+        }
+      }
+
+      if (trimmed.startsWith('private fun createSkin')) {
+        inCreateSkin = true;
+        inCreateLabel = false;
+      } else if (trimmed.startsWith('private fun createLabel')) {
+        inCreateLabel = true;
+        inCreateSkin = false;
+      } else if (trimmed.startsWith('override fun show')) {
+        inCreateSkin = false;
+        inCreateLabel = false;
+      }
+
+      // if both TextraTypist and FreeTypist are enabled then remove the commented out code in createSkin and createLabel
+      if ((textraTypistDep && freeTypistDep) && (inCreateSkin || inCreateLabel) && trimmed.startsWith('//')) {
+        i++;
+        continue;
+      }
+
+      // in createSkin replace FreeTypistSkin usage with the normal scene2d skin
+      if (inCreateSkin && !freeTypistDep) {
+        if (trimmed.startsWith('return FreeTypistSkin')) {
+          // skip the return line and the comment below it
+          i += 2;
+          continue;
+        }
+
+        if (trimmed.startsWith('// return Skin')) {
+          // enable the five normal skin lines
+          result.push(line.replace('// ', ''));
+          i++;
+          result.push(lines[i].replace('// ', ''));
+          i++;
+          result.push(lines[i].replace('// ', ''));
+          i++;
+          result.push(lines[i].replace('// ', ''));
+          i++;
+          result.push(lines[i].replace('// ', ''));
+          i++;
+          continue;
+        }
+      }
+
+      // in createLabel replace TypingLabel usage with the normal scene2d Label
+      if (inCreateLabel && !textraTypistDep) {
+        if (trimmed.startsWith('return TypingLabel')) {
+          // skip the TypingLabel block and the comment below it
+          i += 4;
+          continue;
+        }
+
+        if (trimmed.startsWith('// return Label')) {
+          // enable the three normal Label lines
+          result.push(line.replace('// ', ''));
+          i++;
+          result.push(lines[i].replace('// ', ''));
+          i++;
+          result.push(lines[i].replace('// ', ''));
+          i++;
+          continue;
+        }
+      }
+
+      result.push(line);
+      i++;
+    }
+
+    zip.file(filePath, result.join(LINE_ENDING));
   }
 
   private async updateRootSettingsGradle(zip: JSZip, filePath: string, projectName: string) {
