@@ -413,8 +413,8 @@ export class GradleKotlinTemplateComponent {
           modifiedContent = modifiedContent.replace(', "ktxScene2d"', '');
         }
 
-        // keep TextraTypist ?
-        if (!textraTypistDep) {
+        // keep TextraTypist ? (FreeTypist already includes TextraTypist as transitive dependency)
+        if (!textraTypistDep || freeTypistDep) {
           modifiedContent = modifiedContent
             .split(LINE_ENDING)
             .filter(line => !line.toLowerCase().includes('textratypist'))
@@ -604,7 +604,8 @@ export class GradleKotlinTemplateComponent {
         .join(LINE_ENDING);
     }
 
-    if (!textraTypistDep) {
+    // FreeTypist already includes TextraTypist as transitive dependency
+    if (!textraTypistDep || freeTypistDep) {
       modifiedContent = modifiedContent
         .split(LINE_ENDING)
         .filter(line => !line.toLowerCase().includes('textratypist'))
