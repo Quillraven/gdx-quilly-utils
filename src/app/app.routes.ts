@@ -1,15 +1,25 @@
 import {Routes} from '@angular/router';
-import {TileExtruderComponent} from './components/tile-extruder/tile-extruder.component';
-import {HomeComponent} from './components/home/home.component';
-import {ImageSplitComponent} from './components/image-split/image-split.component';
-import {ImageCombineComponent} from './components/image-combine/image-combine.component';
-import {GradleKotlinTemplateComponent} from './components/gradle-kotlin-template/gradle-kotlin-template.component';
-import {SheetOptimizerComponent} from './components/sheet-optimizer/sheet-optimizer.component';
 
 export const routes: Routes = [
-  {path: '', component: HomeComponent},
-  {path: 'tile-extruder', component: TileExtruderComponent},
-  {path: 'image-split', component: ImageSplitComponent},
-  {path: 'image-combine', component: ImageCombineComponent},
-  {path: 'gradle-kotlin-template', component: GradleKotlinTemplateComponent},
-  {path: 'sheet-optimizer', component: SheetOptimizerComponent},];
+  {path: '', loadComponent: () => import('./components/home/home.component').then(m => m.HomeComponent)},
+  {
+    path: 'tile-extruder',
+    loadComponent: () => import('./components/tile-extruder/tile-extruder.component').then(m => m.TileExtruderComponent)
+  },
+  {
+    path: 'image-split',
+    loadComponent: () => import('./components/image-split/image-split.component').then(m => m.ImageSplitComponent)
+  },
+  {
+    path: 'image-combine',
+    loadComponent: () => import('./components/image-combine/image-combine.component').then(m => m.ImageCombineComponent)
+  },
+  {
+    path: 'gradle-kotlin-template',
+    loadComponent: () => import('./components/gradle-kotlin-template/gradle-kotlin-template.component').then(m => m.GradleKotlinTemplateComponent)
+  },
+  {
+    path: 'sheet-optimizer',
+    loadComponent: () => import('./components/sheet-optimizer/sheet-optimizer.component').then(m => m.SheetOptimizerComponent)
+  }
+];

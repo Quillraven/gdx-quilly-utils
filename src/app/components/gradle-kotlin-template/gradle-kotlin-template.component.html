@@ -160,8 +160,8 @@
         </form>
       </fieldset>
 
-      @if (errorDetails) {
-        <app-error-alert [errorDetails]="errorDetails"></app-error-alert>
+      @if (errorDetails()) {
+        <app-error-alert [errorDetails]="errorDetails()"></app-error-alert>
       }
 
       <button class="btn btn-secondary mt-2"

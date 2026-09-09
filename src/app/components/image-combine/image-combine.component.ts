@@ -1,7 +1,7 @@
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Jimp} from 'jimp';
-import {CommonModule} from '@angular/common';
+import {NgClass} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
@@ -12,20 +12,21 @@ import {FormFieldComponent} from '../form-field/form-field.component';
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    CommonModule,
+    NgClass,
     ErrorAlertComponent,
     FormFieldComponent
   ],
   templateUrl: './image-combine.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './image-combine.component.css'
 })
 export class ImageCombineComponent {
-  selectedImages: string[] = [];
-  originalFileNames: string[] = [];
-  combinedImageUrl: string | null = null;
-  errorDetails: string | null = null;
-  draggedIndex: number = -1;
-  dragOverIndex: number = -1;
+  selectedImages = signal<string[]>([]);
+  originalFileNames = signal<string[]>([]);
+  combinedImageUrl = signal<string | null>(null);
+  errorDetails = signal<string | null>(null);
+  draggedIndex = signal<number>(-1);
+  dragOverIndex = signal<number>(-1);
 
   // Form group for validation
   form: FormGroup;
@@ -61,57 +62,57 @@ export class ImageCombineComponent {
       return;
     }
 
-    this.errorDetails = null;
+    this.errorDetails.set(null);
     // New selection invalidates current combined output
-    this.combinedImageUrl = null;
+    this.combinedImageUrl.set(null);
     Array.from(input.files).forEach(file => {
       const reader = new FileReader();
       reader.onload = () => {
-        this.selectedImages.push(reader.result as string);
-        this.originalFileNames.push(file.name);
+        this.selectedImages.update(images => [...images, reader.result as string]);
+        this.originalFileNames.update(names => [...names, file.name]);
       };
       reader.readAsDataURL(file);
     });
   }
 
   clearImages(): void {
-    this.selectedImages = [];
-    this.originalFileNames = [];
-    this.draggedIndex = -1;
-    this.dragOverIndex = -1;
-    this.errorDetails = null;
+    this.selectedImages.set([]);
+    this.originalFileNames.set([]);
+    this.draggedIndex.set(-1);
+    this.dragOverIndex.set(-1);
+    this.errorDetails.set(null);
   }
 
   async combineImages(): Promise<void> {
-    this.errorDetails = null;
-    if (this.selectedImages.length === 0) {
+    this.errorDetails.set(null);
+    if (this.selectedImages().length === 0) {
       console.warn("No images have been selected to combine.");
-      this.combinedImageUrl = null;
+      this.combinedImageUrl.set(null);
       return;
     }
 
     if (this.form.invalid) {
       console.warn("Form is invalid. Please correct the errors.");
-      this.combinedImageUrl = null;
+      this.combinedImageUrl.set(null);
       return;
     }
 
-    if (this.selectedImages.length > this.gridWidth * this.gridHeight) {
-      this.errorDetails = "The chosen grid size is too small to fit all selected images.";
+    if (this.selectedImages().length > this.gridWidth * this.gridHeight) {
+      this.errorDetails.set("The chosen grid size is too small to fit all selected images.");
       return;
     }
 
     try {
       // Load all images with Jimp
       const jimpImages = [];
-      for (const dataUrl of this.selectedImages) {
+      for (const dataUrl of this.selectedImages()) {
         const jimpImage = await Jimp.read(dataUrl);
         jimpImages.push(jimpImage);
       }
 
       if (jimpImages.length === 0) {
-        this.errorDetails = "Failed to load any images.";
-        console.error(this.errorDetails);
+        this.errorDetails.set("Failed to load any images.");
+        console.error(this.errorDetails());
         return;
       }
 
@@ -164,74 +165,84 @@ export class ImageCombineComponent {
       // Convert the combined image to a data URL
       const buffer = await combinedImage.getBuffer("image/png");
       const base64String = buffer.toString('base64');
-      this.combinedImageUrl = `data:image/png;base64,${base64String}`;
+      this.combinedImageUrl.set(`data:image/png;base64,${base64String}`);
     } catch (error) {
       console.error('Error during image combination:', error);
-      this.combinedImageUrl = null;
+      this.combinedImageUrl.set(null);
       if (error instanceof Error) {
-        this.errorDetails = error.message;
+        this.errorDetails.set(error.message);
       } else {
-        this.errorDetails = String(error);
+        this.errorDetails.set(String(error));
       }
     }
   }
 
   async downloadCombinedImage(): Promise<void> {
-    if (!this.combinedImageUrl) {
+    const combinedImageUrl = this.combinedImageUrl();
+    if (!combinedImageUrl) {
       console.warn('No combined image available to download.');
       return;
     }
 
     try {
-      await this.downloadService.downloadImage(this.combinedImageUrl, `${this.outputFileName}.png`);
+      await this.downloadService.downloadImage(combinedImageUrl, `${this.outputFileName}.png`);
     } catch (error) {
       console.error('Error downloading combined image:', error);
       if (error instanceof Error) {
-        this.errorDetails = error.message;
+        this.errorDetails.set(error.message);
       } else {
-        this.errorDetails = String(error);
+        this.errorDetails.set(String(error));
       }
     }
   }
 
   // Drag and drop methods
   onDragStart(index: number): void {
-    this.draggedIndex = index;
+    this.draggedIndex.set(index);
     document.body.classList.add('dragging');
   }
 
   onDragOver(event: DragEvent, index: number): void {
     event.preventDefault();
-    if (this.draggedIndex !== index) {
-      this.dragOverIndex = index;
+    if (this.draggedIndex() !== index) {
+      this.dragOverIndex.set(index);
     }
   }
 
   onDragLeave(): void {
-    this.dragOverIndex = -1;
+    this.dragOverIndex.set(-1);
   }
 
   onDragEnd(): void {
-    this.draggedIndex = -1;
-    this.dragOverIndex = -1;
+    this.draggedIndex.set(-1);
+    this.dragOverIndex.set(-1);
     document.body.classList.remove('dragging');
   }
 
   onDrop(event: DragEvent, targetIndex: number): void {
     event.preventDefault();
-    if (this.draggedIndex === -1 || this.draggedIndex === targetIndex) {
-      this.dragOverIndex = -1;
+    if (this.draggedIndex() === -1 || this.draggedIndex() === targetIndex) {
+      this.dragOverIndex.set(-1);
       document.body.classList.remove('dragging');
       return;
     }
 
     // Swap the images and file names
-    [this.selectedImages[this.draggedIndex], this.selectedImages[targetIndex]] = [this.selectedImages[targetIndex], this.selectedImages[this.draggedIndex]];
-    [this.originalFileNames[this.draggedIndex], this.originalFileNames[targetIndex]] = [this.originalFileNames[targetIndex], this.originalFileNames[this.draggedIndex]];
+    const draggedIndex = this.draggedIndex();
+    this.selectedImages.update(images => {
+      const next = [...images];
+      [next[draggedIndex], next[targetIndex]] = [next[targetIndex], next[draggedIndex]];
+      return next;
+    });
+    this.originalFileNames.update(names => {
+      const next = [...names];
+      [next[draggedIndex], next[targetIndex]] = [next[targetIndex], next[draggedIndex]];
+      return next;
+    });
 
     // Reset the indices
-    this.draggedIndex = -1;
-    this.dragOverIndex = -1;
+    this.draggedIndex.set(-1);
+    this.dragOverIndex.set(-1);
 
     // Remove dragging class from body
     document.body.classList.remove('dragging');

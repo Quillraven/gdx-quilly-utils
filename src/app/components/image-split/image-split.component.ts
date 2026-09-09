@@ -1,8 +1,7 @@
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {CropOptions, Jimp} from 'jimp';
 import JSZip from 'jszip';
-import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
@@ -13,18 +12,18 @@ import {FormFieldComponent} from '../form-field/form-field.component';
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    CommonModule,
     ErrorAlertComponent,
     FormFieldComponent
   ],
   templateUrl: './image-split.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './image-split.component.css'
 })
 export class ImageSplitComponent {
-  selectedImage: string | null = null;
-  splitTiles: string[] = [];
-  errorDetails: string | null = null;
-  genTilesX: number = 0;
+  selectedImage = signal<string | null>(null);
+  splitTiles = signal<string[]>([]);
+  errorDetails = signal<string | null>(null);
+  genTilesX = signal<number>(0);
 
   // Split mode options
   splitModeOptions: string[] = ['num tiles', 'size'];
@@ -92,24 +91,25 @@ export class ImageSplitComponent {
     const file = input.files[0];
     const reader = new FileReader();
     reader.onload = () => {
-      this.selectedImage = reader.result as string;
-      this.splitTiles = [];
-      this.errorDetails = null;
+      this.selectedImage.set(reader.result as string);
+      this.splitTiles.set([]);
+      this.errorDetails.set(null);
     };
     reader.readAsDataURL(file);
   }
 
   async splitImage(): Promise<void> {
-    this.errorDetails = null;
-    if (!this.selectedImage) {
+    this.errorDetails.set(null);
+    const selectedImage = this.selectedImage();
+    if (!selectedImage) {
       console.warn("No image has been selected to split.");
-      this.splitTiles = [];
+      this.splitTiles.set([]);
       return;
     }
 
     try {
       // Load the image using Jimp
-      const image = await Jimp.read(this.selectedImage);
+      const image = await Jimp.read(selectedImage);
 
       let tileW: number;
       let tileH: number;
@@ -132,13 +132,13 @@ export class ImageSplitComponent {
       }
 
       // Store the number of tiles on x-axis for the grid display
-      this.genTilesX = numTilesX;
+      this.genTilesX.set(numTilesX);
 
       // Calculate total number of tiles
       const totalTiles = numTilesX * numTilesY;
 
       // Clear previous tiles
-      this.splitTiles = [];
+      this.splitTiles.set([]);
 
       // Calculate which tiles to include based on ignored settings
       const startTileIndex = this.ignoreFirstN;
@@ -169,22 +169,22 @@ export class ImageSplitComponent {
           const dataUrl = `data:image/png;base64,${base64String}`;
 
           // Add the tile to the array
-          this.splitTiles.push(dataUrl);
+          this.splitTiles.update(tiles => [...tiles, dataUrl]);
         }
       }
     } catch (error) {
       console.error('Error during image splitting:', error);
-      this.splitTiles = [];
+      this.splitTiles.set([]);
       if (error instanceof Error) {
-        this.errorDetails = error.message;
+        this.errorDetails.set(error.message);
       } else {
-        this.errorDetails = String(error);
+        this.errorDetails.set(String(error));
       }
     }
   }
 
   async downloadSplitTiles(): Promise<void> {
-    if (this.splitTiles.length === 0 || this.form.invalid) {
+    if (this.splitTiles().length === 0 || this.form.invalid) {
       console.warn('No split tiles available to download or form is invalid.');
       return;
     }
@@ -194,9 +194,10 @@ export class ImageSplitComponent {
       const zip = new JSZip();
 
       // Add each tile to the zip file
-      for (let i = 0; i < this.splitTiles.length; i++) {
+      const splitTiles = this.splitTiles();
+      for (let i = 0; i < splitTiles.length; i++) {
         // Convert data URL to binary
-        const dataUrl = this.splitTiles[i];
+        const dataUrl = splitTiles[i];
         const base64Data = dataUrl.split(',')[1];
         const binaryData = atob(base64Data);
 
@@ -219,9 +220,9 @@ export class ImageSplitComponent {
     } catch (error) {
       console.error('Error creating zip file:', error);
       if (error instanceof Error) {
-        this.errorDetails = error.message;
+        this.errorDetails.set(error.message);
       } else {
-        this.errorDetails = String(error);
+        this.errorDetails.set(String(error));
       }
     }
   }

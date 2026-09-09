@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import {AbstractControl, FormControl, ReactiveFormsModule} from '@angular/forms';
 import {NgClass} from '@angular/common';
 import {ValidationService} from '../../services/validation.service';
@@ -6,8 +6,6 @@ import {ValidationService} from '../../services/validation.service';
 function transformInputControl(control: AbstractControl | null): FormControl {
   if (!control) {
     throw new Error('control must be not null for an app-form-field');
-  } else if (!(control instanceof AbstractControl)) {
-    throw new Error('control must be a FormControl for an app-form-field');
   }
 
   return control as FormControl;
@@ -20,6 +18,7 @@ function transformInputControl(control: AbstractControl | null): FormControl {
     NgClass
   ],
   templateUrl: './form-field.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './form-field.component.css'
 })
 export class FormFieldComponent {

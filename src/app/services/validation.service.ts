@@ -1,9 +1,7 @@
-import {Injectable} from '@angular/core';
+import {Service} from '@angular/core';
 import {AbstractControl, ValidationErrors} from '@angular/forms';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class ValidationService {
   /**
    * Validates that a value does not contain spaces.
@@ -92,7 +90,7 @@ export class ValidationService {
       return null;
     }
 
-    const versionRegex = /^\d+\.\d+(?:\.\d+)?(?:-(?i:M\d+|alpha|beta|rc|eap)\d*)?$/
+    const versionRegex = /^\d+\.\d+(?:\.\d+)?(?:-(?:m\d+|alpha|beta|rc|eap)\d*)?$/i
     if (!versionRegex.test(value)) {
       return {invalidKotlinVersion: true};
     }

@@ -41,36 +41,36 @@
           <div class="flex justify-end">
             <button class="btn btn-primary"
                     (click)="optimizeSheet()"
-                    [disabled]="!selectedImage || form.invalid">
+                    [disabled]="!selectedImage() || form.invalid">
               Optimize
             </button>
           </div>
         </form>
       </fieldset>
 
-      @if (errorDetails) {
-        <app-error-alert [errorDetails]="errorDetails"></app-error-alert>
+      @if (errorDetails()) {
+        <app-error-alert [errorDetails]="errorDetails()"></app-error-alert>
       }
 
-      @if (optimizedTileWidth !== null && optimizedTileHeight !== null) {
+      @if (optimizedTileWidth() !== null && optimizedTileHeight() !== null) {
         <div class="mt-4 p-4 bg-base-200 rounded-box border border-base-300">
           <p class="font-semibold mb-1">Optimized frame dimension values:</p>
-          <p>Width: <span class="font-mono font-bold">{{ optimizedTileWidth }}</span></p>
-          <p>Height: <span class="font-mono font-bold">{{ optimizedTileHeight }}</span></p>
+          <p>Width: <span class="font-mono font-bold">{{ optimizedTileWidth() }}</span></p>
+          <p>Height: <span class="font-mono font-bold">{{ optimizedTileHeight() }}</span></p>
         </div>
       }
 
       <button class="btn btn-secondary mt-2"
               (click)="downloadOptimized()"
-              [disabled]="!optimizedImage">
+              [disabled]="!optimizedImage()">
         Download optimized sheet
       </button>
     </div>
 
     <div>
       <h3 class="text-xl font-semibold mb-2">Original Image:</h3>
-      @if (selectedImage) {
-        <img [src]="selectedImage" alt="Original spritesheet"
+      @if (selectedImage()) {
+        <img [src]="selectedImage()" alt="Original spritesheet"
              class="max-w-[300px] max-h-[300px] w-auto h-auto rounded border shadow">
       } @else {
         <div class="skeleton h-32 w-32"></div>
@@ -79,10 +79,10 @@
 
     <div class="mt-6">
       <h3 class="text-xl font-semibold mt-4 mb-2">Optimized Image:</h3>
-      @if (optimizedImage) {
-        <img [src]="optimizedImage" alt="Optimized spritesheet"
+      @if (optimizedImage()) {
+        <img [src]="optimizedImage()" alt="Optimized spritesheet"
              class="max-w-[300px] max-h-[300px] w-auto h-auto rounded border shadow">
-      } @else if (selectedImage) {
+      } @else if (selectedImage()) {
         <p class="text-gray-500">Click Optimize to generate the result.</p>
         <div class="skeleton h-32 w-32"></div>
       } @else {

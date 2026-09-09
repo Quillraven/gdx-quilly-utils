@@ -56,28 +56,28 @@
           <div class="flex justify-end">
             <button class="btn btn-primary"
                     (click)="extrudeImage()"
-                    [disabled]="!selectedImage || form.invalid">
+                    [disabled]="!selectedImage() || form.invalid">
               Extrude
             </button>
           </div>
         </form>
       </fieldset>
 
-      @if (errorDetails) {
-        <app-error-alert [errorDetails]="errorDetails"></app-error-alert>
+      @if (errorDetails()) {
+        <app-error-alert [errorDetails]="errorDetails()"></app-error-alert>
       }
 
       <button class="btn btn-secondary mt-2"
               (click)="downloadExtrudedImage()"
-              [disabled]="!extrudedImageUrl">
+              [disabled]="!extrudedImageUrl()">
         Download extruded tileset
       </button>
     </div>
 
     <div>
       <h3 class="text-xl font-semibold mb-2">Original Tileset:</h3>
-      @if (selectedImage) {
-        <img [src]="selectedImage" alt="Original Tileset"
+      @if (selectedImage()) {
+        <img [src]="selectedImage()" alt="Original Tileset"
              class="max-w-[300px] max-h-[300px] w-auto h-auto rounded border shadow">
       } @else {
         <div class="skeleton h-32 w-32"></div>
@@ -87,10 +87,10 @@
 
   <div class="mt-6">
     <h3 class="text-xl font-semibold mb-2">Extruded Tileset:</h3>
-    @if (extrudedImageUrl) {
-      <img [src]="extrudedImageUrl" alt="Extruded Tileset"
+    @if (extrudedImageUrl()) {
+      <img [src]="extrudedImageUrl()" alt="Extruded Tileset"
            class="max-w-[600px] max-h-[600px] w-auto h-auto rounded border shadow">
-    } @else if (selectedImage) {
+    } @else if (selectedImage()) {
       <p class="text-gray-500">Click the Extrude button to generate the extruded image.</p>
       <div class="skeleton h-32 w-32"></div>
     } @else {

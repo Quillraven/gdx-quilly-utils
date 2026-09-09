@@ -1,9 +1,10 @@
-import {Component, effect, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, signal} from '@angular/core';
 
 @Component({
   selector: 'app-theme-sel',
   imports: [],
   templateUrl: './theme-sel.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './theme-sel.component.css'
 })
 export class ThemeSelComponent {

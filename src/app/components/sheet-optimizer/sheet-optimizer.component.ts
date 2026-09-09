@@ -1,7 +1,6 @@
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Jimp} from 'jimp';
-import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
@@ -9,16 +8,17 @@ import {FormFieldComponent} from '../form-field/form-field.component';
 
 @Component({
   selector: 'app-sheet-optimizer',
-  imports: [FormsModule, ReactiveFormsModule, CommonModule, ErrorAlertComponent, FormFieldComponent],
+  imports: [FormsModule, ReactiveFormsModule, ErrorAlertComponent, FormFieldComponent],
   templateUrl: './sheet-optimizer.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './sheet-optimizer.component.css'
 })
 export class SheetOptimizerComponent {
-  selectedImage: string | null = null;
-  optimizedImage: string | null = null;
-  errorDetails: string | null = null;
-  optimizedTileWidth: number | null = null;
-  optimizedTileHeight: number | null = null;
+  selectedImage = signal<string | null>(null);
+  optimizedImage = signal<string | null>(null);
+  errorDetails = signal<string | null>(null);
+  optimizedTileWidth = signal<number | null>(null);
+  optimizedTileHeight = signal<number | null>(null);
 
   form: FormGroup;
 
@@ -51,21 +51,22 @@ export class SheetOptimizerComponent {
     if (!(input.files && input.files.length > 0)) return;
     const reader = new FileReader();
     reader.onload = () => {
-      this.selectedImage = reader.result as string;
-      this.optimizedImage = null;
-      this.errorDetails = null;
-      this.optimizedTileWidth = null;
-      this.optimizedTileHeight = null;
+      this.selectedImage.set(reader.result as string);
+      this.optimizedImage.set(null);
+      this.errorDetails.set(null);
+      this.optimizedTileWidth.set(null);
+      this.optimizedTileHeight.set(null);
     };
     reader.readAsDataURL(input.files[0]);
   }
 
   async optimizeSheet(): Promise<void> {
-    this.errorDetails = null;
-    if (!this.selectedImage) return;
+    this.errorDetails.set(null);
+    const selectedImage = this.selectedImage();
+    if (!selectedImage) return;
 
     try {
-      const image = await Jimp.read(this.selectedImage);
+      const image = await Jimp.read(selectedImage);
       const cols = this.numCols;
       const rows = this.numRows;
       const tileW = Math.floor(image.bitmap.width / cols);
@@ -105,7 +106,7 @@ export class SheetOptimizerComponent {
         if (b.h > maxH) maxH = b.h;
       }
       if (maxW === 0 || maxH === 0) {
-        this.errorDetails = 'All frames are fully transparent.';
+        this.errorDetails.set('All frames are fully transparent.');
         return;
       }
 
@@ -119,7 +120,7 @@ export class SheetOptimizerComponent {
         if (b.w === 0 || b.h === 0) continue;
         const col = i % cols;
         const row = Math.floor(i / cols);
-        const frame = await Jimp.read(this.selectedImage!);
+        const frame = await Jimp.read(this.selectedImage()!);
         frame.crop({x: b.x, y: b.y, w: b.w, h: b.h});
         const offsetX = col * maxW + Math.floor((maxW - b.w) / 2);
         const offsetY = row * maxH + Math.floor((maxH - b.h) / 2);
@@ -128,18 +129,19 @@ export class SheetOptimizerComponent {
 
       const buffer = await output.getBuffer('image/png');
       const base64 = buffer.toString('base64');
-      this.optimizedImage = `data:image/png;base64,${base64}`;
-      this.optimizedTileWidth = maxW;
-      this.optimizedTileHeight = maxH;
+      this.optimizedImage.set(`data:image/png;base64,${base64}`);
+      this.optimizedTileWidth.set(maxW);
+      this.optimizedTileHeight.set(maxH);
     } catch (error) {
       console.error('Error during sheet optimization:', error);
-      this.optimizedImage = null;
-      this.errorDetails = error instanceof Error ? error.message : String(error);
+      this.optimizedImage.set(null);
+      this.errorDetails.set(error instanceof Error ? error.message : String(error));
     }
   }
 
   async downloadOptimized(): Promise<void> {
-    if (!this.optimizedImage) return;
-    await this.downloadService.downloadImage(this.optimizedImage, `${this.outputFileName}.png`);
+    const optimizedImage = this.optimizedImage();
+    if (!optimizedImage) return;
+    await this.downloadService.downloadImage(optimizedImage, `${this.outputFileName}.png`);
   }
 }

@@ -1,6 +1,5 @@
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, signal} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {CommonModule} from '@angular/common';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
@@ -11,20 +10,24 @@ const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
 const LINE_ENDING = '\n';
 const KOTLIN_DEFAULT_VERSION = '2.4.20';
 
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 @Component({
   selector: 'app-gradle-kotlin-template',
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    CommonModule,
     ErrorAlertComponent,
     FormFieldComponent
   ],
   templateUrl: './gradle-kotlin-template.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './gradle-kotlin-template.component.css'
 })
 export class GradleKotlinTemplateComponent {
-  errorDetails: string | null = null;
+  errorDetails = signal<string | null>(null);
 
   // Form group for validation
   form: FormGroup;
@@ -61,17 +64,17 @@ export class GradleKotlinTemplateComponent {
   }
 
   async downloadTemplate(): Promise<void> {
-    this.errorDetails = null;
+    this.errorDetails.set(null);
 
     if (this.form.invalid) {
-      this.errorDetails = "Form is invalid. Please correct the errors.";
+      this.errorDetails.set("Form is invalid. Please correct the errors.");
       return;
     }
 
     const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
     if (!desktopLauncher && !teaVmLauncher) {
-      this.errorDetails = "Please select at least one launcher option";
+      this.errorDetails.set("Please select at least one launcher option");
       return;
     }
 
@@ -82,7 +85,7 @@ export class GradleKotlinTemplateComponent {
       // Fetch the template zip file
       const response = await fetch(templateUrl);
       if (!response.ok) {
-        this.errorDetails = `Failed to fetch template: ${response.statusText}`;
+        this.errorDetails.set(`Failed to fetch template: ${response.statusText}`);
         return;
       }
       const zipBlob = await response.blob();
@@ -114,9 +117,9 @@ export class GradleKotlinTemplateComponent {
     } catch (error) {
       console.error('Error downloading template:', error);
       if (error instanceof Error) {
-        this.errorDetails = error.message;
+        this.errorDetails.set(error.message);
       } else {
-        this.errorDetails = String(error);
+        this.errorDetails.set(String(error));
       }
     }
   }
@@ -128,7 +131,7 @@ export class GradleKotlinTemplateComponent {
       return;
     }
 
-    const filesToMove = [];
+    const filesToMove: string[] = [];
 
     // Ensure the paths end with a slash to correctly identify folder contents
     const oldFolder = oldPath.endsWith('/') ? oldPath : oldPath + '/';
@@ -169,7 +172,7 @@ export class GradleKotlinTemplateComponent {
     }
 
     // Find and update files that reference the default main class name
-    let mainClassFileToRemove = null;
+    let mainClassFileToRemove: string | null = null;
     for (const filePath in zip.files) {
       if (zip.files[filePath].dir) {
         // ignore directories
@@ -186,14 +189,13 @@ export class GradleKotlinTemplateComponent {
 
         // Replace occurrences of the default class name with the new one
         if (content.includes(defaultMainClass)) {
-          const modifiedContent = content.replace(new RegExp(defaultMainClass, 'g'), mainClassName);
-          zip.file(filePath, modifiedContent);
+          zip.file(filePath, content.replaceAll(defaultMainClass, mainClassName));
         }
 
         // Rename the main class file if found
         if (filePath.endsWith(`/${defaultMainClass}.kt`)) {
           const newPath = filePath.replace(`/${defaultMainClass}.kt`, `/${mainClassName}.kt`);
-          zip.file(newPath, content.replace(new RegExp(defaultMainClass, 'g'), mainClassName));
+          zip.file(newPath, content.replaceAll(defaultMainClass, mainClassName));
           mainClassFileToRemove = filePath;
         }
       } catch (e) {
@@ -211,13 +213,13 @@ export class GradleKotlinTemplateComponent {
     const defaultPackage = 'io.github';
     if (defaultPackage === packageName) {
       // nothing to do because package remains the same
-      return
+      return;
     }
 
     const defaultPackagePath = defaultPackage.replace(/\./g, '/');
     const newPackagePath = packageName.replace(/\./g, '/');
-    const foldersToRemove = [];
-    const filesToProcess = [];
+    const foldersToRemove: string[] = [];
+    const filesToProcess: string[] = [];
 
     // Find and update files that reference the default package name
     const keepDefaultBaseFolders = packageName.startsWith(defaultPackage);
@@ -241,7 +243,7 @@ export class GradleKotlinTemplateComponent {
       }
     }
 
-    const filesToRemove = [];
+    const filesToRemove: string[] = [];
     for (const filePath of filesToProcess) {
       try {
         const content = await zip.files[filePath].async('text');
@@ -249,9 +251,10 @@ export class GradleKotlinTemplateComponent {
         // Replace package declarations, imports and usage in gradle files like group or main class definition
         let modifiedContent = content;
         if (content.includes(defaultPackage)) {
-          modifiedContent = content.replace(new RegExp(`package\\s+${defaultPackage}`, 'g'), `package ${packageName}`);
-          modifiedContent = modifiedContent.replace(new RegExp(`import\\s+${defaultPackage}\\.(?!fourlastor\\.construo\\.Target)`, 'g'), `import ${packageName}.`);
-          modifiedContent = modifiedContent.replace(new RegExp(`"${defaultPackage}`, 'g'), `"${packageName}`);
+          const escapedPackage = escapeRegExp(defaultPackage);
+          modifiedContent = content.replace(new RegExp(`package\\s+${escapedPackage}`, 'g'), `package ${packageName}`);
+          modifiedContent = modifiedContent.replace(new RegExp(`import\\s+${escapedPackage}\\.(?!fourlastor\\.construo\\.Target)`, 'g'), `import ${packageName}.`);
+          modifiedContent = modifiedContent.replaceAll(`"${defaultPackage}`, `"${packageName}`);
         }
 
         // Rename package directories if they match the pattern
@@ -766,7 +769,7 @@ export class GradleKotlinTemplateComponent {
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
 
     const content = await zip.files[filePath].async('text');
-    let modifiedContent = content.replace(new RegExp("gdx-template", 'g'), projectName);
+    let modifiedContent = content.replaceAll('gdx-template', projectName);
 
     if (!desktopLauncher) {
       modifiedContent = modifiedContent
@@ -805,7 +808,7 @@ export class GradleKotlinTemplateComponent {
       return;
     }
 
-    let modifiedContent = content.replace(new RegExp("org.gradle.configuration-cache=false", 'g'), "org.gradle.configuration-cache=true");
+    let modifiedContent = content.replaceAll("org.gradle.configuration-cache=false", "org.gradle.configuration-cache=true");
     zip.file(filePath, modifiedContent);
   }
 
