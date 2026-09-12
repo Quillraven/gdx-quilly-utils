@@ -12,10 +12,10 @@ describe('AppComponent', () => {
     }).compileComponents();
   });
 
-  it('should render the header title', () => {
+  it('should render the header brand title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
-    const header = fixture.nativeElement.querySelector('app-header h1');
-    expect(header.textContent).toContain("Quilly's GDX Utilities");
+    const brand = fixture.nativeElement.querySelector('app-header .brand-link');
+    expect(brand.textContent).toContain("Quilly's GDX Utilities");
   });
 });

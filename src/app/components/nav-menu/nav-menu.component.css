@@ -1,3 +1,7 @@
+:host {
+  display: contents;
+}
+
 .btn-ghost:hover {
-  background-color: var(--color-primary);
+  background-color: color-mix(in oklab, var(--color-primary-content) 12%, transparent);
 }

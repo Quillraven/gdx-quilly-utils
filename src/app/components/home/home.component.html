@@ -1,13 +1,28 @@
-<div>
-  <p>This site contains several utilities that I regularly use for my LibGDX 2D games.</p>
-  <p>Feel free to use them as well! :)</p>
+<div class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+  <div class="hero bg-base-100 rounded-box border border-base-300">
+    <div class="hero-content text-center py-8 sm:py-12">
+      <div class="max-w-2xl">
+        <h1 class="text-3xl font-bold sm:text-4xl">Quilly's GDX Utilities</h1>
+        <p class="text-base-content/70 mt-2">
+          This site contains several utilities that I regularly use for my LibGDX 2D games.
+          Feel free to use them as well!
+        </p>
+      </div>
+    </div>
+  </div>
 
-  <p class="mt-4">Following utilities can be selected from the menu:</p>
-  <ul class="list-disc list-inside">
-    <li><span class="font-bold">Tile Extruder</span>: extrudes tiles in tilesets to avoid texture bleeding issues.</li>
-    <li><span class="font-bold">Spritesheet Splitter</span>: splits a spritesheet into several tiles of equal size.</li>
-    <li><span class="font-bold">Image Combiner</span>: combines multiple images into a grid layout.</li>
-    <li><span class="font-bold">Gradle Kotlin Template</span>: a modern Gradle Kotlin DSL based template for LibGDX Kotlin projects.</li>
-    <li><span class="font-bold">Sheet Optimizer</span>: optimizes a spritesheet by trimming transparent borders and re-centering each frame.</li>
-  </ul>
+  <div class="grid grid-cols-1 gap-4 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+    @for (tool of tools; track tool.path) {
+      <a class="card card-compact bg-base-100 border border-base-300 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+         [routerLink]="tool.path">
+        <div class="card-body">
+          <h2 class="card-title text-lg">{{ tool.title }}</h2>
+          <p class="text-sm text-base-content/70">{{ tool.description }}</p>
+          <div class="card-actions justify-end mt-2">
+            <span class="btn btn-primary btn-sm">Open tool</span>
+          </div>
+        </div>
+      </a>
+    }
+  </div>
 </div>

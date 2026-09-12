@@ -12,7 +12,7 @@ export class ThemeSelComponent {
 
   constructor() {
     effect(() => {
-      const theme = this.isDark() ? 'night' : 'light';
+      const theme = this.isDark() ? 'night' : 'fantasy';
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
     });

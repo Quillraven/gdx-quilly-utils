@@ -1,19 +1,19 @@
-<div class="container p-4">
-  <h2 class="text-2xl font-bold mb-2">Tileset Extruder</h2>
-  <p class="mb-4 text-gray-600">Prevent texture bleeding in tiled games by adding padding around each tile in your tileset.
-    <br>
+<div class="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 sm:py-6">
+  <h1 class="text-2xl font-bold">Tileset Extruder</h1>
+  <p class="text-base-content/70 mt-2">
+    Prevent texture bleeding in tiled games by adding padding around each tile in your tileset.
     This ensures clean rendering when tiles are placed next to each other in a game world.
-    <br>
     Upload your tileset first, then configure the settings and click on <strong>Extrude</strong> to generate the
-    extruded tileset.</p>
+    extruded tileset.
+  </p>
 
-  <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
-    <div>
-      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 md:mt-5">
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,26rem)_1fr]">
+    <div class="min-w-0">
+      <fieldset class="fieldset w-full bg-base-200 border-base-300 rounded-box border p-4">
         <legend class="fieldset-legend">Settings</legend>
 
-        <form [formGroup]="form" class="grid grid-cols-2 gap-x-4 gap-y-2 w-sm">
-          <label class="btn btn-secondary col-span-2">
+        <form [formGroup]="form" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <label class="btn btn-secondary col-span-1 sm:col-span-2">
             Upload tileset
             <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
           </label>
@@ -53,8 +53,8 @@
             type="number"
           />
 
-          <div class="flex justify-end">
-            <button class="btn btn-primary"
+          <div class="flex col-span-1 gap-2 sm:col-span-2 sm:justify-end">
+            <button class="btn btn-primary w-full sm:w-auto"
                     (click)="extrudeImage()"
                     [disabled]="!selectedImage() || form.invalid">
               Extrude
@@ -67,34 +67,39 @@
         <app-error-alert [errorDetails]="errorDetails()"></app-error-alert>
       }
 
-      <button class="btn btn-secondary mt-2"
+      <button class="btn btn-secondary mt-3 w-full sm:w-auto"
               (click)="downloadExtrudedImage()"
               [disabled]="!extrudedImageUrl()">
         Download extruded tileset
       </button>
     </div>
 
-    <div>
-      <h3 class="text-xl font-semibold mb-2">Original Tileset:</h3>
-      @if (selectedImage()) {
-        <img [src]="selectedImage()" alt="Original Tileset"
-             class="max-w-[300px] max-h-[300px] w-auto h-auto rounded border shadow">
-      } @else {
-        <div class="skeleton h-32 w-32"></div>
-      }
-    </div>
-  </div>
+    <div class="min-w-0 space-y-6">
+      <section>
+        <h3 class="text-lg font-semibold">Original Tileset</h3>
+        <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
+          @if (selectedImage()) {
+            <img [src]="selectedImage()" alt="Original Tileset"
+                 class="h-auto max-h-72 w-auto max-w-full rounded border shadow">
+          } @else {
+            <p class="text-sm text-base-content/50">No tileset uploaded yet</p>
+          }
+        </div>
+      </section>
 
-  <div class="mt-6">
-    <h3 class="text-xl font-semibold mb-2">Extruded Tileset:</h3>
-    @if (extrudedImageUrl()) {
-      <img [src]="extrudedImageUrl()" alt="Extruded Tileset"
-           class="max-w-[600px] max-h-[600px] w-auto h-auto rounded border shadow">
-    } @else if (selectedImage()) {
-      <p class="text-gray-500">Click the Extrude button to generate the extruded image.</p>
-      <div class="skeleton h-32 w-32"></div>
-    } @else {
-      <div class="skeleton h-32 w-32"></div>
-    }
+      <section>
+        <h3 class="text-lg font-semibold">Extruded Tileset</h3>
+        <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
+          @if (extrudedImageUrl()) {
+            <img [src]="extrudedImageUrl()" alt="Extruded Tileset"
+                 class="h-auto max-h-96 w-auto max-w-full rounded border shadow">
+          } @else if (selectedImage()) {
+            <p class="text-sm text-base-content/50">Click the Extrude button to generate the extruded image.</p>
+          } @else {
+            <p class="text-sm text-base-content/50">The extruded tileset will appear here.</p>
+          }
+        </div>
+      </section>
+    </div>
   </div>
 </div>

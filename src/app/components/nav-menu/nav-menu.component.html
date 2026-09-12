@@ -1,17 +1,42 @@
-<div class="navbar-start">
-  <details class="dropdown" #navMenu>
-    <summary class="btn btn-square btn-ghost">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-content" viewBox="0 0 24 24" stroke="currentColor">
+<div class="navbar-start flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
+  <details class="dropdown md:hidden" #navMenu>
+    <summary class="btn btn-ghost btn-square" aria-label="Open navigation menu">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
       </svg>
     </summary>
-    <ul class="menu menu-lg dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-      <li><a routerLink="/" (click)="closeMenu()" routerLinkActive="bg-primary text-primary-content" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
-      <li><a routerLink="/tile-extruder" (click)="closeMenu()" routerLinkActive="bg-primary text-primary-content">Tile Extruder</a></li>
-      <li><a routerLink="/image-split" (click)="closeMenu()" routerLinkActive="bg-primary text-primary-content">Spritesheet Splitter</a></li>
-      <li><a routerLink="/image-combine" (click)="closeMenu()" routerLinkActive="bg-primary text-primary-content">Image Combiner</a></li>
-      <li><a routerLink="/sheet-optimizer" (click)="closeMenu()" routerLinkActive="bg-primary text-primary-content">Sheet Optimizer</a></li>
-      <li><a routerLink="/gradle-kotlin-template" (click)="closeMenu()" routerLinkActive="bg-primary text-primary-content">Gradle Kotlin Template</a></li>
+    <ul class="menu dropdown-content z-10 mt-2 w-60 rounded-box bg-base-100 p-2 text-base-content shadow"
+        aria-label="Mobile navigation">
+      @for (item of navItems; track item.path) {
+        <li>
+          <a
+            [routerLink]="item.path"
+            (click)="closeMenu()"
+            routerLinkActive="bg-primary text-primary-content"
+            [routerLinkActiveOptions]="{exact: item.exact}"
+          >{{ item.label }}</a>
+        </li>
+      }
     </ul>
   </details>
+
+  <a routerLink="/"
+     class="brand-link min-w-0 truncate text-lg font-bold hover:underline hover:underline-offset-4 sm:text-xl"
+     aria-label="Quilly's GDX Utilities, back to home">
+    Quilly's GDX Utilities
+  </a>
+
+  <ul class="menu menu-horizontal hidden flex-none gap-1 px-1 md:flex"
+      aria-label="Main navigation">
+    @for (item of navItems; track item.path) {
+      <li>
+        <a
+          [routerLink]="item.path"
+          class="rounded-md px-3 py-2 text-sm font-medium hover:bg-primary-content/10"
+          routerLinkActive="bg-primary-content font-semibold text-primary hover:bg-primary-content"
+          [routerLinkActiveOptions]="{exact: item.exact}"
+        >{{ item.label }}</a>
+      </li>
+    }
+  </ul>
 </div>

@@ -27,7 +27,7 @@ export class FormFieldComponent {
   @Input({required: true}) type!: 'text' | 'number' | 'checkbox' | 'radio';
   @Input({required: true, alias: 'form-control', transform: transformInputControl}) control!: FormControl;
   @Input() options: string[] = []
-  @Input() gridClass: string = 'grid-cols-2';
+  @Input() gridClass: string = 'grid-cols-1';
   @Input({alias: 'tool-tip'}) toolTip: string = '';
 
   constructor(private readonly validationService: ValidationService) {

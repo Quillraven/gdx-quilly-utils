@@ -1,12 +1,12 @@
-<div class="grid grid-flow-row gap-x-4" [ngClass]="gridClass">
+<div class="grid gap-y-1.5" [ngClass]="gridClass">
 
   @if (type !== 'checkbox') {
     <div class="tooltip" [attr.data-tip]="toolTip">
-      <label class="label" for="{{inputId}}">{{ label }}</label>
+      <label class="label px-0 py-0.5" [for]="inputId">{{ label }}</label>
     </div>
   }
 
-  <div class="flex flex-col">
+  <div class="flex min-w-0 flex-col">
     <!-- type cannot be dynamically set because of how Angular internally creates stuff. -->
     <!-- Therefore, we do conditional rendering as a workaround to avoid that numbers are string values in the .ts classes   -->
     @if (type === 'number') {
@@ -14,10 +14,10 @@
         [id]="inputId"
         type="number"
         [formControl]="control"
-        class="input"
+        class="input w-full"
         [ngClass]="{'input-error': hasErrors()}"/>
     } @else if (type === 'radio') {
-      <div class="flex flex-row gap-4">
+      <div class="flex flex-row flex-wrap gap-x-4 gap-y-1.5 py-1">
         @for (option of options; track option) {
           <div class="flex items-start">
             <input
@@ -25,20 +25,20 @@
               [id]="inputId + '_' + option"
               [value]="option"
               [formControl]="control"
-              class="radio radio-xs"
+              class="radio radio-sm"
             />
-            <label [for]="inputId + '_' + option" class="text-sm ml-1">{{ option }}</label>
+            <label [for]="inputId + '_' + option" class="text-sm ml-1.5">{{ option }}</label>
           </div>
         }
       </div>
     } @else if (type === 'checkbox') {
       <div class="tooltip tooltip-right" [attr.data-tip]="toolTip">
-        <label class="label">
+        <label class="label gap-2 px-0 py-1">
           <input
             [id]="inputId"
             type="checkbox"
             [formControl]="control"
-            class="checkbox checkbox-xs checkbox-neutral"/>
+            class="checkbox checkbox-sm checkbox-neutral"/>
           {{ label }}
         </label>
       </div>
@@ -47,7 +47,7 @@
         [id]="inputId"
         type="text"
         [formControl]="control"
-        class="input"
+        class="input w-full"
         [ngClass]="{'input-error': hasErrors()}"/>
     }
 

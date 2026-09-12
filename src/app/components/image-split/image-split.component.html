@@ -1,41 +1,36 @@
-<div class="container p-4">
-  <h2 class="text-2xl font-bold mb-2">Spritesheet Splitter</h2>
-  <p class="text-gray-600">Split a spritesheet into individual image tiles.
-    <br>
-    This tool offers two ways to split your spritesheet:
+<div class="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 sm:py-6">
+  <h1 class="text-2xl font-bold">Spritesheet Splitter</h1>
+  <p class="text-base-content/70 mt-2">
+    Split a spritesheet into individual image tiles.
+    This tool supports two split modes:
   </p>
-  <ul class="list-disc list-inside">
-    <li><strong>Split by num tiles</strong>: Divides your spritesheet into a grid based on the number of rows and
-      columns you specify.
-    </li>
-    <li><strong>Split by size</strong>: Divides your spritesheet based on the dimensions of a single tile (e.g., 32x32
-      pixels).
-    </li>
+  <ul class="text-base-content/70 mt-2 list-inside list-disc space-y-1">
+    <li><strong class="text-base-content">Split by num tiles</strong>: Divides your spritesheet into a grid based on the number of rows and columns you specify.</li>
+    <li><strong class="text-base-content">Split by size</strong>: Divides your spritesheet based on the dimensions of a single tile (e.g. 32x32 pixels).</li>
   </ul>
-  <p class="mb-4 text-gray-600">
+  <p class="text-base-content/70 mt-2">
     Upload your spritesheet first, then configure the settings and click on <strong>Split Image</strong> to generate the
-    individual tiles. Note: When splitting by size, any partial tiles at the edges will be ignored.
+    individual tiles. When splitting by size, any partial tiles at the edges are ignored.
   </p>
 
-  <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
-    <div>
-      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-md border p-4 md:mt-5">
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,26rem)_1fr]">
+    <div class="min-w-0">
+      <fieldset class="fieldset w-full bg-base-200 border-base-300 rounded-box border p-4">
         <legend class="fieldset-legend">Settings</legend>
 
-        <form [formGroup]="form" class="grid grid-cols-2 gap-x-4 gap-y-2">
-          <label class="btn btn-secondary col-span-2">
+        <form [formGroup]="form" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label class="btn btn-secondary col-span-1 md:col-span-2">
             Upload spritesheet
             <input type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
           </label>
 
-          <div class="col-span-2 mb-2">
+          <div class="col-span-1 md:col-span-2">
             <app-form-field
               label="Split mode"
               input-id="splitMode"
               [form-control]="form.get('splitMode')"
               type="radio"
               [options]="splitModeOptions"
-              gridClass="grid-cols-[0.25fr_0.75fr]"
             />
           </div>
 
@@ -88,10 +83,11 @@
             input-id="tilesBaseFileName"
             [form-control]="form.get('tilesBaseFileName')"
             type="text"
+            class="col-span-1 md:col-span-2"
           />
 
-          <div class="flex justify-end">
-            <button class="btn btn-primary"
+          <div class="flex col-span-1 gap-2 md:col-span-2 md:justify-end">
+            <button class="btn btn-primary w-full md:w-auto"
                     (click)="splitImage()"
                     [disabled]="!selectedImage() || form.invalid">
               Split Image
@@ -104,42 +100,49 @@
         <app-error-alert [errorDetails]="errorDetails()"></app-error-alert>
       }
 
-      <button class="btn btn-secondary mt-2"
+      <button class="btn btn-secondary mt-3 w-full sm:w-auto"
               (click)="downloadSplitTiles()"
               [disabled]="splitTiles().length === 0">
         Download tiles as ZIP
       </button>
     </div>
 
-    <div>
-      <h3 class="text-xl font-semibold mb-2">Original Image:</h3>
-      @if (selectedImage()) {
-        <img [src]="selectedImage()" alt="Original Spritesheet"
-             class="max-w-[300px] max-h-[300px] w-auto h-auto rounded border shadow">
-      } @else {
-        <div class="skeleton h-32 w-32"></div>
-      }
-    </div>
-  </div>
+    <div class="min-w-0 space-y-6">
+      <section>
+        <h3 class="text-lg font-semibold">Original Image</h3>
+        <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
+          @if (selectedImage()) {
+            <img [src]="selectedImage()" alt="Original Spritesheet"
+                 class="h-auto max-h-72 w-auto max-w-full rounded border shadow">
+          } @else {
+            <p class="text-sm text-base-content/50">No spritesheet uploaded yet</p>
+          }
+        </div>
+      </section>
 
-  <div class="mt-6">
-    <h3 class="text-xl font-semibold mb-2">{{ tilesBaseFileName }} Images:</h3>
-    @if (splitTiles().length > 0) {
-      <div class="grid gap-2"
-           [style.grid-template-columns]="'repeat(' + (genTilesX()) + ', minmax(0, 1fr))'"
-      >
-        @for (tile of splitTiles(); track $index) {
-          <div class="border rounded p-1 bg-base-200">
-            <img [src]="tile" [alt]="tilesBaseFileName + $index" class="w-full h-auto">
-            <div class="text-center text-xs mt-1">{{ tilesBaseFileName }}_{{ $index }}</div>
-          </div>
-        }
-      </div>
-    } @else if (selectedImage()) {
-      <p class="text-gray-500">Click the Split Image button to generate the tiles.</p>
-      <div class="skeleton h-32 w-32"></div>
-    } @else {
-      <div class="skeleton h-32 w-32"></div>
-    }
+      <section>
+        <h3 class="text-lg font-semibold">{{ tilesBaseFileName }} Images</h3>
+        <div class="mt-2 flex min-h-48 flex-col items-center justify-center gap-2 rounded-box border border-base-300 bg-base-100 p-3">
+          @if (splitTiles().length > 0) {
+            <p class="text-sm text-base-content/70">Generated {{ splitTiles().length }} tile(s).</p>
+            <div class="w-full overflow-x-auto pb-1">
+              <div class="grid justify-center gap-2"
+                   [style.grid-template-columns]="'repeat(' + (genTilesX()) + ', minmax(4rem, 1fr))'">
+                @for (tile of splitTiles(); track $index) {
+                  <div class="rounded-box border border-base-300 bg-base-200 p-1">
+                    <img [src]="tile" [alt]="'Generated tile ' + ($index + 1)" class="h-auto w-full">
+                    <div class="mt-1 truncate text-center text-xs text-base-content/70">{{ tilesBaseFileName }}_{{ $index }}</div>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else if (selectedImage()) {
+            <p class="text-sm text-base-content/50">Click the Split Image button to generate the tiles.</p>
+          } @else {
+            <p class="text-sm text-base-content/50">Split tiles will appear here.</p>
+          }
+        </div>
+      </section>
+    </div>
   </div>
 </div>

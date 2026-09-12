@@ -1,19 +1,19 @@
-<div class="container p-4">
-  <h2 class="text-2xl font-bold mb-2">Image Combiner</h2>
-  <p class="mb-4 text-gray-600">Combine multiple images into a grid layout.
-    <br>
+<div class="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 sm:py-6">
+  <h1 class="text-2xl font-bold">Image Combiner</h1>
+  <p class="text-base-content/70 mt-2">
+    Combine multiple images into a grid layout.
     This tool arranges your images in a grid based on the dimensions you specify.
-    <br>
-    Upload your images first, then configure the grid settings and click on <strong>Combine Images</strong> to generate the
-    combined image.</p>
+    Upload your images first, then configure the grid settings and click on <strong>Combine Images</strong> to generate
+    the combined image.
+  </p>
 
-  <div class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
-    <div>
-      <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-md border p-4 md:mt-12">
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,26rem)_1fr]">
+    <div class="min-w-0">
+      <fieldset class="fieldset w-full bg-base-200 border-base-300 rounded-box border p-4">
         <legend class="fieldset-legend">Settings</legend>
 
-        <form [formGroup]="form" class="grid grid-cols-2 gap-x-4 gap-y-2">
-          <label class="btn btn-secondary col-span-2">
+        <form [formGroup]="form" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label class="btn btn-secondary col-span-1 md:col-span-2">
             Upload images
             <input type="file" class="hidden" accept="image/*" multiple (change)="onFilesSelected($event)">
           </label>
@@ -37,10 +37,11 @@
             input-id="outputFileName"
             [form-control]="form.get('outputFileName')"
             type="text"
+            class="col-span-1 md:col-span-2"
           />
 
-          <div class="flex justify-end">
-            <button class="btn btn-primary"
+          <div class="flex col-span-1 gap-2 md:col-span-2 md:justify-end">
+            <button class="btn btn-primary w-full md:w-auto"
                     (click)="combineImages()"
                     [disabled]="selectedImages().length === 0 || form.invalid">
               Combine Images
@@ -53,70 +54,74 @@
         <app-error-alert [errorDetails]="errorDetails()"></app-error-alert>
       }
 
-      <div class="flex items-center gap-2 mt-2">
-        <button class="btn btn-secondary"
+      <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <button class="btn btn-secondary w-full sm:w-auto"
                 (click)="downloadCombinedImage()"
                 [disabled]="!combinedImageUrl()">
           Download Combined Image
         </button>
-        <button class="btn btn-secondary"
+        <button class="btn btn-secondary w-full sm:w-auto"
                 (click)="clearImages()"
                 [disabled]="selectedImages().length === 0">
           Clear Selected Images
         </button>
       </div>
-
-      <div class="mt-4">
-        <h3 class="text-xl font-semibold mb-2">Combined Image:</h3>
-        @if (combinedImageUrl()) {
-          <img [src]="combinedImageUrl()" alt="Combined Image"
-               class="min-w-[160px] min-h-[160px] max-w-[640px] max-h-[640px] w-auto h-auto rounded border shadow">
-        } @else if (selectedImages().length > 0) {
-          <p class="text-gray-500">Click the Combine Images button to generate the combined image.</p>
-          <div class="skeleton h-32 w-32"></div>
-        } @else {
-          <div class="skeleton h-32 w-32"></div>
-        }
-      </div>
     </div>
 
-    <div>
-      <h3 class="text-xl font-semibold mb-2">Selected Images:</h3>
-      <p class="text-sm text-gray-500 mb-2">Drag and drop to reorder images</p>
-      @if (selectedImages().length > 0) {
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2">
-          @for (image of selectedImages(); track $index) {
-            <div
-              class="border rounded p-1 cursor-move transition-all duration-200 image-item"
-              [ngClass]="{
-                'bg-base-200 hover:shadow-md': draggedIndex() !== $index && dragOverIndex() !== $index,
-                'opacity-50 bg-base-300 dragged': draggedIndex() === $index,
-                'border-primary border-2 bg-primary/10 drag-over': dragOverIndex() === $index
-              }"
-              draggable="true"
-              (dragstart)="onDragStart($index)"
-              (dragover)="onDragOver($event, $index)"
-              (dragleave)="onDragLeave()"
-              (dragend)="onDragEnd()"
-              (drop)="onDrop($event, $index)">
-              <div class="flex justify-between items-center mb-1">
-                <span class="text-sm text-gray-500"># {{ $index + 1 }}</span>
-                <span class="text-sm text-gray-500 drag-handle">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
-                       stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
-                  </svg>
-                </span>
-              </div>
-              <img [src]="image" [alt]="'Image ' + $index" class="min-w-[64px] min-h-[64px] max-w-[128px] max-h-[128px] w-auto h-auto">
-              <div class="text-center text-sm mt-1">{{ originalFileNames()[$index] }}</div>
+    <div class="min-w-0 space-y-6">
+      <section>
+        <h3 class="text-lg font-semibold">Selected Images</h3>
+        <p class="text-sm text-base-content/70 mt-1">Drag and drop to reorder images</p>
+
+        <div class="mt-2 flex min-h-48 flex-col items-center justify-center gap-2 rounded-box border border-base-300 bg-base-100 p-3">
+          @if (selectedImages().length > 0) {
+            <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2">
+              @for (image of selectedImages(); track $index) {
+                <div
+                  class="rounded-box border p-2 transition-all duration-200 image-item"
+                  [ngClass]="{
+                    'border-base-300 bg-base-200 hover:shadow-md': draggedIndex() !== $index && dragOverIndex() !== $index,
+                    'opacity-50 bg-base-300 dragged': draggedIndex() === $index,
+                    'border-primary border-2 bg-primary/10 drag-over': dragOverIndex() === $index
+                  }"
+                  draggable="true"
+                  (dragstart)="onDragStart($index)"
+                  (dragover)="onDragOver($event, $index)"
+                  (dragleave)="onDragLeave()"
+                  (dragend)="onDragEnd()"
+                  (drop)="onDrop($event, $index)">
+                  <div class="mb-1 flex items-center justify-between">
+                    <span class="text-sm text-base-content/70"># {{ $index + 1 }}</span>
+                    <span class="drag-handle text-base-content/70">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                      </svg>
+                    </span>
+                  </div>
+                  <img [src]="image" [alt]="'Image ' + ($index + 1)" class="mx-auto h-auto max-w-full w-auto">
+                  <div class="mt-1 truncate text-center text-sm text-base-content/70">{{ originalFileNames()[$index] }}</div>
+                </div>
+              }
             </div>
+          } @else {
+            <p class="text-sm text-base-content/50">Selected images will appear here.</p>
           }
         </div>
-      } @else {
-        <div class="skeleton h-32 w-32"></div>
-      }
+      </section>
+
+      <section>
+        <h3 class="text-lg font-semibold">Combined Image</h3>
+        <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
+          @if (combinedImageUrl()) {
+            <img [src]="combinedImageUrl()" alt="Combined Image"
+                 class="h-auto max-h-96 w-auto max-w-full rounded border shadow">
+          } @else if (selectedImages().length > 0) {
+            <p class="text-sm text-base-content/50">Click the Combine Images button to generate the combined image.</p>
+          } @else {
+            <p class="text-sm text-base-content/50">The combined image will appear here.</p>
+          }
+        </div>
+      </section>
     </div>
   </div>
-
 </div>
