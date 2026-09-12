@@ -14,6 +14,7 @@
         [id]="inputId"
         type="number"
         [formControl]="control"
+        (focus)="onFocus($event)"
         class="input w-full"
         [ngClass]="{'input-error': hasErrors()}"/>
     } @else if (type === 'radio') {
@@ -47,6 +48,7 @@
         [id]="inputId"
         type="text"
         [formControl]="control"
+        (focus)="onFocus($event)"
         class="input w-full"
         [ngClass]="{'input-error': hasErrors()}"/>
     }

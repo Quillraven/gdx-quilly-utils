@@ -40,4 +40,8 @@ export class FormFieldComponent {
   errorHint(): string {
     return this.validationService.errorHint(this.control);
   }
+
+  onFocus(event: FocusEvent): void {
+    (event.target as HTMLInputElement).select();
+  }
 }
