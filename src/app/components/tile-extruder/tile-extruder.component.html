@@ -77,14 +77,15 @@
     <div class="min-w-0 space-y-6">
       <section>
         <h3 class="text-lg font-semibold">Original Tileset</h3>
-        <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
-          @if (selectedImage()) {
-            <img [src]="selectedImage()" alt="Original Tileset"
-                 class="h-auto max-h-72 w-auto max-w-full rounded border shadow">
-          } @else {
-            <p class="text-sm text-base-content/50">No tileset uploaded yet</p>
-          }
-        </div>
+        <app-drop-zone
+          [empty]="!selectedImage()"
+          dropTitle="Drag &amp; drop a tileset here"
+          dropHint="or use the Upload tileset button"
+          overlayText="Drop to replace tileset"
+          (filesDropped)="loadImageFile($event[0])">
+          <img [src]="selectedImage()" alt="Original Tileset"
+               class="h-auto max-h-72 w-auto max-w-full rounded border shadow">
+        </app-drop-zone>
       </section>
 
       <section>

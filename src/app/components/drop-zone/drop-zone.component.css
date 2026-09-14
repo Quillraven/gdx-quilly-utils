@@ -1,0 +1,39 @@
+.drop-zone {
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.15s ease,
+  background-color 0.15s ease,
+  box-shadow 0.15s ease;
+}
+
+.drop-zone-empty {
+  border-style: dashed;
+}
+
+.drop-zone:hover {
+  border-color: var(--color-base-content);
+}
+
+.drop-zone-active {
+  border-color: var(--color-primary);
+  border-style: solid;
+  background-color: color-mix(in oklab, var(--color-primary) 12%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-primary) 20%, transparent);
+}
+
+.drop-zone-active.drop-zone-empty {
+  border-style: dashed;
+}
+
+.drop-zone-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  background-color: color-mix(in oklab, var(--color-base-100) 90%, transparent);
+  color: var(--color-primary);
+}

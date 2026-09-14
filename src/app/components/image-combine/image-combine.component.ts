@@ -6,6 +6,7 @@ import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent} from '../form-field/form-field.component';
+import {DropZoneComponent} from '../drop-zone/drop-zone.component';
 
 @Component({
   selector: 'app-image-combine',
@@ -14,7 +15,8 @@ import {FormFieldComponent} from '../form-field/form-field.component';
     ReactiveFormsModule,
     NgClass,
     ErrorAlertComponent,
-    FormFieldComponent
+    FormFieldComponent,
+    DropZoneComponent
   ],
   templateUrl: './image-combine.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -61,18 +63,26 @@ export class ImageCombineComponent {
     if (!(input.files && input.files.length > 0)) {
       return;
     }
+    this.addFiles(Array.from(input.files));
+    input.value = '';
+  }
 
+  onFilesDropped(files: File[]): void {
+    this.addFiles(files);
+  }
+
+  private addFiles(files: File[]): void {
     this.errorDetails.set(null);
     // New selection invalidates current combined output
     this.combinedImageUrl.set(null);
-    Array.from(input.files).forEach(file => {
+    for (const file of files) {
       const reader = new FileReader();
       reader.onload = () => {
         this.selectedImages.update(images => [...images, reader.result as string]);
         this.originalFileNames.update(names => [...names, file.name]);
       };
       reader.readAsDataURL(file);
-    });
+    }
   }
 
   clearImages(): void {

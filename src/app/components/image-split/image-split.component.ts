@@ -6,6 +6,7 @@ import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent} from '../form-field/form-field.component';
+import {DropZoneComponent} from '../drop-zone/drop-zone.component';
 
 @Component({
   selector: 'app-image-split',
@@ -13,7 +14,8 @@ import {FormFieldComponent} from '../form-field/form-field.component';
     FormsModule,
     ReactiveFormsModule,
     ErrorAlertComponent,
-    FormFieldComponent
+    FormFieldComponent,
+    DropZoneComponent
   ],
   templateUrl: './image-split.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -87,8 +89,11 @@ export class ImageSplitComponent {
     if (!(input.files && input.files.length > 0)) {
       return;
     }
+    this.loadImageFile(input.files[0]);
+    input.value = '';
+  }
 
-    const file = input.files[0];
+  loadImageFile(file: File): void {
     const reader = new FileReader();
     reader.onload = () => {
       this.selectedImage.set(reader.result as string);

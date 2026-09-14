@@ -73,40 +73,42 @@
         <h3 class="text-lg font-semibold">Selected Images</h3>
         <p class="text-sm text-base-content/70 mt-1">Drag and drop to reorder images</p>
 
-        <div class="mt-2 flex min-h-48 flex-col items-center justify-center gap-2 rounded-box border border-base-300 bg-base-100 p-3">
-          @if (selectedImages().length > 0) {
-            <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2">
-              @for (image of selectedImages(); track $index) {
-                <div
-                  class="rounded-box border p-2 transition-all duration-200 image-item"
-                  [ngClass]="{
-                    'border-base-300 bg-base-200 hover:shadow-md': draggedIndex() !== $index && dragOverIndex() !== $index,
-                    'opacity-50 bg-base-300 dragged': draggedIndex() === $index,
-                    'border-primary border-2 bg-primary/10 drag-over': dragOverIndex() === $index
-                  }"
-                  draggable="true"
-                  (dragstart)="onDragStart($index)"
-                  (dragover)="onDragOver($event, $index)"
-                  (dragleave)="onDragLeave()"
-                  (dragend)="onDragEnd()"
-                  (drop)="onDrop($event, $index)">
-                  <div class="mb-1 flex items-center justify-between">
-                    <span class="text-sm text-base-content/70"># {{ $index + 1 }}</span>
-                    <span class="drag-handle text-base-content/70">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
-                      </svg>
-                    </span>
-                  </div>
-                  <img [src]="image" [alt]="'Image ' + ($index + 1)" class="mx-auto h-auto max-w-full w-auto">
-                  <div class="mt-1 truncate text-center text-sm text-base-content/70">{{ originalFileNames()[$index] }}</div>
+        <app-drop-zone
+          [empty]="selectedImages().length === 0"
+          [multiple]="true"
+          dropTitle="Drag &amp; drop images here"
+          dropHint="or use the Upload images button"
+          overlayText="Drop to add more images"
+          (filesDropped)="onFilesDropped($event)">
+          <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2">
+            @for (image of selectedImages(); track $index) {
+              <div
+                class="rounded-box border p-2 transition-all duration-200 image-item"
+                [ngClass]="{
+                  'border-base-300 bg-base-200 hover:shadow-md': draggedIndex() !== $index && dragOverIndex() !== $index,
+                  'opacity-50 bg-base-300 dragged': draggedIndex() === $index,
+                  'border-primary border-2 bg-primary/10 drag-over': dragOverIndex() === $index
+                }"
+                draggable="true"
+                (dragstart)="onDragStart($index)"
+                (dragover)="onDragOver($event, $index)"
+                (dragleave)="onDragLeave()"
+                (dragend)="onDragEnd()"
+                (drop)="onDrop($event, $index)">
+                <div class="mb-1 flex items-center justify-between">
+                  <span class="text-sm text-base-content/70"># {{ $index + 1 }}</span>
+                  <span class="drag-handle text-base-content/70">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                    </svg>
+                  </span>
                 </div>
-              }
-            </div>
-          } @else {
-            <p class="text-sm text-base-content/50">Selected images will appear here.</p>
-          }
-        </div>
+                <img [src]="image" [alt]="'Image ' + ($index + 1)" class="mx-auto h-auto max-w-full w-auto">
+                <div class="mt-1 truncate text-center text-sm text-base-content/70">{{ originalFileNames()[$index] }}</div>
+              </div>
+            }
+          </div>
+        </app-drop-zone>
       </section>
 
       <section>

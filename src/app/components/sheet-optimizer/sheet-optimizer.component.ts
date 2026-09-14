@@ -5,10 +5,11 @@ import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent} from '../form-field/form-field.component';
+import {DropZoneComponent} from '../drop-zone/drop-zone.component';
 
 @Component({
   selector: 'app-sheet-optimizer',
-  imports: [FormsModule, ReactiveFormsModule, ErrorAlertComponent, FormFieldComponent],
+  imports: [FormsModule, ReactiveFormsModule, ErrorAlertComponent, FormFieldComponent, DropZoneComponent],
   templateUrl: './sheet-optimizer.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './sheet-optimizer.component.css'
@@ -49,6 +50,11 @@ export class SheetOptimizerComponent {
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!(input.files && input.files.length > 0)) return;
+    this.loadImageFile(input.files[0]);
+    input.value = '';
+  }
+
+  loadImageFile(file: File): void {
     const reader = new FileReader();
     reader.onload = () => {
       this.selectedImage.set(reader.result as string);
@@ -57,7 +63,7 @@ export class SheetOptimizerComponent {
       this.optimizedTileWidth.set(null);
       this.optimizedTileHeight.set(null);
     };
-    reader.readAsDataURL(input.files[0]);
+    reader.readAsDataURL(file);
   }
 
   async optimizeSheet(): Promise<void> {

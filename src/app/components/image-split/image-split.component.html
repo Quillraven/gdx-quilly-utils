@@ -110,14 +110,15 @@
     <div class="min-w-0 space-y-6">
       <section>
         <h3 class="text-lg font-semibold">Original Image</h3>
-        <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
-          @if (selectedImage()) {
-            <img [src]="selectedImage()" alt="Original Spritesheet"
-                 class="h-auto max-h-72 w-auto max-w-full rounded border shadow">
-          } @else {
-            <p class="text-sm text-base-content/50">No spritesheet uploaded yet</p>
-          }
-        </div>
+        <app-drop-zone
+          [empty]="!selectedImage()"
+          dropTitle="Drag &amp; drop your spritesheet here"
+          dropHint="or use the Upload spritesheet button"
+          overlayText="Drop to replace spritesheet"
+          (filesDropped)="loadImageFile($event[0])">
+          <img [src]="selectedImage()" alt="Original Spritesheet"
+               class="h-auto max-h-72 w-auto max-w-full rounded border shadow">
+        </app-drop-zone>
       </section>
 
       <section>
