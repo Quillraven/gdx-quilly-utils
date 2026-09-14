@@ -22,7 +22,7 @@
 
 .image-preview-modal-stage {
   width: 100%;
-  height: min(70vh, 32rem);
+  height: min(76vh, 48rem);
   border: 1px solid var(--color-base-300);
   border-radius: var(--radius-box);
   cursor: grab;
@@ -31,7 +31,9 @@
 }
 
 .modal-box {
-  width: min(90vw, 48rem);
+  width: min(92vw, 80rem);
+  max-width: none;
+  max-height: 100vh;
 }
 
 .image-preview-grabbing {
