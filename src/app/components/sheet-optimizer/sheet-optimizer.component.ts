@@ -129,21 +129,32 @@ export class SheetOptimizerComponent {
           : {x: fx + minX, y: fy + minY, w: maxX - minX + 1, h: maxY - minY + 1});
       }
 
-      // Find tightest bounding box across all frames
-      let maxW = 0;
-      let maxH = 0;
+      // Find the common bounding box across all frames (in tile-relative coords)
+      let relMinX = tileW;
+      let relMinY = tileH;
+      let relMaxX = 0;
+      let relMaxY = 0;
+      let hasContent = false;
       for (const b of frameBounds) {
-        if (b.w > maxW) maxW = b.w;
-        if (b.h > maxH) maxH = b.h;
+        if (b.w === 0 || b.h === 0) continue;
+        hasContent = true;
+        const relX = b.x - Math.floor(b.x / tileW) * tileW;
+        const relY = b.y - Math.floor(b.y / tileH) * tileH;
+        if (relX < relMinX) relMinX = relX;
+        if (relY < relMinY) relMinY = relY;
+        if (relX + b.w > relMaxX) relMaxX = relX + b.w;
+        if (relY + b.h > relMaxY) relMaxY = relY + b.h;
       }
-      if (maxW === 0 || maxH === 0) {
+      if (!hasContent) {
         this.errorDetails.set('All frames are fully transparent.');
         return;
       }
+      const boxW = relMaxX - relMinX;
+      const boxH = relMaxY - relMinY;
 
-      // Build output sheet: center each frame's content in maxW x maxH, preserve grid layout
-      const outW = maxW * cols;
-      const outH = maxH * rows;
+      // Crop every frame to the same bounding box, preserving each frame's original content position
+      const outW = boxW * cols;
+      const outH = boxH * rows;
       const output = new Jimp({width: outW, height: outH, color: 0x00000000});
 
       for (let i = 0; i < totalFrames; i++) {
@@ -151,18 +162,20 @@ export class SheetOptimizerComponent {
         if (b.w === 0 || b.h === 0) continue;
         const col = i % cols;
         const row = Math.floor(i / cols);
-        const frame = await Jimp.read(this.selectedImage()!);
-        frame.crop({x: b.x, y: b.y, w: b.w, h: b.h});
-        const offsetX = col * maxW + Math.floor((maxW - b.w) / 2);
-        const offsetY = row * maxH + Math.floor((maxH - b.h) / 2);
+        const fx = col * tileW;
+        const fy = row * tileH;
+        const frame = image.clone();
+        frame.crop({x: fx + relMinX, y: fy + relMinY, w: boxW, h: boxH});
+        const offsetX = col * boxW;
+        const offsetY = row * boxH;
         output.composite(frame, offsetX, offsetY);
       }
 
       const buffer = await output.getBuffer('image/png');
       const base64 = buffer.toString('base64');
       this.optimizedImage.set(`data:image/png;base64,${base64}`);
-      this.optimizedTileWidth.set(maxW);
-      this.optimizedTileHeight.set(maxH);
+      this.optimizedTileWidth.set(boxW);
+      this.optimizedTileHeight.set(boxH);
     } catch (error) {
       console.error('Error during sheet optimization:', error);
       this.optimizedImage.set(null);
