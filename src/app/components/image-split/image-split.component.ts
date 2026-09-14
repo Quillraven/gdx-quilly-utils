@@ -7,6 +7,7 @@ import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent} from '../form-field/form-field.component';
 import {DropZoneComponent} from '../drop-zone/drop-zone.component';
+import {ImagePreviewComponent, Zoom} from '../image-preview/image-preview.component';
 
 @Component({
   selector: 'app-image-split',
@@ -15,7 +16,8 @@ import {DropZoneComponent} from '../drop-zone/drop-zone.component';
     ReactiveFormsModule,
     ErrorAlertComponent,
     FormFieldComponent,
-    DropZoneComponent
+    DropZoneComponent,
+    ImagePreviewComponent
   ],
   templateUrl: './image-split.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -26,6 +28,7 @@ export class ImageSplitComponent {
   splitTiles = signal<string[]>([]);
   errorDetails = signal<string | null>(null);
   genTilesX = signal<number>(0);
+  originalZoom = signal<Zoom>(1);
 
   // Split mode options
   splitModeOptions: string[] = ['num tiles', 'size'];

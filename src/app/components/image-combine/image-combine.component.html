@@ -113,16 +113,21 @@
 
       <section>
         <h3 class="text-lg font-semibold">Combined Image</h3>
-        <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
-          @if (combinedImageUrl()) {
-            <img [src]="combinedImageUrl()" alt="Combined Image"
-                 class="h-auto max-h-96 w-auto max-w-full rounded border shadow">
-          } @else if (selectedImages().length > 0) {
+        @if (combinedImageUrl()) {
+          <app-image-preview
+            class="mt-2 block"
+            [src]="combinedImageUrl()!"
+            [zoom]="combinedZoom()"
+            (zoomChange)="combinedZoom.set($event)" />
+        } @else if (selectedImages().length > 0) {
+          <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
             <p class="text-sm text-base-content/50">Click the Combine Images button to generate the combined image.</p>
-          } @else {
+          </div>
+        } @else {
+          <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
             <p class="text-sm text-base-content/50">The combined image will appear here.</p>
-          }
-        </div>
+          </div>
+        }
       </section>
     </div>
   </div>

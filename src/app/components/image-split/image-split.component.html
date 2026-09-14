@@ -116,8 +116,11 @@
           dropHint="or use the Upload spritesheet button"
           overlayText="Drop to replace spritesheet"
           (filesDropped)="loadImageFile($event[0])">
-          <img [src]="selectedImage()" alt="Original Spritesheet"
-               class="h-auto max-h-72 w-auto max-w-full rounded border shadow">
+          <app-image-preview
+            [src]="selectedImage()!"
+            [boxed]="false"
+            [zoom]="originalZoom()"
+            (zoomChange)="originalZoom.set($event)" />
         </app-drop-zone>
       </section>
 
@@ -130,8 +133,11 @@
               <div class="grid justify-center gap-2"
                    [style.grid-template-columns]="'repeat(' + (genTilesX()) + ', minmax(4rem, 1fr))'">
                 @for (tile of splitTiles(); track $index) {
-                  <div class="rounded-box border border-base-300 bg-base-200 p-1">
-                    <img [src]="tile" [alt]="'Generated tile ' + ($index + 1)" class="h-auto w-full">
+                  <div class="rounded-box border border-base-300 bg-base-100 p-1">
+                    <app-image-preview
+                      [src]="tile"
+                      [alt]="'Generated tile ' + ($index + 1)"
+                      variant="thumbnail" />
                     <div class="mt-1 truncate text-center text-xs text-base-content/70">{{ tilesBaseFileName }}_{{ $index }}</div>
                   </div>
                 }

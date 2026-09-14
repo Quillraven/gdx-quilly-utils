@@ -6,10 +6,11 @@ import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent} from '../form-field/form-field.component';
 import {DropZoneComponent} from '../drop-zone/drop-zone.component';
+import {ImagePreviewComponent, Zoom} from '../image-preview/image-preview.component';
 
 @Component({
   selector: 'app-sheet-optimizer',
-  imports: [FormsModule, ReactiveFormsModule, ErrorAlertComponent, FormFieldComponent, DropZoneComponent],
+  imports: [FormsModule, ReactiveFormsModule, ErrorAlertComponent, FormFieldComponent, DropZoneComponent, ImagePreviewComponent],
   templateUrl: './sheet-optimizer.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './sheet-optimizer.component.css'
@@ -20,6 +21,9 @@ export class SheetOptimizerComponent {
   errorDetails = signal<string | null>(null);
   optimizedTileWidth = signal<number | null>(null);
   optimizedTileHeight = signal<number | null>(null);
+  linkZoom = signal<boolean>(true);
+  originalZoom = signal<Zoom>(1);
+  optimizedZoom = signal<Zoom>(1);
 
   form: FormGroup;
 
@@ -45,6 +49,27 @@ export class SheetOptimizerComponent {
       numRows: [4, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
       outputFileName: ['optimized', [Validators.required, Validators.minLength(1), this.validationService.validFilenameValidator]]
     });
+  }
+
+  onZoomChanged(zoom: Zoom, target: 'original' | 'optimized'): void {
+    if (this.linkZoom()) {
+      this.originalZoom.set(zoom);
+      this.optimizedZoom.set(zoom);
+    } else {
+      if (target === 'original') {
+        this.originalZoom.set(zoom);
+      } else {
+        this.optimizedZoom.set(zoom);
+      }
+    }
+  }
+
+  onLinkZoomChange(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.linkZoom.set(checked);
+    if (checked) {
+      this.optimizedZoom.set(this.originalZoom());
+    }
   }
 
   onFileSelected(event: Event): void {

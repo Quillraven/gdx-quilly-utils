@@ -1,0 +1,58 @@
+@if (variant === 'thumbnail') {
+  <img [src]="src" [alt]="alt" class="h-auto w-full cursor-zoom-in" draggable="false"
+       (click)="openModal()" (load)="onImgLoad($event)">
+} @else {
+  <div class="image-preview"
+       [class.rounded-box]="boxed"
+       [class.border]="boxed"
+       [class.border-base-300]="boxed"
+       [class.bg-base-100]="boxed"
+       [class.p-3]="boxed">
+    <div class="image-preview-stage" #stage>
+      <img [src]="src" [alt]="alt"
+           class="image-preview-img cursor-zoom-in"
+           [class.image-preview-pixelated]="displayZoom() >= 1.01"
+           [style.width.px]="displayWidth()"
+           draggable="false"
+           (click)="openModal()"
+           (load)="onImgLoad($event)">
+    </div>
+    <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-1">
+        <button type="button" class="btn btn-sm" (click)="zoomOut()" aria-label="Zoom out">−</button>
+        <span class="min-w-14 px-1 text-center text-sm tabular-nums">{{ zoomLabel() }}</span>
+        <button type="button" class="btn btn-sm" (click)="zoomIn()" aria-label="Zoom in">+</button>
+        <button type="button" class="btn btn-sm" [class.btn-active]="zoom === 1" (click)="setZoom(1)">1:1</button>
+        <button type="button" class="btn btn-sm" [class.btn-active]="zoom === 'fit'" (click)="setZoom('fit')">Fit</button>
+      </div>
+      @if (naturalWidth() > 0) {
+        <span class="text-xs tabular-nums text-base-content/70">{{ naturalWidth() }} × {{ naturalHeight() }} px</span>
+      }
+    </div>
+  </div>
+}
+
+<dialog class="modal" #dialog (click)="onModalBackdropClick($event)">
+  <div class="modal-box">
+    <div class="flex items-center justify-between gap-2">
+      <h3 class="text-lg font-semibold">Image preview</h3>
+      <button type="button" class="btn btn-square btn-sm" (click)="closeModal()" aria-label="Close preview">✕</button>
+    </div>
+    <div class="image-preview-modal-stage mt-3"
+         [class.image-preview-grabbing]="panning()"
+         #modalStage
+         (pointerdown)="onPanStart($event)"
+         (pointermove)="onPanMove($event)"
+         (pointerup)="onPanEnd()"
+         (pointercancel)="onPanEnd()"
+         (wheel)="onModalWheel($event)">
+      <img [src]="src" [alt]="alt"
+           class="image-preview-img"
+           [class.image-preview-pixelated]="modalZoom() >= 1.01"
+           [style.width.px]="modalWidth()"
+           draggable="false"
+           (load)="onImgLoad($event)">
+    </div>
+    <p class="text-sm text-base-content/70 mt-2">Scroll to zoom · drag to pan</p>
+  </div>
+</dialog>

@@ -1,0 +1,52 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.image-preview-stage,
+.image-preview-modal-stage {
+  display: flex;
+  align-items: flex-start;
+  overflow: auto;
+  background-color: var(--color-base-100);
+  background-image: repeating-conic-gradient(
+    color-mix(in oklab, var(--color-base-content) 10%, transparent) 0% 25%,
+    transparent 0% 50%
+  );
+  background-size: 16px 16px;
+}
+
+.image-preview-stage {
+  height: 18rem;
+}
+
+.image-preview-modal-stage {
+  width: 100%;
+  height: min(70vh, 32rem);
+  border: 1px solid var(--color-base-300);
+  border-radius: var(--radius-box);
+  cursor: grab;
+  touch-action: none;
+  overflow: scroll;
+}
+
+.modal-box {
+  width: min(90vw, 48rem);
+}
+
+.image-preview-grabbing {
+  cursor: grabbing;
+}
+
+.image-preview-img {
+  margin: auto;
+  flex: none;
+  max-width: none;
+  max-height: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.image-preview-pixelated {
+  image-rendering: pixelated;
+}

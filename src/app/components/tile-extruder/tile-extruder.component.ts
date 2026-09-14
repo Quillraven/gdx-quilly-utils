@@ -6,6 +6,7 @@ import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent} from '../form-field/form-field.component';
 import {DropZoneComponent} from '../drop-zone/drop-zone.component';
+import {ImagePreviewComponent, Zoom} from '../image-preview/image-preview.component';
 
 @Component({
   selector: 'app-tile-extruder',
@@ -14,7 +15,8 @@ import {DropZoneComponent} from '../drop-zone/drop-zone.component';
     ReactiveFormsModule,
     ErrorAlertComponent,
     FormFieldComponent,
-    DropZoneComponent
+    DropZoneComponent,
+    ImagePreviewComponent
   ],
   templateUrl: './tile-extruder.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -25,6 +27,9 @@ export class TileExtruderComponent {
   originalFileName = signal<string>('');
   extrudedImageUrl = signal<string | null>(null);
   errorDetails = signal<string | null>(null);
+  linkZoom = signal<boolean>(true);
+  originalZoom = signal<Zoom>(1);
+  extrudedZoom = signal<Zoom>(1);
 
   // Form group for validation
   form: FormGroup;
@@ -62,6 +67,27 @@ export class TileExtruderComponent {
       spacing: [0, [this.validationService.integerValidator]],
       extrusion: [4, [Validators.required, Validators.min(1), this.validationService.integerValidator]]
     });
+  }
+
+  onZoomChanged(zoom: Zoom, target: 'original' | 'extruded'): void {
+    if (this.linkZoom()) {
+      this.originalZoom.set(zoom);
+      this.extrudedZoom.set(zoom);
+    } else {
+      if (target === 'original') {
+        this.originalZoom.set(zoom);
+      } else {
+        this.extrudedZoom.set(zoom);
+      }
+    }
+  }
+
+  onLinkZoomChange(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.linkZoom.set(checked);
+    if (checked) {
+      this.extrudedZoom.set(this.originalZoom());
+    }
   }
 
   onFileSelected(event: Event): void {

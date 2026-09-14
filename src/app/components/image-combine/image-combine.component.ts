@@ -7,6 +7,7 @@ import {DownloadService} from '../../services/download.service';
 import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent} from '../form-field/form-field.component';
 import {DropZoneComponent} from '../drop-zone/drop-zone.component';
+import {ImagePreviewComponent, Zoom} from '../image-preview/image-preview.component';
 
 @Component({
   selector: 'app-image-combine',
@@ -16,7 +17,8 @@ import {DropZoneComponent} from '../drop-zone/drop-zone.component';
     NgClass,
     ErrorAlertComponent,
     FormFieldComponent,
-    DropZoneComponent
+    DropZoneComponent,
+    ImagePreviewComponent
   ],
   templateUrl: './image-combine.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -29,6 +31,7 @@ export class ImageCombineComponent {
   errorDetails = signal<string | null>(null);
   draggedIndex = signal<number>(-1);
   dragOverIndex = signal<number>(-1);
+  combinedZoom = signal<Zoom>(1);
 
   // Form group for validation
   form: FormGroup;

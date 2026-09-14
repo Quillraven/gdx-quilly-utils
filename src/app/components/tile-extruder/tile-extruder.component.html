@@ -83,23 +83,41 @@
           dropHint="or use the Upload tileset button"
           overlayText="Drop to replace tileset"
           (filesDropped)="loadImageFile($event[0])">
-          <img [src]="selectedImage()" alt="Original Tileset"
-               class="h-auto max-h-72 w-auto max-w-full rounded border shadow">
+          <app-image-preview
+            [src]="selectedImage()!"
+            [boxed]="false"
+            [zoom]="originalZoom()"
+            (zoomChange)="onZoomChanged($event, 'original')" />
         </app-drop-zone>
       </section>
 
       <section>
-        <h3 class="text-lg font-semibold">Extruded Tileset</h3>
-        <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
-          @if (extrudedImageUrl()) {
-            <img [src]="extrudedImageUrl()" alt="Extruded Tileset"
-                 class="h-auto max-h-96 w-auto max-w-full rounded border shadow">
-          } @else if (selectedImage()) {
-            <p class="text-sm text-base-content/50">Click the Extrude button to generate the extruded image.</p>
-          } @else {
-            <p class="text-sm text-base-content/50">The extruded tileset will appear here.</p>
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold">Extruded Tileset</h3>
+          @if (selectedImage()) {
+            <label class="flex cursor-pointer items-center gap-2 text-sm text-base-content/70">
+              <span>Link zoom</span>
+              <input type="checkbox" class="toggle toggle-primary toggle-sm"
+                     [checked]="linkZoom()"
+                     (change)="onLinkZoomChange($event)">
+            </label>
           }
         </div>
+        @if (extrudedImageUrl()) {
+          <app-image-preview
+            class="mt-2 block"
+            [src]="extrudedImageUrl()!"
+            [zoom]="extrudedZoom()"
+            (zoomChange)="onZoomChanged($event, 'extruded')" />
+        } @else if (selectedImage()) {
+          <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
+            <p class="text-sm text-base-content/50">Click the Extrude button to generate the extruded image.</p>
+          </div>
+        } @else {
+          <div class="mt-2 flex min-h-48 items-center justify-center rounded-box border border-base-300 bg-base-100 p-3">
+            <p class="text-sm text-base-content/50">The extruded tileset will appear here.</p>
+          </div>
+        }
       </section>
     </div>
   </div>
