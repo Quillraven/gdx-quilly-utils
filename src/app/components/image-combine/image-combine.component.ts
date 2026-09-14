@@ -96,6 +96,16 @@ export class ImageCombineComponent {
     this.errorDetails.set(null);
   }
 
+  removeImage(index: number): void {
+    this.selectedImages.update(images => images.filter((_, i) => i !== index));
+    this.originalFileNames.update(names => names.filter((_, i) => i !== index));
+    this.draggedIndex.set(-1);
+    this.dragOverIndex.set(-1);
+    // Removal invalidates the current combined output
+    this.combinedImageUrl.set(null);
+    this.errorDetails.set(null);
+  }
+
   async combineImages(): Promise<void> {
     this.errorDetails.set(null);
     if (this.selectedImages().length === 0) {

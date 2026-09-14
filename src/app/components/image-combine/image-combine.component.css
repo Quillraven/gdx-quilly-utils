@@ -3,14 +3,15 @@
 }
 
 /* Smooth transitions for drag and drop */
-.image-item {
-  transition: all 0.2s ease-in-out;
+.card {
+  transition: transform 0.2s ease-in-out;
+  border-width: 1px;
 }
 
-.image-item.drag-over {
+.card.drag-over {
   transform: scale(1.02);
 }
 
-.image-item.dragged {
+.card.dragged {
   transform: scale(0.98);
 }

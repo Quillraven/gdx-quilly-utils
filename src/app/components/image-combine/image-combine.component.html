@@ -71,7 +71,7 @@
     <div class="min-w-0 space-y-6">
       <section>
         <h3 class="text-lg font-semibold">Selected Images</h3>
-        <p class="text-sm text-base-content/70 mt-1">Drag and drop to reorder images</p>
+        <p class="text-sm text-base-content/70 mt-1">Click an image to preview it · drag to reorder</p>
 
         <app-drop-zone
           [empty]="selectedImages().length === 0"
@@ -83,11 +83,12 @@
           <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2">
             @for (image of selectedImages(); track $index) {
               <div
-                class="rounded-box border p-2 transition-all duration-200 image-item"
+                class="card border bg-base-100 shadow-sm transition-all"
                 [ngClass]="{
-                  'border-base-300 bg-base-200 hover:shadow-md': draggedIndex() !== $index && dragOverIndex() !== $index,
+                  'border-base-300': draggedIndex() !== $index && dragOverIndex() !== $index,
                   'opacity-50 bg-base-300 dragged': draggedIndex() === $index,
-                  'border-primary border-2 bg-primary/10 drag-over': dragOverIndex() === $index
+                  'border-primary border-2 bg-primary/5 shadow-md drag-over': dragOverIndex() === $index,
+                  'hover:shadow-md': draggedIndex() !== $index && dragOverIndex() !== $index
                 }"
                 draggable="true"
                 (dragstart)="onDragStart($index)"
@@ -95,16 +96,31 @@
                 (dragleave)="onDragLeave()"
                 (dragend)="onDragEnd()"
                 (drop)="onDrop($event, $index)">
-                <div class="mb-1 flex items-center justify-between">
-                  <span class="text-sm text-base-content/70"># {{ $index + 1 }}</span>
-                  <span class="drag-handle text-base-content/70">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
-                    </svg>
-                  </span>
+                <div class="card-body gap-1 p-2">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="badge badge-outline badge-sm">#{{ $index + 1 }}</span>
+                    <span class="flex items-center gap-1">
+                      <span class="drag-handle flex items-center text-base-content/60">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 cursor-grab" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                        </svg>
+                      </span>
+                      <button type="button"
+                              class="btn btn-circle btn-xs btn-ghost text-base-content/60 transition-colors hover:bg-error/10 hover:text-error"
+                              (click)="removeImage($index)"
+                              aria-label="Remove image {{ $index + 1 }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <line x1="18" y1="6" x2="6" y2="18"></line>
+                          <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                      </button>
+                    </span>
+                  </div>
+                  <div class="truncate text-center text-sm text-base-content/70">{{ originalFileNames()[$index] }}</div>
                 </div>
-                <img [src]="image" [alt]="'Image ' + ($index + 1)" class="mx-auto h-auto max-w-full w-auto">
-                <div class="mt-1 truncate text-center text-sm text-base-content/70">{{ originalFileNames()[$index] }}</div>
+                <figure class="p-2">
+                  <app-image-preview [src]="image" [alt]="'Image ' + ($index + 1)" variant="thumbnail" />
+                </figure>
               </div>
             }
           </div>
