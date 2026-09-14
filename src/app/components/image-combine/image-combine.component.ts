@@ -219,8 +219,27 @@ export class ImageCombineComponent {
     }
   }
 
+  moveImage(index: number, direction: -1 | 1): void {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= this.selectedImages().length) {
+      return;
+    }
+    this.swapImages(index, targetIndex);
+    // Reordering invalidates the current combined output
+    this.combinedImageUrl.set(null);
+    this.errorDetails.set(null);
+    this.draggedIndex.set(-1);
+    this.dragOverIndex.set(-1);
+  }
+
   // Drag and drop methods
-  onDragStart(index: number): void {
+  onDragStart(event: DragEvent, index: number): void {
+    // Edge/Chromium need drag data set to start a proper drag instead of
+    // falling back to a default page drag.
+    event.dataTransfer?.setData('text/plain', String(index));
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+    }
     this.draggedIndex.set(index);
     document.body.classList.add('dragging');
   }
@@ -252,22 +271,30 @@ export class ImageCombineComponent {
 
     // Swap the images and file names
     const draggedIndex = this.draggedIndex();
-    this.selectedImages.update(images => {
-      const next = [...images];
-      [next[draggedIndex], next[targetIndex]] = [next[targetIndex], next[draggedIndex]];
-      return next;
-    });
-    this.originalFileNames.update(names => {
-      const next = [...names];
-      [next[draggedIndex], next[targetIndex]] = [next[targetIndex], next[draggedIndex]];
-      return next;
-    });
+    this.swapImages(draggedIndex, targetIndex);
 
     // Reset the indices
     this.draggedIndex.set(-1);
     this.dragOverIndex.set(-1);
 
+    // Reordering invalidates the current combined output
+    this.combinedImageUrl.set(null);
+    this.errorDetails.set(null);
+
     // Remove dragging class from body
     document.body.classList.remove('dragging');
+  }
+
+  private swapImages(a: number, b: number): void {
+    this.selectedImages.update(images => {
+      const next = [...images];
+      [next[a], next[b]] = [next[b], next[a]];
+      return next;
+    });
+    this.originalFileNames.update(names => {
+      const next = [...names];
+      [next[a], next[b]] = [next[b], next[a]];
+      return next;
+    });
   }
 }

@@ -71,7 +71,7 @@
     <div class="min-w-0 space-y-6">
       <section>
         <h3 class="text-lg font-semibold">Selected Images</h3>
-        <p class="text-sm text-base-content/70 mt-1">Click an image to preview it · drag to reorder</p>
+        <p class="text-sm text-base-content/70 mt-1">Click an image to preview it · drag to reorder or use the arrow buttons</p>
 
         <app-drop-zone
           [empty]="selectedImages().length === 0"
@@ -80,7 +80,7 @@
           dropHint="or use the Upload images button"
           overlayText="Drop to add more images"
           (filesDropped)="onFilesDropped($event)">
-          <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2">
+          <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-2">
             @for (image of selectedImages(); track $index) {
               <div
                 class="card border bg-base-100 shadow-sm transition-all"
@@ -91,20 +91,37 @@
                   'hover:shadow-md': draggedIndex() !== $index && dragOverIndex() !== $index
                 }"
                 draggable="true"
-                (dragstart)="onDragStart($index)"
+                (dragstart)="onDragStart($event, $index)"
                 (dragover)="onDragOver($event, $index)"
                 (dragleave)="onDragLeave()"
                 (dragend)="onDragEnd()"
                 (drop)="onDrop($event, $index)">
-                <div class="card-body gap-1 p-2">
+                <div class="card-body flex-none gap-1 p-2">
                   <div class="flex items-center justify-between gap-1">
-                    <span class="badge badge-outline badge-sm">#{{ $index + 1 }}</span>
-                    <span class="flex items-center gap-1">
-                      <span class="drag-handle flex items-center text-base-content/60">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 cursor-grab" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                    <span class="drag-handle flex items-center text-base-content/60">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 cursor-grab" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                      </svg>
+                    </span>
+                    <span class="flex items-center gap-0.5">
+                      <button type="button"
+                              class="btn btn-circle btn-xs btn-ghost text-base-content/60 transition-colors hover:bg-primary/10 hover:text-primary"
+                              (click)="moveImage($index, -1)"
+                              [disabled]="$index === 0"
+                              aria-label="Move image {{ $index + 1 }} left">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M15 19l-7-7 7-7"/>
                         </svg>
-                      </span>
+                      </button>
+                      <button type="button"
+                              class="btn btn-circle btn-xs btn-ghost text-base-content/60 transition-colors hover:bg-primary/10 hover:text-primary"
+                              (click)="moveImage($index, 1)"
+                              [disabled]="$index === selectedImages().length - 1"
+                              aria-label="Move image {{ $index + 1 }} right">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M9 5l7 7-7 7"/>
+                        </svg>
+                      </button>
                       <button type="button"
                               class="btn btn-circle btn-xs btn-ghost text-base-content/60 transition-colors hover:bg-error/10 hover:text-error"
                               (click)="removeImage($index)"
@@ -116,11 +133,12 @@
                       </button>
                     </span>
                   </div>
+                  <span class="badge badge-outline badge-sm w-fit">#{{ $index + 1 }}</span>
                   <div class="truncate text-center text-sm text-base-content/70">{{ originalFileNames()[$index] }}</div>
                 </div>
-                <figure class="p-2">
+                <div class="flex flex-1 items-center justify-center px-2 pb-2">
                   <app-image-preview [src]="image" [alt]="'Image ' + ($index + 1)" variant="thumbnail" />
-                </figure>
+                </div>
               </div>
             }
           </div>
