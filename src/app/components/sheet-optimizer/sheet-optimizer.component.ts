@@ -3,6 +3,7 @@ import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {Jimp} from 'jimp';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
+import {SheetOptimizerService} from '../../services/sheet-optimizer.service';
 import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent} from '../form-field/form-field.component';
 import {DropZoneComponent} from '../drop-zone/drop-zone.component';
@@ -42,6 +43,7 @@ export class SheetOptimizerComponent {
   constructor(
     private fb: FormBuilder,
     private downloadService: DownloadService,
+    private sheetOptimizerService: SheetOptimizerService,
     private validationService: ValidationService
   ) {
     this.form = this.fb.group({
@@ -98,84 +100,12 @@ export class SheetOptimizerComponent {
 
     try {
       const image = await Jimp.read(selectedImage);
-      const cols = this.numCols;
-      const rows = this.numRows;
-      const tileW = Math.floor(image.bitmap.width / cols);
-      const tileH = Math.floor(image.bitmap.height / rows);
-
-      // Scan each frame's pixels to find tight bounding boxes
-      const totalFrames = rows * cols;
-      const frameBounds: { x: number; y: number; w: number; h: number }[] = [];
-
-      for (let i = 0; i < totalFrames; i++) {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        const fx = col * tileW;
-        const fy = row * tileH;
-        let minX = tileW, minY = tileH, maxX = -1, maxY = -1;
-        for (let py = 0; py < tileH; py++) {
-          for (let px = 0; px < tileW; px++) {
-            const idx = ((fy + py) * image.bitmap.width + (fx + px)) * 4;
-            if (image.bitmap.data[idx + 3] > 0) {
-              if (px < minX) minX = px;
-              if (px > maxX) maxX = px;
-              if (py < minY) minY = py;
-              if (py > maxY) maxY = py;
-            }
-          }
-        }
-        frameBounds.push(maxX === -1
-          ? {x: fx, y: fy, w: 0, h: 0}
-          : {x: fx + minX, y: fy + minY, w: maxX - minX + 1, h: maxY - minY + 1});
-      }
-
-      // Find the common bounding box across all frames (in tile-relative coords)
-      let relMinX = tileW;
-      let relMinY = tileH;
-      let relMaxX = 0;
-      let relMaxY = 0;
-      let hasContent = false;
-      for (const b of frameBounds) {
-        if (b.w === 0 || b.h === 0) continue;
-        hasContent = true;
-        const relX = b.x - Math.floor(b.x / tileW) * tileW;
-        const relY = b.y - Math.floor(b.y / tileH) * tileH;
-        if (relX < relMinX) relMinX = relX;
-        if (relY < relMinY) relMinY = relY;
-        if (relX + b.w > relMaxX) relMaxX = relX + b.w;
-        if (relY + b.h > relMaxY) relMaxY = relY + b.h;
-      }
-      if (!hasContent) {
-        this.errorDetails.set('All frames are fully transparent.');
-        return;
-      }
-      const boxW = relMaxX - relMinX;
-      const boxH = relMaxY - relMinY;
-
-      // Crop every frame to the same bounding box, preserving each frame's original content position
-      const outW = boxW * cols;
-      const outH = boxH * rows;
-      const output = new Jimp({width: outW, height: outH, color: 0x00000000});
-
-      for (let i = 0; i < totalFrames; i++) {
-        const b = frameBounds[i];
-        if (b.w === 0 || b.h === 0) continue;
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        const fx = col * tileW;
-        const fy = row * tileH;
-        const frame = image.clone();
-        frame.crop({x: fx + relMinX, y: fy + relMinY, w: boxW, h: boxH});
-        const offsetX = col * boxW;
-        const offsetY = row * boxH;
-        output.composite(frame, offsetX, offsetY);
-      }
-
-      const buffer = await output.getBuffer('image/png');
+      const optimized = this.sheetOptimizerService.optimize(image, this.numCols, this.numRows);
+      const buffer = await optimized.image.getBuffer('image/png');
       const base64 = buffer.toString('base64');
       this.optimizedImage.set(`data:image/png;base64,${base64}`);
-      this.optimizedTileWidth.set(boxW);
-      this.optimizedTileHeight.set(boxH);
+      this.optimizedTileWidth.set(optimized.tileWidth);
+      this.optimizedTileHeight.set(optimized.tileHeight);
     } catch (error) {
       console.error('Error during sheet optimization:', error);
       this.optimizedImage.set(null);

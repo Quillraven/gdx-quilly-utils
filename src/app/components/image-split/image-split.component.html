@@ -10,7 +10,9 @@
   </ul>
   <p class="text-base-content/70 mt-2">
     Upload your spritesheet first, then configure the settings and click on <strong>Split Image</strong> to generate the
-    individual tiles. When splitting by size, any partial tiles at the edges are ignored.
+    individual tiles. When splitting by size, any partial tiles at the edges are ignored. Enable
+    <strong>Optimize frames</strong> to apply the Sheet Optimizer logic before splitting, which trims transparent
+    borders and aligns every frame to a common bounding box while preserving the original content position.
   </p>
 
   <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,26rem)_1fr]">
@@ -76,6 +78,15 @@
             input-id="ignoreLastN"
             [form-control]="form.get('ignoreLastN')"
             type="number"
+          />
+
+          <app-form-field
+            label="Optimize frames"
+            input-id="optimize"
+            [form-control]="form.get('optimize')"
+            type="checkbox"
+            class="col-span-1 md:col-span-2"
+            toolTip="Applies the Sheet Optimizer logic first: trims transparent borders and aligns every frame to a common bounding box while preserving the original content position."
           />
 
           <app-form-field

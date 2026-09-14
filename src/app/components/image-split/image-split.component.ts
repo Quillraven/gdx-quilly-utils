@@ -4,6 +4,7 @@ import {CropOptions, Jimp} from 'jimp';
 import JSZip from 'jszip';
 import {ErrorAlertComponent} from '../error-alert/error-alert.component';
 import {DownloadService} from '../../services/download.service';
+import {SheetOptimizerService} from '../../services/sheet-optimizer.service';
 import {ValidationService} from '../../services/validation.service';
 import {FormFieldComponent} from '../form-field/form-field.component';
 import {DropZoneComponent} from '../drop-zone/drop-zone.component';
@@ -69,9 +70,14 @@ export class ImageSplitComponent {
     return this.form.get('ignoreLastN')?.value || 0;
   }
 
+  get optimize(): boolean {
+    return this.form.get('optimize')?.value || false;
+  }
+
   constructor(
     private fb: FormBuilder,
     private downloadService: DownloadService,
+    private sheetOptimizerService: SheetOptimizerService,
     private validationService: ValidationService
   ) {
     this.form = this.fb.group({
@@ -82,7 +88,8 @@ export class ImageSplitComponent {
       tileSizeHeight: [32, [Validators.required, Validators.min(1), this.validationService.integerValidator]],
       ignoreFirstN: [0, [this.validationService.integerValidator]],
       ignoreLastN: [0, [this.validationService.integerValidator]],
-      tilesBaseFileName: ['Tile', [Validators.required, Validators.minLength(1), this.validationService.validFilenameValidator]]
+      tilesBaseFileName: ['Tile', [Validators.required, Validators.minLength(1), this.validationService.validFilenameValidator]],
+      optimize: [false]
     });
   }
 
@@ -142,6 +149,16 @@ export class ImageSplitComponent {
       // Store the number of tiles on x-axis for the grid display
       this.genTilesX.set(numTilesX);
 
+      // Optionally apply the Sheet Optimizer logic first, so each generated tile is trimmed
+      // and aligned to a common bounding box while its content position is preserved
+      let splitSource = image;
+      if (this.optimize) {
+        const optimized = this.sheetOptimizerService.optimize(image, numTilesX, numTilesY);
+        splitSource = optimized.image;
+        tileW = optimized.tileWidth;
+        tileH = optimized.tileHeight;
+      }
+
       // Calculate total number of tiles
       const totalTiles = numTilesX * numTilesY;
 
@@ -162,14 +179,14 @@ export class ImageSplitComponent {
             continue;
           }
 
-          // Crop the tile from the original image
+          // Crop the tile from the image
           const options: CropOptions = {
             x: x * tileW,
             y: y * tileH,
             w: tileW,
             h: tileH
           }
-          const tile = image.clone().crop(options);
+          const tile = splitSource.clone().crop(options);
 
           // Convert the tile to a base64 data URL
           const buffer = await tile.getBuffer("image/png");
