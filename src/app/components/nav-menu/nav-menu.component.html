@@ -1,42 +1,66 @@
-<div class="navbar-start flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
-  <details class="dropdown md:hidden" #navMenu>
-    <summary class="btn btn-ghost btn-square" aria-label="Open navigation menu">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
-      </svg>
-    </summary>
-    <ul class="menu dropdown-content z-10 mt-2 w-60 rounded-box bg-base-100 p-2 text-base-content shadow"
-        aria-label="Mobile navigation">
-      @for (item of navItems; track item.path) {
-        <li>
-          <a
-            [routerLink]="item.path"
-            (click)="closeMenu()"
-            routerLinkActive="bg-primary text-primary-content"
-            [routerLinkActiveOptions]="{exact: item.exact}"
-          >{{ item.label }}</a>
-        </li>
-      }
-    </ul>
-  </details>
-
-  <a routerLink="/"
-     class="brand-link min-w-0 truncate text-lg font-bold hover:underline hover:underline-offset-4 sm:text-xl"
-     aria-label="Quilly's GDX Utilities, back to home">
-    Quilly's GDX Utilities
-  </a>
-
-  <ul class="menu menu-horizontal hidden flex-none gap-1 px-1 md:flex"
-      aria-label="Main navigation">
+<nav class="flex h-full min-w-0 flex-col bg-base-100 text-base-content" aria-label="Main navigation">
+  <ul class="menu min-w-0 flex-1 gap-1 overflow-y-auto px-2 py-2">
     @for (item of navItems; track item.path) {
       <li>
         <a
           [routerLink]="item.path"
-          class="rounded-md px-3 py-2 text-sm font-medium hover:bg-primary-content/10"
-          routerLinkActive="bg-primary-content font-semibold text-primary hover:bg-primary-content"
+          (click)="closeMenu()"
+          class="nav-link min-w-0 rounded-md px-3 py-2 text-sm font-medium"
+          routerLinkActive="bg-primary font-semibold text-primary-content"
           [routerLinkActiveOptions]="{exact: item.exact}"
-        >{{ item.label }}</a>
+        >
+          <span class="shrink-0" aria-hidden="true">
+            @switch (item.icon) {
+              @case ('home') {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m3 9.5 9-6.5 9 6.5"/>
+                  <path d="M5 10v9a1 1 0 0 0 1 1h4v-5h4v5h4a1 1 0 0 0 1-1v-9"/>
+                </svg>
+              }
+              @case ('grid') {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="7" height="7" rx="1"/>
+                  <rect x="14" y="3" width="7" height="7" rx="1"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1"/>
+                  <rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+              }
+              @case ('split') {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="16" rx="2"/>
+                  <path d="M12 4v16"/>
+                </svg>
+              }
+              @case ('layers') {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m12 2 10 5-10 5L2 7z"/>
+                  <path d="m2 12 10 5 10-5"/>
+                  <path d="m2 17 10 5 10-5"/>
+                </svg>
+              }
+              @case ('optimize') {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 14h6v6"/>
+                  <path d="M20 10h-6V4"/>
+                  <path d="M14 10l7-7"/>
+                  <path d="M3 21l7-7"/>
+                </svg>
+              }
+              @case ('code') {
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m16 18 6-6-6-6"/>
+                  <path d="m8 6-6 6 6 6"/>
+                </svg>
+              }
+            }
+          </span>
+          <span class="nav-label min-w-0 flex-1 truncate whitespace-nowrap">{{ item.label }}</span>
+        </a>
       </li>
     }
   </ul>
-</div>
+
+  <div class="sidebar-footer flex items-center justify-center border-t border-base-300 px-2 py-2">
+    <app-theme-sel></app-theme-sel>
+  </div>
+</nav>

@@ -1,7 +1,40 @@
 :host {
-  display: contents;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  width: 16rem;
+  background-color: var(--color-base-100);
+  color: var(--color-base-content);
+  border-inline-end: 1px solid var(--color-base-300);
 }
 
-.btn-ghost:hover {
-  background-color: color-mix(in oklab, var(--color-primary-content) 12%, transparent);
+/* Desktop with a fine-pointer mouse: collapsed icon rail by default,
+   expands on hover and collapses again a moment after the pointer leaves. */
+@media (hover: hover) and (pointer: fine) {
+  :host {
+    width: 4rem;
+    overflow: hidden;
+    transition: width 0.25s ease-in-out 0.2s;
+  }
+
+  :host:hover {
+    width: 13rem;
+    transition-delay: 0s;
+  }
+
+  :host .nav-label {
+    max-width: 0;
+    opacity: 0;
+    transition:
+      opacity 0.15s ease-in-out 0.3s,
+      max-width 0s linear 0.45s;
+  }
+
+  :host:hover .nav-label {
+    max-width: 15rem;
+    opacity: 1;
+    transition:
+      opacity 0.2s ease-in-out 0.05s,
+      max-width 0.2s ease-in-out 0.05s;
+  }
 }
