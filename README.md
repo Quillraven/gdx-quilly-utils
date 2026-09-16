@@ -1,56 +1,78 @@
 # Quilly's GDX Utilities
 
-![Angular](https://img.shields.io/badge/Angular-22-purple?logo=angular)
+> A friendly web toolbox for LibGDX 2D games — clean your tiles, split your sprites and optimize your sheets, right in the browser. No installs, no accounts, no fuss.
 
-This repository contains a set of utilities that are typically needed for a 2D game using LibGDX.
-It is hosted as a GitHub page under following [link](https://quillraven.github.io/gdx-quilly-utils/).
+## Live app
 
-## Tile Extruder
+Everything runs client-side, so your images never leave your machine. Give it a try:
 
-A utility to prevent texture bleeding in tiled games by adding padding around each tile in your tileset. This ensures clean rendering when tiles are placed next to each other in a game world.
+**https://quillraven.github.io/gdx-quilly-utils/**
 
-Features:
-- Upload your tileset image
-- Configure tile width, height, margin, spacing, and extrusion amount
-- Preview the extruded tileset
-- Download the processed image for use in your game
+## The tools at a glance
 
-## Spritesheet Splitter
+| Tool | What it does | Best for |
+| --- | --- | --- |
+| **Tileset Extruder** | Adds padding around every tile to stop texture bleeding | Clean, seam-free tilemaps |
+| **Spritesheet Splitter** | Cuts a spritesheet into individual tiles | Animations & asset export |
+| **Image Combiner** | Stitches several images into one grid layout | Packing related icons or frames |
+| **Sheet Optimizer** | Trims empty space around every frame | Slim, tidy animation sheets |
+| **Gradle Kotlin Template** | Generates a modern Gradle Kotlin DSL project | Starting a LibGDX Kotlin game fast |
 
-A tool to split a spritesheet into individual image tiles. This utility divides your spritesheet into a grid of tiles based on the number of rows and columns you specify.
+## The toolkit
 
-Features:
-- Upload your spritesheet image
-- Configure the number of tiles on x-axis and y-axis
-- Options to ignore first n and last n tiles
-- Set a base filename for the output tiles
-- Preview all extracted tiles
-- Download all tiles as a ZIP file
+### Tileset Extruder
 
-## Image Combiner
+Texture bleeding is that ugly line between adjacent tiles. This tool fixes it by **extruding (padding) each tile** in your tileset so sprites never leak into their neighbours.
 
-A tool to combine multiple images into a single grid layout. This utility arranges your uploaded images in a grid based on the dimensions you specify.
+- Upload any tileset image
+- Set tile width, height, margin & spacing
+- Choose how much to extrude
+- Live preview before you download
+- Download the polished image, ready for your game
 
-Features:
-- Upload multiple images
-- Configure grid width and height for arrangement
-- Drag and drop to reorder images
-- Preview the combined image
-- Set a custom filename for the output
-- Download the combined image
+### Spritesheet Splitter
 
-## Sheet Optimizer
+Turn one big spritesheet into a neat stack of individual tiles.
 
-A tool to remove empty space around each frame of a sprite sheet.
+- Upload your spritesheet
+- Split by **tile count** *or* **tile size**
+- Skip the first `n` and last `n` tiles if you have unwanted extras
+- Pick a base filename for the output
+- Preview every extracted tile
+- Download everything as a single ZIP file
 
-Features:
+### Image Combiner
+
+Patch multiple images into one organized grid in seconds.
+
+- Upload several images at once
+- Choose grid width & height
+- **Drag and drop to reorder** images before combining
+- Preview the final composition
+- Custom filename, then download
+
+### Sheet Optimizer
+
+Spritesheets often carry wasted transparent space. The optimizer **trims the borders of every frame and re-centers the art**, giving you tighter, cleaner sheets.
+
 - Upload a sprite sheet
-- Configure grid of frames
-- Set an output filename
-- Preview the optimized sheet including the new dimensions of each frame
+- Describe your frame grid
+- Preview the result, including each frame's new dimensions
 - Download the optimized sheet
 
-## Gradle Kotlin Template
+### Gradle Kotlin Template
 
-A modern Gradle Kotlin DSL based template for creating LibGDX projects using Kotlin.
-It uses a version catalog and build-logic directory for convention plugins.
+A **modern Gradle Kotlin DSL template** for LibGDX Kotlin projects — less boilerplate, more building.
+
+- Version catalog (`libs.versions.toml`) for tidy dependency management
+- `build-logic` directory with reusable convention plugins
+- Kotlin from the ground up
+
+## Development
+
+Built with **Angular 22**, Tailwind CSS & daisyUI, using `pnpm`.
+
+```bash
+pnpm install     # install dependencies
+ng serve         # run Angular on localhost
+```
