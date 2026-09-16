@@ -1,4 +1,4 @@
-<div class="grid gap-y-1.5" [ngClass]="gridClass">
+<div class="grid gap-y-0.5" [ngClass]="gridClass">
 
   @if (type !== 'checkbox') {
     <div class="tooltip" [attr.data-tip]="toolTip">
@@ -18,7 +18,7 @@
         class="input w-full"
         [ngClass]="{'input-error': hasErrors()}"/>
     } @else if (type === 'radio') {
-      <div class="flex flex-row flex-wrap gap-x-4 gap-y-1.5 py-1">
+      <div class="flex flex-row flex-wrap gap-x-4 gap-y-1 py-0.5">
         @for (option of options; track option) {
           <div class="flex items-start">
             <input
@@ -55,7 +55,7 @@
     }
 
     @if (hasErrors()) {
-      <div class="text-error text-xs mt-1">
+      <div class="text-error text-xs mt-0.5">
         <span>{{ errorHint() }}</span>
       </div>
     }

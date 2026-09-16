@@ -1,16 +1,16 @@
-<div class="flex min-h-screen flex-col">
+<div class="flex min-h-dvh flex-col">
   <app-header></app-header>
 
   <div class="drawer flex-1 lg:drawer-open">
     <input id="main-drawer" type="checkbox" class="drawer-toggle" aria-label="Toggle navigation sidebar"/>
 
-    <div class="drawer-content flex flex-col">
+    <div class="drawer-content flex min-h-0 flex-col overflow-y-auto">
       <main class="w-full flex-grow">
         <router-outlet/>
       </main>
     </div>
 
-    <div class="drawer-side lg:top-16 lg:h-[calc(100dvh-4rem)]">
+    <div class="drawer-side lg:top-16 lg:h-[calc(100dvh-4rem)] lg:fixed">
       <label for="main-drawer" aria-label="Close navigation sidebar" class="drawer-overlay"></label>
       <app-nav-menu></app-nav-menu>
     </div>

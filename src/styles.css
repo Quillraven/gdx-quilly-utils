@@ -11,6 +11,10 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+.btn {
+  --size-field: 0.2rem;
+}
+
 :root {
   color-scheme: light;
 }
