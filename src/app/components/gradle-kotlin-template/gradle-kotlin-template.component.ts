@@ -60,6 +60,7 @@ export class GradleKotlinTemplateComponent {
       ktxScene2dDep: [false],
       textraTypistDep: [true],
       freeTypistDep: [true],
+      kotlinxSerializationDep: [true],
     });
   }
 
@@ -308,6 +309,7 @@ export class GradleKotlinTemplateComponent {
     const freeTypistDep: boolean = this.form.get('freeTypistDep')?.value === true;
     const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
+    const serializationDep: boolean = this.form.get('kotlinxSerializationDep')?.value === true;
 
     // Find the libs.versions.toml file
     for (const filePath in zip.files) {
@@ -432,6 +434,17 @@ export class GradleKotlinTemplateComponent {
             .join(LINE_ENDING);
         }
 
+        // keep kotlinx serialization ?
+        if (!serializationDep) {
+          modifiedContent = modifiedContent
+            .split(LINE_ENDING)
+            .filter(line =>
+              !line.startsWith('kotlinxSerialization') &&
+              !line.startsWith('# serialization') &&
+              !line.startsWith('kotlinSerialization'))
+            .join(LINE_ENDING);
+        }
+
         // remove other ktx extension comment if necessary
         if (!ktxTiledDep && !ktxPrefsDep && !ktxI18nDep) {
           modifiedContent = modifiedContent
@@ -484,6 +497,11 @@ export class GradleKotlinTemplateComponent {
 
     for (const filePath in zip.files) {
       try {
+        if (filePath.endsWith('/build.gradle.kts') && !filePath.includes('build-logic')) {
+          await this.updateRootBuildGradle(zip, filePath);
+          continue;
+        }
+
         if (filePath.endsWith('/core/build.gradle.kts')) {
           await this.updateCoreBuildGradle(zip, filePath)
           continue;
@@ -537,6 +555,21 @@ export class GradleKotlinTemplateComponent {
     }
   }
 
+  private async updateRootBuildGradle(zip: JSZip, filePath: string) {
+    const kotlinxSerializationDep: boolean = this.form.get('kotlinxSerializationDep')?.value === true;
+
+    let modifiedContent = await zip.files[filePath].async('text');
+
+    if (!kotlinxSerializationDep) {
+      modifiedContent = modifiedContent
+        .split(LINE_ENDING)
+        .filter(line => !line.toLowerCase().includes('serialization'))
+        .join(LINE_ENDING);
+    }
+
+    zip.file(filePath, modifiedContent);
+  }
+
   private async updateCoreBuildGradle(zip: JSZip, filePath: string) {
     const gdxAi: boolean = this.form.get('gdxAiDep')?.value === true;
     const fleksDep: boolean = this.form.get('fleksDep')?.value === true;
@@ -548,6 +581,7 @@ export class GradleKotlinTemplateComponent {
     const ktxScene2dDep: boolean = this.form.get('ktxScene2dDep')?.value === true;
     const textraTypistDep: boolean = this.form.get('textraTypistDep')?.value === true;
     const freeTypistDep: boolean = this.form.get('freeTypistDep')?.value === true;
+    const serializationDep: boolean = this.form.get('kotlinxSerializationDep')?.value === true;
 
     let modifiedContent = await zip.files[filePath].async('text');
 
@@ -619,6 +653,13 @@ export class GradleKotlinTemplateComponent {
       modifiedContent = modifiedContent
         .split(LINE_ENDING)
         .filter(line => !line.toLowerCase().includes('freetypist'))
+        .join(LINE_ENDING);
+    }
+
+    if (!serializationDep) {
+      modifiedContent = modifiedContent
+        .split(LINE_ENDING)
+        .filter(line => !line.toLowerCase().includes('serialization'))
         .join(LINE_ENDING);
     }
 
