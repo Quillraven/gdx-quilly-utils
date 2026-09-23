@@ -9,6 +9,7 @@ import JSZip from 'jszip';
 const FILES_TO_UPDATE = ['kt', 'kts', 'md'];
 const LINE_ENDING = '\n';
 const KOTLIN_DEFAULT_VERSION = '2.4.20';
+const ROOT_FOLDER = 'gdx-kotlin-template-master/';
 
 function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -61,6 +62,7 @@ export class GradleKotlinTemplateComponent {
       textraTypistDep: [true],
       freeTypistDep: [true],
       kotlinxSerializationDep: [true],
+      toolsDep: [true],
     });
   }
 
@@ -126,7 +128,7 @@ export class GradleKotlinTemplateComponent {
   }
 
   private async updateRootFolderName(zip: JSZip, projectName: string) {
-    const oldPath = "gdx-kotlin-template-master/";
+    const oldPath = ROOT_FOLDER;
     const newPath = `${projectName}/`;
     if (oldPath === newPath) {
       return;
@@ -310,6 +312,7 @@ export class GradleKotlinTemplateComponent {
     const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
     const serializationDep: boolean = this.form.get('kotlinxSerializationDep')?.value === true;
+    const toolsDep: boolean = this.form.get('toolsDep')?.value === true;
 
     // Find the libs.versions.toml file
     for (const filePath in zip.files) {
@@ -445,6 +448,14 @@ export class GradleKotlinTemplateComponent {
             .join(LINE_ENDING);
         }
 
+        // keep gdx-tools ?
+        if (!toolsDep) {
+          modifiedContent = modifiedContent
+            .split(LINE_ENDING)
+            .filter(line => !line.startsWith('gdxTools'))
+            .join(LINE_ENDING);
+        }
+
         // remove other ktx extension comment if necessary
         if (!ktxTiledDep && !ktxPrefsDep && !ktxI18nDep) {
           modifiedContent = modifiedContent
@@ -492,12 +503,18 @@ export class GradleKotlinTemplateComponent {
     const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
     const freeTypistDep: boolean = this.form.get('freeTypistDep')?.value === true;
+    const toolsDep: boolean = this.form.get('toolsDep')?.value === true;
 
     const filesToRemove = [];
 
     for (const filePath in zip.files) {
       try {
-        if (filePath.endsWith('/build.gradle.kts') && !filePath.includes('build-logic')) {
+        if (!toolsDep && filePath.includes('/tool/')) {
+          filesToRemove.push(filePath);
+          continue;
+        }
+
+        if (filePath === `${ROOT_FOLDER}build.gradle.kts`) {
           await this.updateRootBuildGradle(zip, filePath);
           continue;
         }
@@ -714,7 +731,7 @@ export class GradleKotlinTemplateComponent {
 
         // enable the textra Font and Styles imports unless TextraTypist is disabled as well
         if (trimmed.startsWith('// import com.github.tommyettinger.textra.Font') ||
-            trimmed.startsWith('// import com.github.tommyettinger.textra.Styles')) {
+          trimmed.startsWith('// import com.github.tommyettinger.textra.Styles')) {
           if (!textraTypistDep) {
             // both TextraTypist and FreeTypist are disabled -> remove the imports
             i++;
@@ -727,7 +744,7 @@ export class GradleKotlinTemplateComponent {
 
         // remove the FreeTypistSkin and toInternalFile imports
         if (line.includes('com.github.tommyettinger.freetypist.FreeTypistSkin') ||
-            line.includes('ktx.assets.toInternalFile')) {
+          line.includes('ktx.assets.toInternalFile')) {
           i++;
           continue;
         }
@@ -808,6 +825,7 @@ export class GradleKotlinTemplateComponent {
     const fleksDep: boolean = this.form.get('fleksDep')?.value === true;
     const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
+    const toolsDep: boolean = this.form.get('toolsDep')?.value === true;
 
     const content = await zip.files[filePath].async('text');
     let modifiedContent = content.replaceAll('gdx-template', projectName);
@@ -833,6 +851,13 @@ export class GradleKotlinTemplateComponent {
         .split(LINE_ENDING)
         .filter(line => !line.includes('Fleks') &&
           !line.includes('s01.oss.sonatype'))
+        .join(LINE_ENDING);
+    }
+
+    if (!toolsDep) {
+      modifiedContent = modifiedContent
+        .split(LINE_ENDING)
+        .filter(line => !line.includes('include(":tool")'))
         .join(LINE_ENDING);
     }
 
