@@ -59,6 +59,7 @@ export class GradleKotlinTemplateComponent {
       ktxPrefsDep: [true],
       ktxI18nDep: [false],
       ktxScene2dDep: [false],
+      gdxControllersDep: [false],
       textraTypistDep: [true],
       freeTypistDep: [true],
       kotlinxSerializationDep: [true],
@@ -309,6 +310,7 @@ export class GradleKotlinTemplateComponent {
     const ktxScene2dDep: boolean = this.form.get('ktxScene2dDep')?.value === true;
     const textraTypistDep: boolean = this.form.get('textraTypistDep')?.value === true;
     const freeTypistDep: boolean = this.form.get('freeTypistDep')?.value === true;
+    const gdxControllers: boolean = this.form.get('gdxControllersDep')?.value === true;
     const desktopLauncher: boolean = this.form.get('desktopLauncher')?.value === true;
     const teaVmLauncher: boolean = this.form.get('teaVmLauncher')?.value === true;
     const serializationDep: boolean = this.form.get('kotlinxSerializationDep')?.value === true;
@@ -456,6 +458,17 @@ export class GradleKotlinTemplateComponent {
             .join(LINE_ENDING);
         }
 
+        // keep gdx-controllers ?
+        if (!gdxControllers) {
+          modifiedContent = modifiedContent
+            .split(LINE_ENDING)
+            .filter(line =>
+              !line.startsWith('gdxControllers') &&
+              !line.startsWith('gdxTeaVmControllers') &&
+              !line.startsWith('# gdx controllers'))
+            .join(LINE_ENDING);
+        }
+
         // remove other ktx extension comment if necessary
         if (!ktxTiledDep && !ktxPrefsDep && !ktxI18nDep) {
           modifiedContent = modifiedContent
@@ -472,7 +485,8 @@ export class GradleKotlinTemplateComponent {
             .filter(line =>
               !line.startsWith('gdxBackendLwjgl3') &&
               !line.startsWith('gdxPlatform') &&
-              !line.startsWith('construo'))
+              !line.startsWith('construo') &&
+              !line.startsWith('gdxControllersDesktop'))
             .join(LINE_ENDING);
         }
 
@@ -599,8 +613,16 @@ export class GradleKotlinTemplateComponent {
     const textraTypistDep: boolean = this.form.get('textraTypistDep')?.value === true;
     const freeTypistDep: boolean = this.form.get('freeTypistDep')?.value === true;
     const serializationDep: boolean = this.form.get('kotlinxSerializationDep')?.value === true;
+    const gdxControllers: boolean = this.form.get('gdxControllersDep')?.value === true;
 
     let modifiedContent = await zip.files[filePath].async('text');
+
+    if (!gdxControllers) {
+      modifiedContent = modifiedContent
+        .split(LINE_ENDING)
+        .filter(line => !line.toLowerCase().includes('controllers'))
+        .join(LINE_ENDING);
+    }
 
     if (!b2dDep) {
       modifiedContent = modifiedContent
@@ -881,8 +903,23 @@ export class GradleKotlinTemplateComponent {
   private async updateDesktopBuildGradle(zip: JSZip, filePath: string, projectName: string) {
     const b2dDep: boolean = this.form.get('b2dDep')?.value === true;
     const freetypeDep: boolean = this.form.get('freetypeDep')?.value === true;
+    const gdxControllers: boolean = this.form.get('gdxControllersDep')?.value === true;
 
     let modifiedContent = await zip.files[filePath].async('text');
+
+    if (!gdxControllers) {
+      const lines = modifiedContent.split(LINE_ENDING);
+      const newContent = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.toLowerCase().includes('controllers')) {
+          continue;
+        }
+
+        newContent.push(line);
+      }
+      modifiedContent = newContent.join(LINE_ENDING);
+    }
 
     modifiedContent = modifiedContent.replace('applicationName = "GdxGame"', `applicationName = "${projectName}"`);
 
@@ -920,8 +957,16 @@ export class GradleKotlinTemplateComponent {
   private async updateTeaVmBuildGradle(zip: JSZip, filePath: string) {
     const b2dDep: boolean = this.form.get('b2dDep')?.value === true;
     const freetypeDep: boolean = this.form.get('freetypeDep')?.value === true;
+    const gdxControllers: boolean = this.form.get('gdxControllersDep')?.value === true;
 
     let modifiedContent = await zip.files[filePath].async('text');
+
+    if (!gdxControllers) {
+      modifiedContent = modifiedContent
+        .split(LINE_ENDING)
+        .filter(line => !line.toLowerCase().includes('controllers'))
+        .join(LINE_ENDING);
+    }
 
     if (!b2dDep) {
       modifiedContent = modifiedContent

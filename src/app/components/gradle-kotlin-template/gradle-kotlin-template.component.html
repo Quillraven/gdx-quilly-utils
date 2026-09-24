@@ -70,14 +70,6 @@
 
         <div class="flex flex-wrap gap-x-4 gap-y-1">
           <app-form-field
-            label="Tools"
-            input-id="toolsDep"
-            [form-control]="form.get('toolsDep')"
-            type="checkbox"
-            tool-tip="Adds a tool module with a gdx-tools dependency"
-          />
-
-          <app-form-field
             label="Kotlinx Serialization"
             input-id="kotlinxSerializationDep"
             [form-control]="form.get('kotlinxSerializationDep')"
@@ -93,10 +85,28 @@
           />
 
           <app-form-field
+            label="Tools"
+            input-id="toolsDep"
+            [form-control]="form.get('toolsDep')"
+            type="checkbox"
+            tool-tip="Adds a tool module with a gdx-tools dependency"
+          />
+        </div>
+
+        <div class="flex flex-wrap gap-x-4 gap-y-1 pt-2">
+          <app-form-field
             label="Gdx-AI"
             input-id="gdxAiDep"
             [form-control]="form.get('gdxAiDep')"
             type="checkbox"
+          />
+
+          <app-form-field
+            label="Gdx-Controllers"
+            input-id="gdxControllersDep"
+            [form-control]="form.get('gdxControllersDep')"
+            type="checkbox"
+            tool-tip="Controller support for desktop, and web (TeaVM)"
           />
 
           <app-form-field

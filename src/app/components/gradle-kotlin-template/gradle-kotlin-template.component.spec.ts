@@ -55,12 +55,17 @@ rootProject.name = "gdx-template"
 jvmToolchainVersion = "25"
 kotlinVersion = "2.4.20"
 gdxVersion = "1.14.2"
+gdxControllersVersion = "2.2.4"
 
 [libraries]
 kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinVersion" }
 #gdx base
 gdx = { module = "com.badlogicgames.gdx:gdx", version.ref = "gdxVersion" }
 gdxTools = { module = "com.badlogicgames.gdx:gdx-tools", version.ref = "gdxVersion" }
+# gdx controllers
+gdxControllersCore = { module = "com.badlogicgames.gdx-controllers:gdx-controllers-core", version.ref = "gdxControllersVersion" }
+gdxTeaVmControllers = { module = "com.github.xpenatan.gdx-teavm:gdx-controllers-web", version.ref = "gdxControllersVersion" }
+gdxControllersDesktop = { module = "com.badlogicgames.gdx-controllers:gdx-controllers-desktop", version.ref = "gdxControllersVersion" }
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlinVersion" }
@@ -100,6 +105,7 @@ dependencies {
     implementation(libs.fleks)
     implementation(libs.textraTypist)
     implementation(libs.freeTypist)
+    implementation(libs.gdxControllersCore)
 
     testImplementation(kotlin("test"))
 }
@@ -117,6 +123,10 @@ class GdxGame : Game() {
 
   add(zip, `${ROOT}lwjgl3/build.gradle.kts`, `group = "io.github"
 version = "1.0"
+
+dependencies {
+    implementation(libs.gdxControllersDesktop)
+}
 
 application {
     applicationName = "GdxGame"
@@ -139,6 +149,11 @@ fun main() {
   add(zip, `${ROOT}teavm/build.gradle.kts`, `plugins {
     id("kotlin-jvm")
     alias(libs.plugins.gdxTeaVmPlugin)
+}
+
+dependencies {
+    implementation(libs.gdxTeaVmControllers)
+    implementation(project(":core"))
 }
 
 gdxTeaVM {
@@ -355,5 +370,85 @@ describe('GradleKotlinTemplateComponent', () => {
 
     const teaVmBuild = await fileContent(downloaded, '/teavm/build.gradle.kts');
     expect(teaVmBuild).toContain('mainClass.set("com.example.TeaVMLauncherKt")');
+  });
+
+  it('leaves the Gdx-Controllers option unticked per default', async () => {
+    const component = await createComponent();
+    expect(component.form.get('gdxControllersDep')?.value).toBe(false);
+  });
+
+  it('removes the gdx-controllers lines when Gdx-Controllers is unticked', async () => {
+    const component = await createComponent();
+    await component.downloadTemplate();
+
+    const downloaded = await new JSZip().loadAsync(downloadSpy.mock.calls[0][0]);
+
+    const toml = await fileContent(downloaded, '/gradle/libs.versions.toml');
+    expect(toml).not.toMatch(/^gdxControllers/m);
+    expect(toml).not.toMatch(/^gdxTeaVmControllers/m);
+    expect(toml).not.toContain('# gdx controllers');
+
+    const coreBuild = await fileContent(downloaded, '/core/build.gradle.kts');
+    expect(coreBuild).not.toContain('gdxControllersCore');
+
+    const lwjgl3Build = await fileContent(downloaded, '/lwjgl3/build.gradle.kts');
+    expect(lwjgl3Build).not.toContain('gdxControllersDesktop');
+
+    const teaVmBuild = await fileContent(downloaded, '/teavm/build.gradle.kts');
+    expect(teaVmBuild).not.toContain('gdxTeaVmControllers');
+  });
+
+  it('keeps the gdx-controllers lines when Gdx-Controllers is ticked', async () => {
+    const component = await createComponent();
+    component.form.get('gdxControllersDep')?.setValue(true);
+    await component.downloadTemplate();
+
+    const downloaded = await new JSZip().loadAsync(downloadSpy.mock.calls[0][0]);
+
+    const toml = await fileContent(downloaded, '/gradle/libs.versions.toml');
+    expect(toml).toMatch(/^gdxControllersVersion/m);
+    expect(toml).toMatch(/^gdxControllersCore/m);
+    expect(toml).toMatch(/^gdxTeaVmControllers/m);
+    expect(toml).toMatch(/^gdxControllersDesktop/m);
+    expect(toml).toContain('# gdx controllers');
+
+    const coreBuild = await fileContent(downloaded, '/core/build.gradle.kts');
+    expect(coreBuild).toContain('gdxControllersCore');
+
+    const lwjgl3Build = await fileContent(downloaded, '/lwjgl3/build.gradle.kts');
+    expect(lwjgl3Build).toContain('gdxControllersDesktop');
+
+    const teaVmBuild = await fileContent(downloaded, '/teavm/build.gradle.kts');
+    expect(teaVmBuild).toContain('gdxTeaVmControllers');
+  });
+
+  it('removes the teavm gdx-controllers line from the version catalog when TeaVM is unticked', async () => {
+    const component = await createComponent();
+    component.form.get('gdxControllersDep')?.setValue(true);
+    component.form.get('teaVmLauncher')?.setValue(false);
+    await component.downloadTemplate();
+
+    const downloaded = await new JSZip().loadAsync(downloadSpy.mock.calls[0][0]);
+
+    const toml = await fileContent(downloaded, '/gradle/libs.versions.toml');
+    expect(toml).toMatch(/^gdxControllersVersion/m);
+    expect(toml).toMatch(/^gdxControllersCore/m);
+    expect(toml).toMatch(/^gdxControllersDesktop/m);
+    expect(toml).not.toMatch(/^gdxTeaVmControllers/m);
+  });
+
+  it('removes the desktop gdx-controllers line from the version catalog when Desktop is unticked', async () => {
+    const component = await createComponent();
+    component.form.get('gdxControllersDep')?.setValue(true);
+    component.form.get('desktopLauncher')?.setValue(false);
+    await component.downloadTemplate();
+
+    const downloaded = await new JSZip().loadAsync(downloadSpy.mock.calls[0][0]);
+
+    const toml = await fileContent(downloaded, '/gradle/libs.versions.toml');
+    expect(toml).toMatch(/^gdxControllersVersion/m);
+    expect(toml).toMatch(/^gdxControllersCore/m);
+    expect(toml).toMatch(/^gdxTeaVmControllers/m);
+    expect(toml).not.toMatch(/^gdxControllersDesktop/m);
   });
 });
