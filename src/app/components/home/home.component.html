@@ -1,4 +1,4 @@
-<div class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+<div class="mx-auto w-full max-w-[120rem] px-4 2xl:px-10 py-6 sm:px-6 sm:py-10">
   <div class="hero bg-base-100 rounded-box border border-base-300">
     <div class="hero-content text-center py-8 sm:py-12">
       <div class="max-w-2xl">
@@ -11,18 +11,18 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 gap-4 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="grid grid-cols-1 gap-4 pt-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
     @for (tool of tools; track tool.path) {
-      <a class="card card-compact bg-base-100 border border-base-300 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-         [routerLink]="tool.path">
+      <div class="card card-compact bg-base-100 border border-base-300 shadow-sm">
         <div class="card-body">
           <h2 class="card-title text-lg">{{ tool.title }}</h2>
           <p class="text-sm text-base-content/70">{{ tool.description }}</p>
           <div class="card-actions justify-end mt-2">
-            <span class="btn btn-primary btn-sm">Open tool</span>
+            <a class="btn btn-primary btn-sm" [routerLink]="tool.path"
+               [attr.aria-label]="'Open ' + tool.title">Open tool</a>
           </div>
         </div>
-      </a>
+      </div>
     }
   </div>
 </div>

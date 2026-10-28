@@ -17,7 +17,8 @@
     transition: width 0.25s ease-in-out 0.2s;
   }
 
-  :host:hover {
+  :host:hover,
+  :host:focus-within {
     width: 13rem;
     transition-delay: 0s;
   }
@@ -30,11 +31,26 @@
       max-width 0s linear 0.45s;
   }
 
-  :host:hover .nav-label {
+  :host:hover .nav-label,
+  :host:focus-within .nav-label {
     max-width: 15rem;
     opacity: 1;
     transition:
       opacity 0.2s ease-in-out 0.05s,
       max-width 0.2s ease-in-out 0.05s;
+  }
+}
+/* Very wide screens have plenty of room: keep the sidebar permanently expanded. */
+@media (hover: hover) and (pointer: fine) and (min-width: 1920px) {
+  :host,
+  :host:hover,
+  :host:focus-within {
+    width: 14rem;
+    overflow: visible;
+  }
+
+  :host .nav-label {
+    max-width: 15rem;
+    opacity: 1;
   }
 }

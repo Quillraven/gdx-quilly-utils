@@ -1,21 +1,19 @@
-<div class="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 sm:py-6">
+<div class="mx-auto w-full max-w-[120rem] px-4 2xl:px-10 py-4 sm:px-6 sm:py-6">
   <h1 class="text-2xl font-bold">Spritesheet Splitter</h1>
   <p class="text-base-content/70 mt-2">
-    Split a spritesheet into individual image tiles.
-    This tool supports two split modes:
+    Split a spritesheet into individual tiles, either by a number of rows and columns or by the size of a single tile.
+    Upload your spritesheet, adjust the settings and click <strong>Split Image</strong>.
   </p>
-  <ul class="text-base-content/70 mt-2 list-inside list-disc space-y-1">
-    <li><strong class="text-base-content">Split by num tiles</strong>: Divides your spritesheet into a grid based on the number of rows and columns you specify.</li>
-    <li><strong class="text-base-content">Split by size</strong>: Divides your spritesheet based on the dimensions of a single tile (e.g. 32x32 pixels).</li>
-  </ul>
-  <p class="text-base-content/70 mt-2">
-    Upload your spritesheet first, then configure the settings and click on <strong>Split Image</strong> to generate the
-    individual tiles. When splitting by size, any partial tiles at the edges are ignored. Enable
-    <strong>Optimize frames</strong> to apply the Sheet Optimizer logic before splitting, which trims transparent
-    borders and aligns every frame to a common bounding box while preserving the original content position.
-  </p>
+  <details class="text-base-content/70 mt-2 text-sm">
+    <summary class="cursor-pointer font-medium">More details</summary>
+    <ul class="mt-2 list-inside list-disc space-y-1">
+      <li><strong class="text-base-content">Split by num tiles</strong>: divides the sheet into a grid of the given rows and columns.</li>
+      <li><strong class="text-base-content">Split by size</strong>: uses the size of one tile (e.g. 32x32); partial tiles at the edges are ignored.</li>
+      <li><strong class="text-base-content">Optimize frames</strong>: applies the Sheet Optimizer logic first, trimming transparent borders and aligning all frames to a common bounding box.</li>
+    </ul>
+  </details>
 
-  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,26rem)_1fr]">
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,26rem)_1fr] 2xl:grid-cols-[minmax(0,30rem)_1fr] 2xl:gap-8">
     <div class="min-w-0">
       <fieldset class="fieldset w-full bg-base-200 border-base-300 rounded-box border p-4">
         <legend class="fieldset-legend">Settings</legend>
