@@ -1,0 +1,236 @@
+<div>
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,26rem)_1fr]">
+    <div class="min-w-0">
+      <fieldset class="fieldset w-full bg-base-200 border-base-300 rounded-box border p-4">
+        <legend class="fieldset-legend">Settings</legend>
+
+        <form [formGroup]="form" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label class="btn btn-secondary col-span-1 md:col-span-2">
+            Upload spritesheets
+            <input type="file" class="hidden" accept="image/*" multiple (change)="onFilesSelected($event)">
+          </label>
+
+          <app-form-field
+            label="Mode"
+            input-id="optimizerMode"
+            [form-control]="modeControl"
+            type="radio"
+            [options]="modeOptions"
+            class="col-span-1 md:col-span-2"
+          />
+
+          <app-form-field
+            label="Directions per sheet"
+            input-id="directionCount"
+            [form-control]="form.get('directionCount')"
+            type="radio"
+            [options]="directionCountOptions"
+            class="col-span-1 md:col-span-2"
+            tool-tip="Number of rows (directions) of sheets that have no direction in their file name."
+          />
+
+          <app-form-field
+            label="Direction of each row (top to bottom)"
+            input-id="directionOrder"
+            [form-control]="form.get('directionOrder')"
+            type="text"
+            class="col-span-1 md:col-span-2"
+          />
+
+          <app-form-field
+            label="Frame width (px, optional)"
+            input-id="frameWidth"
+            [form-control]="form.get('frameWidth')"
+            type="number"
+            class="col-span-1 md:col-span-2"
+            tool-tip="Leave empty if frames are square (frame width = row height). Set it for non-square frames, e.g. 64 for frames of 64x128."
+          />
+
+          <app-form-field
+            label="Anchor"
+            input-id="anchor"
+            [form-control]="form.get('anchor')"
+            type="radio"
+            [options]="anchorOptions"
+            class="col-span-1 md:col-span-2"
+            tool-tip="Point of a frame that is used to align sheets with different frame sizes. Has no effect if all sheets use the same frame size."
+          />
+
+          <app-form-field
+            label="Output filename"
+            input-id="outputFileName"
+            [form-control]="form.get('outputFileName')"
+            type="text"
+            class="col-span-1 md:col-span-2"
+          />
+
+          <div class="flex col-span-1 gap-2 md:col-span-2 md:justify-end">
+            <button type="button" class="btn btn-primary w-full md:w-auto"
+                    (click)="optimize()"
+                    [disabled]="!canOptimize()">
+              Optimize
+            </button>
+          </div>
+        </form>
+      </fieldset>
+
+      @if (duplicateKeys().length > 0) {
+        <app-error-alert
+          [errorDetails]="'Multiple sheets use the same animation and direction: ' + duplicateKeys().join(', ') + '. Rename or remove a sheet.'"></app-error-alert>
+      }
+
+      @if (errorDetails()) {
+        <app-error-alert [errorDetails]="errorDetails()"></app-error-alert>
+      }
+
+      @if (result(); as r) {
+        <div class="mt-3 rounded-box border border-base-300 bg-base-200 p-4">
+          <p class="font-semibold mb-1">Optimized frame dimension values:</p>
+          <p>Width: <span class="font-mono font-bold">{{ r.frameWidth }}</span></p>
+          <p>Height: <span class="font-mono font-bold">{{ r.frameHeight }}</span></p>
+          <p class="mt-1">Frames: <span class="font-mono font-bold">{{ r.frames.length }}</span></p>
+
+          <p class="font-semibold mt-3 mb-1">Offset of each sheet to the shared rect:</p>
+          <div class="overflow-x-auto">
+            <table class="table table-xs">
+              <thead>
+              <tr>
+                <th>Sheet</th>
+                <th>Frames</th>
+                <th>dx</th>
+                <th>dy</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (s of r.sheets; track s.name) {
+                  <tr>
+                    <td class="max-w-48 truncate" [title]="s.name">{{ s.name }}</td>
+                    <td class="font-mono">{{ s.frameCount }}</td>
+                    <td class="font-mono">{{ s.dx }}</td>
+                    <td class="font-mono">{{ s.dy }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @for (warning of r.warnings; track $index) {
+            <p class="mt-2 text-sm text-warning">{{ warning }}</p>
+          }
+        </div>
+      }
+
+      <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <button type="button" class="btn btn-secondary w-full sm:w-auto"
+                (click)="downloadFrames()"
+                [disabled]="groups().length === 0">
+          Download frames as ZIP
+        </button>
+        <button type="button" class="btn btn-secondary w-full sm:w-auto"
+                (click)="clearSheets()"
+                [disabled]="sheets().length === 0">
+          Clear sheets
+        </button>
+      </div>
+    </div>
+
+    <div class="min-w-0 space-y-6">
+      <section>
+        <h3 class="text-lg font-semibold">Spritesheets</h3>
+        <app-drop-zone
+          [empty]="sheets().length === 0"
+          [multiple]="true"
+          dropTitle="Drag &amp; drop all spritesheets of the character here"
+          dropHint="or use the Upload spritesheets button"
+          overlayText="Drop to add more spritesheets"
+          (filesDropped)="addFiles($event)">
+          <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(13rem,1fr))] gap-2">
+            @for (sheet of sheets(); track sheet.id) {
+              <div class="card border bg-base-100 shadow-sm"
+                   [class.border-base-300]="!isDuplicate(sheet) && !gridError(sheet)"
+                   [class.border-error]="isDuplicate(sheet) || gridError(sheet)">
+                <div class="card-body flex-none gap-1 p-2">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="truncate text-sm text-base-content/70" [title]="sheet.fileName">{{ sheet.fileName }}</span>
+                    <button type="button"
+                            class="btn btn-circle btn-xs btn-ghost text-base-content/60 transition-colors hover:bg-error/10 hover:text-error"
+                            (click)="removeSheet(sheet.id)"
+                            [attr.aria-label]="'Remove ' + sheet.fileName">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <label class="flex items-center gap-2 text-xs">
+                    <span class="w-16 shrink-0">Animation</span>
+                    <input type="text" class="input input-sm w-full min-w-0" [value]="sheet.animation"
+                           (change)="onAnimationInput(sheet.id, $event)">
+                  </label>
+                  <label class="flex items-center gap-2 text-xs">
+                    <span class="w-16 shrink-0">Direction</span>
+                    <input type="text" class="input input-sm w-full min-w-0" [value]="sheet.direction"
+                           [disabled]="sheet.rows !== 1" placeholder="none"
+                           (change)="onDirectionInput(sheet.id, $event)">
+                  </label>
+                  <label class="flex items-center gap-2 text-xs">
+                    <span class="w-16 shrink-0">Rows</span>
+                    <input type="number" min="1" class="input input-sm w-full min-w-0" [value]="sheet.rows"
+                           (change)="onRowsInput(sheet.id, $event)">
+                  </label>
+
+                  @if (gridError(sheet); as error) {
+                    <p class="text-xs text-error">{{ error }}</p>
+                  } @else {
+                    <p class="text-xs text-base-content/70">{{ gridInfo(sheet) }}</p>
+                  }
+                  @if (isDuplicate(sheet)) {
+                    <p class="text-xs text-error">Same animation and direction as another sheet.</p>
+                  }
+                </div>
+                <div class="flex flex-1 items-center justify-center px-2 pb-2">
+                  <app-image-preview [src]="sheet.dataUrl" [alt]="sheet.fileName" variant="thumbnail" />
+                </div>
+              </div>
+            }
+          </div>
+        </app-drop-zone>
+      </section>
+
+      <section>
+        <h3 class="text-lg font-semibold">Frames</h3>
+        <div class="mt-2 flex min-h-48 flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-3">
+          @if (groups().length > 0) {
+            @for (group of groups(); track group.animation) {
+              <div>
+                <p class="text-sm font-semibold">{{ group.animation }}
+                  <span class="font-normal text-base-content/70">({{ frameCount(group) }} frames)</span></p>
+                <div class="mt-1 space-y-1">
+                  @for (row of group.rows; track row.direction) {
+                    <div class="flex items-center gap-2">
+                      <span class="w-20 shrink-0 truncate text-xs text-base-content/70" [title]="row.direction">{{ row.direction || '–' }}</span>
+                      <div class="grid min-w-0 flex-1 gap-1"
+                           [style.grid-template-columns]="'repeat(' + columnCount(group) + ', minmax(0, 4rem))'">
+                        @for (frame of row.frames; track frame.name) {
+                          <div class="rounded-box border border-base-300 bg-base-100 p-0.5" [title]="frame.name">
+                            <app-image-preview [src]="frame.dataUrl" [alt]="frame.name" variant="thumbnail" />
+                            <div class="text-center text-[0.65rem] leading-tight text-base-content/70">{{ frame.index }}</div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          } @else if (sheets().length > 0) {
+            <p class="m-auto text-sm text-base-content/50">Click the Optimize button to generate the frames.</p>
+          } @else {
+            <p class="m-auto text-sm text-base-content/50">The extracted frames will appear here.</p>
+          }
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

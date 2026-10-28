@@ -34,7 +34,7 @@ export class HomeComponent {
     {
       path: '/sheet-optimizer',
       title: 'Sheet Optimizer',
-      description: 'Trim transparent borders and re-center every frame of a spritesheet.'
+      description: 'Trim transparent borders and extract aligned frames from one or many spritesheets of a character.'
     },
     {
       path: '/gradle-kotlin-template',

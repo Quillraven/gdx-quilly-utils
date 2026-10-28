@@ -120,6 +120,8 @@ export class ValidationService {
       return 'Value cannot contain spaces';
     } else if (errors['invalidPackageName']) {
       return 'Value is not a valid package name. Format should be: com.example.myapp';
+    } else if (errors['invalidDirections']) {
+      return errors['invalidDirections'];
     } else if (errors['invalidKotlinVersion']) {
       return "Value is not a valid Kotlin version";
     }

@@ -15,7 +15,7 @@ Everything runs client-side, so your images never leave your machine. Give it a 
 | **Tileset Extruder** | Adds padding around every tile to stop texture bleeding | Clean, seam-free tilemaps |
 | **Spritesheet Splitter** | Cuts a spritesheet into individual tiles | Animations & asset export |
 | **Image Combiner** | Stitches several images into one grid layout | Packing related icons or frames |
-| **Sheet Optimizer** | Trims empty space around every frame | Slim, tidy animation sheets |
+| **Sheet Optimizer** | Trims empty space around every frame and extracts the frames of multi-sheet characters | Slim, tidy animation sheets and frames that line up |
 | **Gradle Kotlin Template** | Generates a modern Gradle Kotlin DSL project | Starting a LibGDX Kotlin game fast |
 
 ## The toolkit
@@ -53,12 +53,17 @@ Patch multiple images into one organized grid in seconds.
 
 ### Sheet Optimizer
 
-Spritesheets often carry wasted transparent space. The optimizer **trims the borders of every frame and re-centers the art**, giving you tighter, cleaner sheets.
+Spritesheets often carry wasted transparent space. The optimizer **trims the borders of every frame and keeps the art aligned**, giving you tighter, cleaner frames. It has two modes:
 
-- Upload a sprite sheet
-- Describe your frame grid
-- Preview the result, including each frame's new dimensions
-- Download the optimized sheet
+**Character (multi-sheet)** — for a character whose animations are spread over several sheets, possibly with different frame sizes.
+
+- Upload all sheets of the character; animation (walk, run, hurt, attack, death, idle, ...) and a direction in the file name (e.g. `DownRight`) are detected and can be edited
+- Sheets without a direction in their name have one row per direction: 4 (down, left, right, up) or 8 (with diagonals), in an order you can change
+- Frames can be non-square (set a frame width) and are aligned by an anchor (bottom-center by default) when sheet frame sizes differ
+- Every frame of every sheet is cropped to one shared rect, so all frames have the same size and line up across animations
+- Preview the frames (`walk_down_1`, `attack_right_3`, ...) and download them as a flat ZIP
+
+**Single sheet** — upload one sprite sheet, describe the frame grid, preview and download the optimized sheet including each frame's new dimensions.
 
 ### Gradle Kotlin Template
 
